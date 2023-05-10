@@ -1,0 +1,127 @@
+body {
+    margin: 0
+}
+
+@supports (backdrop-filter: blur()) {
+    .card,
+    .modal-content {
+        background-color: rgba(33, 37, 41, 30%);
+        backdrop-filter: blur(15px);
+    }
+}
+
+#messagesSpan {
+    position: absolute;
+    top: 10%;
+    left: 50%;
+    transform: translate(-50%, 0);
+    color: rgba(255, 255, 255, 0.8);
+    text-shadow: 1px 1px rgba(0, 0, 0, 0.8);
+    font-size: 4vmin;
+    text-align: center;
+}
+
+#messagesSpan div {
+    opacity: 0;
+    overflow: hidden;
+}
+
+@keyframes show-level-animation {
+    from {
+        opacity: 0;
+        transform: translateY(200%);
+    }
+    50% {
+        opacity: 100%;
+        transform: translateY(0) scaleY(1);
+        line-height: var(--bs-body-line-height);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-100%) scaleY(0);
+        line-height: 0;
+    }
+}
+
+#messagesSpan div.show-level-animation {
+    animation: show-level-animation;
+    animation-timing-function: (0.4, 0, 0.6, 1);
+    animation-duration: 2s;
+}
+
+@keyframes zoom-in-animation {
+    from {
+        opacity: 0;
+        transform: scale3d(0.3, 0.3, 0.3);
+        line-height: var(--bs-body-line-height);
+
+    }
+    30% {
+        opacity: 1;
+        transform: scale3d(1, 1, 1);
+    }
+    80% {
+        opacity: 1;
+        transform: scale3d(1, 1, 1);
+        line-height: var(--bs-body-line-height);
+    }
+    to {
+        opacity: 0;
+        transform: scale3d(1.5, 0, 1);
+        line-height: 0;
+    }
+}
+
+@keyframes rotate-in-animation {
+    0% {
+        opacity:0;
+        transform:rotate(200deg);
+        line-height: var(--bs-body-line-height);
+    }
+    30% {
+        opacity:1;
+        transform:translateZ(0);
+        transform: scale3d(1, 1, 1);
+    }
+    80% {
+        opacity: 1;
+        transform: scale3d(1, 1, 1);
+        line-height: var(--bs-body-line-height);
+    }
+    to {
+        opacity: 0;
+        transform: scale3d(1.5, 0, 1);
+        line-height: 0;
+    }
+}
+
+#messagesSpan div.rotate-in-animation {
+    animation-name:  rotate-in-animation;
+    animation-timing-function: cubic-bezier(.25,.46,.45,.94);
+    animation-duration: 1s;
+}
+
+#messagesSpan div.zoom-in-animation {
+    animation-name: zoom-in-animation;
+    animation-timing-function: cubic-bezier(.25,.46,.45,.94);
+    transform-origin:center;
+    animation-duration: 1s;
+}
+
+@keyframes game-over-animation {
+    from {
+        opacity: 0;
+        transform: translateY(200%);
+    }
+    to {
+        opacity: 100%;
+        transform: translateY(0) scaleY(1);
+        line-height: var(--bs-body-line-height);
+    }
+}
+
+#messagesSpan div.game-over-animation {
+    animation: game-over-animation;
+    animation-timing-function: (0.4, 0, 0.6, 1);
+    animation-duration: 2s;
+}

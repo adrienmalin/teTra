@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+
+<html lang="fr">
+
+    <head>
+      <meta charset="utf-8" />
+        <title>teTra</title>
+        <link rel="icon" href="favicon.ico">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.4/font/bootstrap-icons.css">
+        <link rel="stylesheet" href="style.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r122/three.min.js"></script>
+    </head>
+
+    <body data-bs-theme="dark">
+
+      <div class="modal fade" id="settingsModal" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 id="titleHeader" class="modal-title w-100 text-center">te<strong>T</strong>ra</h1>
+            </div>
+            <div class="modal-body">
+              <form name="settingsForm" class="needs-validation" novalidate>
+                <fieldset id="keyBindFielset" class="row g-2 mb-3 align-items-center text-center">
+                  <legend class="text-start">Commandes</legend>
+                  <label for="moveLeftInput" title="Gauche" class="col-sm-2 col-form-label d-flex align-items-center justify-content-center">
+                    <i class="bi bi-arrow-left"></i>
+                  </label>
+                  <div class="col-sm-4">
+                    <input name="moveLeft" id="moveLeftInput" type="text" class="form-control text-center" value="←" onclick="changeKey(this)" placeholder="Touche ?" required>
+                  </div>
+                  <div class="col-sm-4">
+                    <input name="moveRight" id="moveRightInput" type="text" class="form-control text-center" value="→" onclick="changeKey(this)" placeholder="Touche ?" required>
+                  </div>
+                  <label for="moveRightInput" title="Droite" class="col-sm-2 col-form-label d-flex align-items-center justify-content-center">
+                    <i class="bi bi-arrow-right"></i>
+                  </label>
+                  <label for="rotateCounterclockwiseInput" title="Rotation anti-horaire" class="col-sm-2 col-form-label d-flex align-items-center justify-content-center">
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                  </label>
+                  <div class="col-sm-4">
+                    <input name="rotateCounterclockwise" id="rotateCounterclockwiseInput" type="text" class="form-control text-center" value="w" onclick="changeKey(this)" placeholder="Touche ?" required>
+                  </div>
+                  <div class="col-sm-4">
+                    <input name="rotateClockwise" id="rotateClockwiseInput" type="text" class="form-control text-center" value="↑" onclick="changeKey(this)" placeholder="Touche ?" required>
+                  </div>
+                  <label for="rotateClockwiseInput" title="Rotation horaire" class="col-sm-2 col-form-label d-flex align-items-center justify-content-center">
+                    <i class="bi bi-arrow-clockwise"></i>
+                  </label>
+                  <label for="softDropInput" title="Chute lente" class="col-sm-2 col-form-label d-flex align-items-center justify-content-center">
+                    <i class="bi bi-arrow-down-short"></i>
+                  </label>
+                  <div class="col-sm-4">
+                    <input name="softDrop" id="softDropInput" type="text" class="form-control text-center" value="↓" onclick="changeKey(this)" placeholder="Touche ?" required>
+                  </div>
+                  <div class="col-sm-4">
+                    <input name="hardDrop" id="hardDropInput" type="text" class="form-control text-center" value="Espace" onclick="changeKey(this)" placeholder="Touche ?" required>
+                  </div>
+                  <label for="hardDropInput" title="Chute rapide" class="col-sm-2 col-form-label d-flex align-items-center justify-content-center">
+                    <i class="bi bi-download"></i>
+                  </label>
+                  <label for="holdInput" title="Échanger la pièce" class="col-sm-2 col-form-label d-flex align-items-center justify-content-center">
+                    <i class="bi bi-arrow-left-right"></i>
+                  </label>
+                  <div class="col-sm-4">
+                    <input name="hold" id="holdInput" type="text" class="form-control text-center" value="c" onclick="changeKey(this)" placeholder="Touche ?" required>
+                  </div>
+                  <div class="col-sm-4">
+                    <input name="pause" id="pauseInput" type="text" class="form-control text-center" value="Échap" onclick="changeKey(this)" placeholder="Touche ?" required>
+                  </div>
+                  <label for="pauseInput" title="Pause" class="col-sm-2 col-form-label d-flex align-items-center justify-content-center">
+                    <i class="bi bi-pause"></i>
+                  </label>
+                </fieldset>
+                <fieldset id="autorepearFieldset" class="row g-2 mb-3 align-items-center text-center">
+                  <legend class="text-start">Répétition automatique</legend>
+                  <label for="arrInput" class="col-sm-2 col-form-label" title="Automatic Repeat Rate : période de répétition de l'action">ARR</label>
+                  <div class="col-sm-4">
+                    <div class="input-group">
+                      <input name="arr" id="arrInput" type="number" class="form-control text-center" value="50" min="2" max="200" step="1">
+                      <div class="input-group-text">ms</div>
+                    </div>
+                  </div>
+                  <div class="col-sm-4">
+                    <div class="input-group">
+                      <input name="das" id="dasInput" type="number" class="form-control text-center" value="300" min="100" max="500" step="5">
+                      <div class="input-group-text">ms</div>
+                    </div>
+                  </div>
+                  <label for="dasInput" class="col-sm-2 col-form-label" title="Delayed AutoShift : délai initial avant répétition">DAS</label>
+                </fieldset>
+                <fieldset id="audioFieldset" class="row g-2 mb-3 align-items-center text-center">
+                  <legend class="text-start">Volume</legend>
+                  <label for="musicVolumeInput" class="col-sm-2 col-form-label">Musique</label>
+                  <div class="col-sm-4">
+                    <input name="musicVolume" id="musicVolumeInput" type="range" class="form-range" value=".5" min="0" max="1" step="0.01">
+                  </div>
+                  <div class="col-sm-4">
+                    <input name="sfxVolume" id="sfxVolumeInput" type="range" class="form-range" value=".5" min="0" max="1" step="0.01">
+                  </div>
+                  <label for="sfxVolumeInput" class="col-sm-2 col-form-label">SFX</label>
+                </fieldset>
+                <fieldset class="row g-2 mb-3 align-items-center text-center">
+                  <legend class="text-start">Partie</legend>
+                  <label for="levelInput" class="col-sm-2 col-form-label text-center">Niveau</label>
+                  <div class="col-sm-4">
+                    <input name="startLevel" id="levelInput" type="number" class="form-control text-center" value="1" min="1" max="15">
+                  </div>
+                  <div class="col-sm-4">
+                    <button id="resumeButton" type="submit" class="btn btn-primary w-100" autofocus>Jouer</button>
+                  </div>
+                </fieldset>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <span id="messagesSpan" class ="position-absolute"></span>
+
+      <div class="modal fade" id="statsModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h2 class="modal-title w-100 text-center">Fin</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+              </div>
+              <div class="modal-body p-0">
+                <table class="table mb-0">
+                  <tr><th>Score         </th><td id="statsModalScoreCell">        </td><th>Niveau               </th><td id="statsModalLevelCell">          </td></tr>
+                  <tr><th>Meilleur score</th><td id="statsModalHighScoreCell">    </td><th>Temps                </th><td id="statsModalTimeCell">           </td></tr>
+                  <tr><th>Lignes        </th><td id="statsModaltotalClearedLines"></td><th>Lignes par minute    </th><td id="statsModaltotalClearedLinesPM"></td></tr>
+                  <tr><th>Quatris       </th><td id="statsModalNbQuatris">        </td><th>Plus long combo      </th><td id="statsModalMaxCombo">           </td></tr>
+                  <tr><th>Pirouettes    </th><td id="statsModalNbTSpin">          </td><th>Plus long bout à bout</th><td id="statsModalMaxB2B">             </td></tr>
+                </table>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="restart()">Rejouer ?</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"></script>
+      <script src="app.js"></script>
+    </body>
+</html>
