@@ -968,7 +968,7 @@ function resume(event) {
 
         lineClearSound.volume = settings.sfxVolume
         tetrisSound.volume    = settings.sfxVolume
-        if (music.volume > 0) {
+        if (settings.musicVolume > 0) {
             music.volume      = settings.musicVolume
             music.play()
         }
