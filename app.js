@@ -123,7 +123,6 @@ class Scheduler {
 class Matrix extends THREE.Group {
     constructor() {
         super()
-        this.init()
     }
 
     init() {
@@ -329,7 +328,7 @@ I.prototype.ghostMaterial = new THREE.MeshBasicMaterial({
     reflectivity: .6,
     envMap: minoRenderTarget.texture,
     transparent: true,
-    opacity: 0.5
+    opacity: 0.4
 })
 
 class J extends Tetromino {}
@@ -349,7 +348,7 @@ J.prototype.ghostMaterial = new THREE.MeshBasicMaterial({
     reflectivity: .6,
     envMap: minoRenderTarget.texture,
     transparent: true,
-    opacity: 0.5
+    opacity: 0.4
 })
 
 class L extends Tetromino {}
@@ -369,7 +368,7 @@ L.prototype.ghostMaterial = new THREE.MeshBasicMaterial({
     reflectivity: .6,
     envMap: minoRenderTarget.texture,
     transparent: true,
-    opacity: 0.5
+    opacity: 0.4
 })
 
 class O extends Tetromino {}
@@ -389,7 +388,7 @@ O.prototype.ghostMaterial = new THREE.MeshBasicMaterial({
     reflectivity: .6,
     envMap: minoRenderTarget.texture,
     transparent: true,
-    opacity: 0.5
+    opacity: 0.4
 })
 
 class S extends Tetromino {}
@@ -409,7 +408,7 @@ S.prototype.ghostMaterial = new THREE.MeshBasicMaterial({
     reflectivity: .6,
     envMap: minoRenderTarget.texture,
     transparent: true,
-    opacity: 0.5
+    opacity: 0.4
 })
 
 class T extends Tetromino {
@@ -447,7 +446,7 @@ T.prototype.ghostMaterial = new THREE.MeshBasicMaterial({
     reflectivity: .6,
     envMap: minoRenderTarget.texture,
     transparent: true,
-    opacity: 0.5
+    opacity: 0.4
 })
 
 class Z extends Tetromino {}
@@ -467,7 +466,7 @@ Z.prototype.ghostMaterial = new THREE.MeshBasicMaterial({
     reflectivity: .6,
     envMap: minoRenderTarget.texture,
     transparent: true,
-    opacity: 0.5
+    opacity: 0.4
 })
 
 class Ghost extends Tetromino {
@@ -495,7 +494,6 @@ class Settings {
         settingsModal.addEventListener('shown.bs.modal', () => {
             resumeButton.focus()
         })
-        this.init()
     }
 
     load() {
@@ -567,7 +565,6 @@ class Stats {
     constructor() {
         this.modal = new bootstrap.Modal('#statsModal')
         this.load()
-        this.init()
     }
 
     load() {
@@ -738,6 +735,22 @@ Stats.prototype.timeFormat = new Intl.DateTimeFormat("fr-FR", {
 
 /* Scene */
 
+const manager = new THREE.LoadingManager()
+manager.onStart = function ( url, itemsLoaded, itemsTotal ) {
+	messagesSpan.innerHTML = 'Chargement : 0%...'
+}
+manager.onLoad = function ( ) {
+	restart()
+    messagesSpan.innerHTML = ""
+    animate()
+}
+manager.onProgress = function ( url, itemsLoaded, itemsTotal ) {
+	messagesSpan.innerHTML = 'Chargement : ' + 100 * itemsLoaded / itemsTotal + '%...'
+}
+manager.onError = function ( url ) {
+	messagesSpan.innerHTML = 'Erreur de chargement'
+}
+
 const scene = new THREE.Scene()
 
 const renderer = new THREE.WebGLRenderer()
@@ -751,7 +764,7 @@ camera.lookAt(5, 8.5, 0)
 const commonCylinderGeometry = new THREE.CylinderGeometry(25, 25, 400, 20, 1, true)
 
 // dark space full of stars - background cylinder
-const darkCylinderTexture = new THREE.TextureLoader().load("images/dark.jpg")
+const darkCylinderTexture = new THREE.TextureLoader(manager).load("images/dark.jpg")
 darkCylinderTexture.wrapS = THREE.RepeatWrapping
 darkCylinderTexture.wrapT = THREE.MirroredRepeatWrapping
 darkCylinderTexture.repeat.set(1, 1)
@@ -768,7 +781,7 @@ darkCylinder.position.set(5, 10, -10)
 scene.add(darkCylinder)
 
 // colourfull space full of nebulas - main universe cylinder
-const colorFullCylinderTexture = new THREE.TextureLoader().load("images/colorfull.jpg")
+const colorFullCylinderTexture = new THREE.TextureLoader(manager).load("images/colorfull.jpg")
 colorFullCylinderTexture.wrapS = THREE.RepeatWrapping
 colorFullCylinderTexture.wrapT = THREE.MirroredRepeatWrapping
 colorFullCylinderTexture.repeat.set(1, 1)
@@ -853,7 +866,6 @@ function animate() {
     minoCamera.update(renderer, scene)
 
 }
-animate()
 
 
 /* Game logic */
@@ -868,6 +880,18 @@ let stats = new Stats()
 let playing = false
 //let favicon = document.querySelector("link[rel~='icon']")
 
+function restart() {
+    stats.modal.hide()
+    stats.init()
+    settings.init()
+    holdQueue.remove(holdQueue.piece)
+    Array.from(matrix.children).forEach(mino => matrix.remove(mino))
+    matrix.init()
+    nextQueue.remove(nextQueue.piece)
+    music.currentTime = 0
+    pauseSettings()
+}
+
 function pauseSettings() {
     scheduler.clearInterval(fall)
     scheduler.clearTimeout(lockDown)
@@ -881,8 +905,6 @@ function pauseSettings() {
     settings.show()
 }
 onblur = pauseSettings
-
-pauseSettings()
 
 function newGame() {
     if (!settings.form.checkValidity()) {
@@ -1087,18 +1109,6 @@ function gameOver() {
     music.pause()
 
     stats.show()
-}
-
-function restart() {
-    stats.modal.hide()
-    stats.init()
-    settings.init()
-    holdQueue.remove(holdQueue.piece)
-    Array.from(matrix.children).forEach(mino => matrix.remove(mino))
-    matrix.init()
-    nextQueue.remove(nextQueue.piece)
-    music.currentTime = 0
-    pauseSettings()
 }
 
 window.onbeforeunload = function(event) {
