@@ -121,18 +121,14 @@ class Scheduler {
 
 
 class Matrix extends THREE.Group {
-    constructor() {
-        super()
-    }
-
     init() {
         this.cells = Array(ROWS).fill().map(() => Array(COLUMNS))
     }
 
-    cellIsEmpty(position) {
-        return 0 <= position.x && position.x < COLUMNS &&
-               0 <= position.y && position.y < ROWS &&
-               !this.cells[position.y][position.x]
+    cellIsEmpty(p) {
+        return 0 <= p.x && p.x < COLUMNS &&
+               0 <= p.y && p.y < ROWS &&
+               !this.cells[p.y][p.x]
     }
 
     lock(piece) {
@@ -170,6 +166,30 @@ class Matrix extends THREE.Group {
     }
 }
 
+
+class NextQueue extends THREE.Group {
+    init() {
+        this.pieces = this.positions.map((p) => {
+            let piece = new Tetromino.random()
+            piece.position.set(p.x, p.y, p.z)
+            this.add(piece)
+            return piece
+        })
+    }
+
+    shift() {
+        let fistPiece = this.pieces.shift()
+        let lastPiece = new Tetromino.random()
+        this.add(lastPiece)
+        this.pieces.push(lastPiece)
+        this.positions.forEach((p, i) => {
+            this.pieces[i].position.set(p.x, p.y, p.z)
+        })
+        return fistPiece
+    }
+
+}
+NextQueue.prototype.positions = [P(0, 0, 0), P(0, -4, 0), P(0, -8, 0), P(0, -12, 0), P(0, -16, 0)]
 
 class Mino extends THREE.Mesh {
     constructor() {
@@ -218,7 +238,7 @@ class Tetromino extends THREE.Group {
     set facing(facing) {
         this._facing = facing
         this.minoesPosition[this.facing].forEach(
-            (position, i) => this.children[i].position.set(position.x, position.y, position.z)
+            (p, i) => this.children[i].position.set(p.x, p.y, p.z)
         )
     }
 
@@ -415,7 +435,7 @@ class T extends Tetromino {
     get tSpin() {
         if (this.rotatedLast) {
             let [a, b, c, d] = this.tSlots[piece.facing]
-                .map(position => !matrix.cellIsEmpty(position.clone().add(this.position)))
+                .map(p => !matrix.cellIsEmpty(p.clone().add(this.position)))
             if (a && b && (c || d))
                 return T_SPIN.T_SPIN
             else if (c && d && (a || b))
@@ -835,7 +855,7 @@ holdQueue.position.set(-5, 16, 0)
 scene.add(holdQueue)
 const matrix = new Matrix()
 scene.add(matrix)
-const nextQueue = new THREE.Group()
+const nextQueue = new NextQueue()
 nextQueue.position.set(13, 16, 0)
 scene.add(nextQueue)
 let ghost = new Ghost()
@@ -885,9 +905,13 @@ function restart() {
     stats.init()
     settings.init()
     holdQueue.remove(holdQueue.piece)
+    holdQueue.piece = null
+    if (nextQueue.pieces) nextQueue.pieces.forEach(piece => nextQueue.remove(piece))
     Array.from(matrix.children).forEach(mino => matrix.remove(mino))
     matrix.init()
-    nextQueue.remove(nextQueue.piece)
+    scene.remove(piece)
+    piece = null
+    scene.remove(ghost)
     music.currentTime = 0
     pauseSettings()
 }
@@ -904,9 +928,8 @@ function pauseSettings() {
 
     settings.show()
 }
-onblur = pauseSettings
 
-function newGame() {
+function newGame(event) {
     if (!settings.form.checkValidity()) {
         event.preventDefault()
         event.stopPropagation()
@@ -918,12 +941,11 @@ function newGame() {
         titleHeader.innerHTML = "PAUSE"
         resumeButton.innerHTML = "Reprendre"
         event.target.onsubmit = resume
-        holdQueue.piece = null
-        nextQueue.piece = new Tetromino.random()
-        nextQueue.add(nextQueue.piece)
+        nextQueue.init()
         stats.level = levelInput.valueAsNumber
         localStorage["startLevel"] = levelInput.value
         playing = true
+        onblur = pauseSettings
         resume(event)
     }
 }
@@ -961,9 +983,7 @@ function generate(heldPiece) {
     if (heldPiece) {
         piece = heldPiece
     } else {
-        piece = nextQueue.piece
-        nextQueue.piece = new Tetromino.random()
-        nextQueue.add(nextQueue.piece)
+        piece = nextQueue.shift()
     }
     piece.position.set(4, SKYLINE, 0)
     scene.add(piece)
