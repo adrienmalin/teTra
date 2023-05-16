@@ -1107,10 +1107,10 @@ function lockDown() {
         let nbClearedLines = matrix.clearLines()
         if (nbClearedLines == 4 || (nbClearedLines && tSpin)) {
             tetrisSound.currentTime = 0
-            tetrisSound.play()
+            if (tetrisSound.volume) tetrisSound.play()
         } else if (nbClearedLines || tSpin) {
             lineClearSound.currentTime = 0
-            lineClearSound.play()
+            if(lineClearSound.volume) lineClearSound.play()
         }
         stats.lockDown(nbClearedLines, tSpin)
 
