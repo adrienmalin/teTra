@@ -917,14 +917,16 @@ function restart() {
 }
 
 function pauseSettings() {
+    stats.pauseTime = stats.time
+
     scheduler.clearInterval(fall)
     scheduler.clearTimeout(lockDown)
     scheduler.clearTimeout(repeat)
     scheduler.clearInterval(autorepeat)
-    stats.pauseTime = stats.time
-    music.pause()
 
+    music.pause()
     document.onkeydown = null
+    renderer.domElement.style.cursor = "auto"
 
     settings.show()
 }
@@ -972,6 +974,8 @@ function resume(event) {
             music.volume      = settings.musicVolume
             music.play()
         }
+
+        renderer.domElement.style.cursor = "none"
 
         if (piece) scheduler.setInterval(fall, stats.fallPeriod)
         else generate()
