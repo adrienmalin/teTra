@@ -83,11 +83,11 @@ const GLOBAL_ROTATION = 0.0025
 
 const DARK_TEXTURE_ROTATION = 0.0015
 const DARK_MOVE_FORWARD = -0.0007
-const DARK_OPACITY = 0.4
+const DARK_OPACITY = 0.3
 
 const COLORFULL_TEXTURE_ROTATION = 0.0015
 const COLORFULL_MOVE_FORWARD = -0.002
-const COLORFULL_OPACITY = 0.4
+const COLORFULL_OPACITY = 0.3
 
 
 /* Classes */
@@ -169,9 +169,9 @@ class Matrix extends THREE.Group {
 
 class NextQueue extends THREE.Group {
     init() {
-        this.pieces = this.positions.map((p) => {
+        this.pieces = this.positions.map((position) => {
             let piece = new Tetromino.random()
-            piece.position.set(p.x, p.y, p.z)
+            piece.position.copy(position)
             this.add(piece)
             return piece
         })
@@ -182,8 +182,8 @@ class NextQueue extends THREE.Group {
         let lastPiece = new Tetromino.random()
         this.add(lastPiece)
         this.pieces.push(lastPiece)
-        this.positions.forEach((p, i) => {
-            this.pieces[i].position.set(p.x, p.y, p.z)
+        this.positions.forEach((position, i) => {
+            this.pieces[i].position.copy(position)
         })
         return fistPiece
     }
@@ -238,7 +238,7 @@ class Tetromino extends THREE.Group {
     set facing(facing) {
         this._facing = facing
         this.minoesPosition[this.facing].forEach(
-            (p, i) => this.children[i].position.set(p.x, p.y, p.z)
+            (position, i) => this.children[i].position.copy(position)
         )
     }
 
@@ -491,11 +491,11 @@ Z.prototype.ghostMaterial = new THREE.MeshBasicMaterial({
 
 class Ghost extends Tetromino {
     copy(piece) {
-        this.position.set(piece.position.x, piece.position.y, piece.position.z)
+        this.position.copy(piece.position)
         this.facing = piece.facing
         this.minoesPosition = piece.minoesPosition
         piece.children.forEach((mino, i) => {
-            this.children[i].position.set(mino.position.x, mino.position.y, mino.position.z)
+            this.children[i].position.copy(mino.position)
             this.children[i].material = piece.ghostMaterial
         })
         while (this.canMove(TRANSLATION.DOWN)) this.position.y--
@@ -1130,6 +1130,7 @@ function gameOver() {
     document.onkeydown = null
     onblur = null
     playing = false
+    renderer.domElement.style.cursor = "auto"
     music.pause()
 
     stats.show()
