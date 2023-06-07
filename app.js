@@ -126,6 +126,7 @@ class Scheduler {
 class Matrix extends THREE.Group {
     init() {
         this.cells = Array(ROWS).fill().map(() => Array(COLUMNS))
+        this.unlockedMinoes = new Set()
     }
 
     cellIsEmpty(p) {
@@ -153,7 +154,7 @@ class Matrix extends THREE.Group {
             let row = this.cells[y]
             if (row.filter(mino => mino).length == COLUMNS) {
                 nbClearedLines++
-                row.forEach(mino => this.remove(mino))
+                row.forEach(mino => this.unlockedMinoes.add(mino))
                 this.cells.splice(y, 1)
                 this.cells.push(Array(COLUMNS))
             }
@@ -166,6 +167,16 @@ class Matrix extends THREE.Group {
             })
         }
         return nbClearedLines
+    }
+
+    updateUnlockedMinoes(delta) {
+        this.unlockedMinoes.forEach(mino => {
+            mino.update(delta)
+            if (Math.sqrt(mino.position.x*mino.position.x + mino.position.z*mino.position.z) > 25) {
+                this.remove(mino)
+                this.unlockedMinoes.delete(mino)
+            }
+        })
     }
 }
 
@@ -197,7 +208,15 @@ NextQueue.prototype.positions = [P(0, 0, 0), P(0, -4, 0), P(0, -8, 0), P(0, -12,
 class Mino extends THREE.Mesh {
     constructor() {
         super(Mino.prototype.geometry)
+        this.velocity        = P(5-10*Math.random(), 5-10*Math.random(), 5-10*Math.random())
+        this.rotationAngle   = P(Math.random(), Math.random(), Math.random()).normalize()
+        this.angularVelocity = 5-10*Math.random()
         scene.add(this)
+    }
+
+    update(delta) {
+        this.position.addScaledVector(this.velocity, delta)
+        this.rotateOnWorldAxis(this.rotationAngle, delta*this.angularVelocity)
     }
 }
 const minoFaceShape = new THREE.Shape()
@@ -887,6 +906,8 @@ window.addEventListener("resize", () => {
   camera.updateProjectionMatrix()
 })
 
+let clock = new THREE.Clock()
+
 function animate() {
     requestAnimationFrame(animate)
 
@@ -898,7 +919,9 @@ function animate() {
     colorFullCylinderTexture.offset.y -= COLORFULL_MOVE_FORWARD
     colorFullCylinderTexture.offset.x -= COLORFULL_TEXTURE_ROTATION
 
-    controls.update();
+    controls.update()
+
+    matrix.updateUnlockedMinoes(clock.getDelta())
 
     renderer.render(scene, camera)
     minoCamera.update(renderer, scene)
