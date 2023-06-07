@@ -211,7 +211,7 @@ const GRAVITY = -20
 class Mino extends THREE.Mesh {
     constructor() {
         super(Mino.prototype.geometry)
-        this.velocity        = P(25-50*Math.random(), 25-50*Math.random(), 25-50*Math.random())
+        this.velocity        = P(50-100*Math.random(), 50-100*Math.random(), 50-100*Math.random())
         this.rotationAngle   = P(Math.random(), Math.random(), Math.random()).normalize()
         this.angularVelocity = 5-10*Math.random()
         scene.add(this)
