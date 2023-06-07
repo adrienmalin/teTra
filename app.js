@@ -810,7 +810,7 @@ renderer.setSize(window.innerWidth, window.innerHeight)
 document.body.appendChild(renderer.domElement)
 
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 400)
-camera.position.set(5, 1, 16)
+camera.position.set(5, 3, 17)
 
 const controls = new OrbitControls( camera, renderer.domElement );
 controls.autoRotate;
