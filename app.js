@@ -205,6 +205,9 @@ class NextQueue extends THREE.Group {
 }
 NextQueue.prototype.positions = [P(0, 0, 0), P(0, -4, 0), P(0, -8, 0), P(0, -12, 0), P(0, -16, 0)]
 
+
+const GRAVITY = -20
+
 class Mino extends THREE.Mesh {
     constructor() {
         super(Mino.prototype.geometry)
@@ -215,6 +218,7 @@ class Mino extends THREE.Mesh {
     }
 
     update(delta) {
+        this.velocity.y += delta * GRAVITY
         this.position.addScaledVector(this.velocity, delta)
         this.rotateOnWorldAxis(this.rotationAngle, delta*this.angularVelocity)
     }
