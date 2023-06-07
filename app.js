@@ -342,7 +342,7 @@ const minoCamera = new THREE.CubeCamera(1, 1000, minoRenderTarget)
 minoCamera.position.set(5, 10, 0)
 Tetromino.prototype.lockedMaterial = new THREE.MeshBasicMaterial({
     color: 0xffffff,
-    reflectivity: .6,
+    reflectivity: 0.85,
     envMap: minoRenderTarget.texture
 })
 
@@ -361,13 +361,13 @@ I.prototype.srs = [
 ]
 I.prototype.material = new THREE.MeshBasicMaterial({
     color: 0xafeff9,
-    reflectivity: 0.95,
+    reflectivity: 0.85,
     envMap: minoRenderTarget.texture
 })
 I.prototype.ghostMaterial = new THREE.MeshBasicMaterial({
     side: THREE.DoubleSide,
     color: 0xafeff9,
-    reflectivity: 0.95,
+    reflectivity: 0.85,
     envMap: minoRenderTarget.texture,
     transparent: true,
     opacity: 0.3
@@ -382,13 +382,13 @@ J.prototype.minoesPosition = [
 ]
 J.prototype.material = new THREE.MeshBasicMaterial({
     color: 0xb8b4ff,
-    reflectivity: 0.95,
+    reflectivity: 0.85,
     envMap: minoRenderTarget.texture
 })
 J.prototype.ghostMaterial = new THREE.MeshBasicMaterial({
     side: THREE.DoubleSide,
     color: 0xb8b4ff,
-    reflectivity: 0.95,
+    reflectivity: 0.85,
     envMap: minoRenderTarget.texture,
     transparent: true,
     opacity: 0.3
@@ -403,13 +403,13 @@ L.prototype.minoesPosition = [
 ]
 L.prototype.material = new THREE.MeshBasicMaterial({
     color: 0xfdd0b7,
-    reflectivity: 0.95,
+    reflectivity: 0.85,
     envMap: minoRenderTarget.texture
 })
 L.prototype.ghostMaterial = new THREE.MeshBasicMaterial({
     side: THREE.DoubleSide,
     color: 0xfdd0b7,
-    reflectivity: 0.95,
+    reflectivity: 0.85,
     envMap: minoRenderTarget.texture,
     transparent: true,
     opacity: 0.3
@@ -424,13 +424,13 @@ O.prototype.srs = [
 ]
 O.prototype.material = new THREE.MeshBasicMaterial({
     color: 0xffedac,
-    reflectivity: 0.95,
+    reflectivity: 0.85,
     envMap: minoRenderTarget.texture
 })
 O.prototype.ghostMaterial = new THREE.MeshBasicMaterial({
     side: THREE.DoubleSide,
     color: 0xffedac,
-    reflectivity: 0.95,
+    reflectivity: 0.85,
     envMap: minoRenderTarget.texture,
     transparent: true,
     opacity: 0.3
@@ -445,13 +445,13 @@ S.prototype.minoesPosition = [
 ]
 S.prototype.material = new THREE.MeshBasicMaterial({
     color: 0xC8FBA8,
-    reflectivity: 0.95,
+    reflectivity: 0.85,
     envMap: minoRenderTarget.texture
 })
 S.prototype.ghostMaterial = new THREE.MeshBasicMaterial({
     side: THREE.DoubleSide,
     color: 0xC8FBA8,
-    reflectivity: 0.95,
+    reflectivity: 0.85,
     envMap: minoRenderTarget.texture,
     transparent: true,
     opacity: 0.3
@@ -484,13 +484,13 @@ T.prototype.tSlots = [
 ]
 T.prototype.material = new THREE.MeshBasicMaterial({
     color: 0xedb2ff,
-    reflectivity: 0.95,
+    reflectivity: 0.85,
     envMap: minoRenderTarget.texture
 })
 T.prototype.ghostMaterial = new THREE.MeshBasicMaterial({
     side: THREE.DoubleSide,
     color: 0xedb2ff,
-    reflectivity: 0.95,
+    reflectivity: 0.85,
     envMap: minoRenderTarget.texture,
     transparent: true,
     opacity: 0.3
@@ -505,13 +505,13 @@ Z.prototype.minoesPosition = [
 ]
 Z.prototype.material = new THREE.MeshBasicMaterial({
     color: 0xffb8c5,
-    reflectivity: 0.95,
+    reflectivity: 0.85,
     envMap: minoRenderTarget.texture
 })
 Z.prototype.ghostMaterial = new THREE.MeshBasicMaterial({
     side: THREE.DoubleSide,
     color: 0xffb8c5,
-    reflectivity: 0.95,
+    reflectivity: 0.85,
     envMap: minoRenderTarget.texture,
     transparent: true,
     opacity: 0.3
@@ -861,7 +861,7 @@ const edgeMaterial = new THREE.MeshBasicMaterial({
     color: 0x88abe0,
     transparent: true,
     opacity: 0.5,
-    reflectivity: .4,
+    reflectivity: 0.85,
     envMap: minoRenderTarget.texture
 })
 
