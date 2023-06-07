@@ -208,7 +208,7 @@ NextQueue.prototype.positions = [P(0, 0, 0), P(0, -4, 0), P(0, -8, 0), P(0, -12,
 class Mino extends THREE.Mesh {
     constructor() {
         super(Mino.prototype.geometry)
-        this.velocity        = P(5-10*Math.random(), 5-10*Math.random(), 5-10*Math.random())
+        this.velocity        = P(25-50*Math.random(), 25-50*Math.random(), 25-50*Math.random())
         this.rotationAngle   = P(Math.random(), Math.random(), Math.random()).normalize()
         this.angularVelocity = 5-10*Math.random()
         scene.add(this)
