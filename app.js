@@ -1,10 +1,13 @@
-P = (x, y, z) => new THREE.Vector3(x, y, z)
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+let P = (x, y, z) => new THREE.Vector3(x, y, z)
 
 Array.prototype.pick = function() { return this.splice(Math.floor(Math.random()*this.length), 1)[0] }
 
 HTMLElement.prototype.addNewChild = function(tag, properties) {
     let child = document.createElement(tag)
-    for (key in properties) {
+    for (let key in properties) {
         child[key] = properties[key]
     }
     this.appendChild(child)
@@ -227,7 +230,6 @@ class Tetromino extends THREE.Group {
         this.rotatedLast = false
         this.rotationPoint4Used = false
         this.holdEnabled = true
-        let material = this.material
         for (let i=0; i<4; i++) {
             this.add(new Mino())
         }
@@ -315,9 +317,9 @@ Tetromino.prototype.srs = [
     { [ROTATION.CW]: [P(0, 0, 0), P( 1, 0, 0), P( 1,  1, 0), P(0, -2, 0), P( 1, -2, 0)], [ROTATION.CCW]: [P(0, 0, 0), P(-1, 0, 0), P(-1,  1, 0), P(0, -2, 0), P(-1, -2, 0)] },
     { [ROTATION.CW]: [P(0, 0, 0), P(-1, 0, 0), P(-1, -1, 0), P(0,  2, 0), P(-1,  2, 0)], [ROTATION.CCW]: [P(0, 0, 0), P(-1, 0, 0), P(-1, -1, 0), P(0,  2, 0), P(-1,  2, 0)] },
 ]
-minoRenderTarget = new THREE.WebGLCubeRenderTarget(256)
+const minoRenderTarget = new THREE.WebGLCubeRenderTarget(256)
 minoRenderTarget.texture.type = THREE.HalfFloatType
-minoCamera = new THREE.CubeCamera(1, 1000, minoRenderTarget)
+const minoCamera = new THREE.CubeCamera(1, 1000, minoRenderTarget)
 minoCamera.position.set(5, 10, 0)
 Tetromino.prototype.lockedMaterial = new THREE.MeshBasicMaterial({
     color: 0xffffff,
@@ -785,8 +787,17 @@ renderer.setSize(window.innerWidth, window.innerHeight)
 document.body.appendChild(renderer.domElement)
 
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 400)
-camera.position.set(5, 7, 16)
-camera.lookAt(5, 9, 0) 
+camera.position.set(5, 1, 16)
+
+const controls = new OrbitControls( camera, renderer.domElement );
+controls.autoRotate;
+controls.enableDamping;
+controls.maxDistance = 21;
+controls.keys = {};
+controls.minPolarAngle = 0.9;
+controls.maxPolarAngle = 2.14;
+controls.target = P(5, 9, 0);
+controls.update();
 
 const commonCylinderGeometry = new THREE.CylinderGeometry(25, 25, 400, 20, 1, true)
 
@@ -850,11 +861,9 @@ const edgeExtrudeSettings = {
 	bevelEnabled: false,
 }
 const edge = new THREE.Mesh(
-    //new THREE.PlaneGeometry(10, SKYLINE),
     new THREE.ExtrudeGeometry(edgeShape, edgeExtrudeSettings),
     edgeMaterial
 )
-//edge.position.set(5, 10, 0)
 scene.add(edge)
 
 const holdQueue = new THREE.Group()
@@ -888,6 +897,8 @@ function animate() {
     colorFullCylinder.rotation.y += GLOBAL_ROTATION
     colorFullCylinderTexture.offset.y -= COLORFULL_MOVE_FORWARD
     colorFullCylinderTexture.offset.x -= COLORFULL_TEXTURE_ROTATION
+
+    controls.update();
 
     renderer.render(scene, camera)
     minoCamera.update(renderer, scene)
@@ -1033,7 +1044,7 @@ let playerActions = {
             scheduler.clearInterval(fall)
             scheduler.clearTimeout(lockDown)
     
-            heldpiece = holdQueue.piece
+            let heldpiece = holdQueue.piece
             holdQueue.piece = piece
             holdQueue.piece.holdEnabled = false
             holdQueue.piece.locked = false
@@ -1053,15 +1064,15 @@ const REPEATABLE_ACTIONS = [
     playerActions.moveRight,
     playerActions.softDrop
 ]
-pressedKeys = new Set()
-actionsQueue = []
+let pressedKeys = new Set()
+let actionsQueue = []
 
 function onkeydown(event) {
     if (event.key in settings.keyBind) {
         event.preventDefault()
         if (!pressedKeys.has(event.key)) {
             pressedKeys.add(event.key)
-            action = settings.keyBind[event.key]
+            let action = settings.keyBind[event.key]
             action()
             if (REPEATABLE_ACTIONS.includes(action)) {
                 actionsQueue.unshift(action)
@@ -1093,7 +1104,7 @@ function onkeyup(event) {
     if (event.key in settings.keyBind) {
         event.preventDefault()
         pressedKeys.delete(event.key)
-        action = settings.keyBind[event.key]
+        let action = settings.keyBind[event.key]
         if (actionsQueue.includes(action)) {
             actionsQueue.splice(actionsQueue.indexOf(action), 1)
             if (!actionsQueue.length) {
