@@ -1016,7 +1016,7 @@ function resume(event) {
             music.play()
         }
 
-        renderer.domElement.style.cursor = "grab"
+        renderer.domElement.style.cursor = "move"
 
         if (piece) scheduler.setInterval(fall, stats.fallPeriod)
         else generate()
