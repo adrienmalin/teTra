@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-let P = (x, y, z) => new THREE.Vector3(x, y, z)
+let P = (x, y, z=0) => new THREE.Vector3(x, y, z)
 
 Array.prototype.pick = function() { return this.splice(Math.floor(Math.random()*this.length), 1)[0] }
 
@@ -33,10 +33,10 @@ const FACING = {
 }
 
 const TRANSLATION = {
-    NONE:  P( 0,  0, 0),
-    LEFT:  P(-1,  0, 0),
-    RIGHT: P( 1,  0, 0),
-    DOWN:  P( 0, -1, 0),
+    NONE:  P( 0,  0),
+    LEFT:  P(-1,  0),
+    RIGHT: P( 1,  0),
+    DOWN:  P( 0, -1),
 }
 
 const ROTATION = {
@@ -162,7 +162,7 @@ class Matrix extends THREE.Group {
         if (nbClearedLines) {
             this.cells.forEach((rows, y) => {
                 rows.forEach((mino, x) => {
-                    mino.position.set(x, y, 0)
+                    mino.position.set(x, y)
                 })
             })
         }
@@ -203,7 +203,7 @@ class NextQueue extends THREE.Group {
     }
 
 }
-NextQueue.prototype.positions = [P(0, 0, 0), P(0, -4, 0), P(0, -8, 0), P(0, -12, 0), P(0, -16, 0)]
+NextQueue.prototype.positions = [P(0, 0), P(0, -4), P(0, -8), P(0, -12), P(0, -16)]
 
 
 const GRAVITY = -20
@@ -335,15 +335,15 @@ class Tetromino extends THREE.Group {
 // Super Rotation System
 // freedom of movement = srs[piece.facing][rotation]
 Tetromino.prototype.srs = [
-    { [ROTATION.CW]: [P(0, 0, 0), P(-1, 0, 0), P(-1,  1, 0), P(0, -2, 0), P(-1, -2, 0)], [ROTATION.CCW]: [P(0, 0, 0), P( 1, 0, 0), P( 1,  1, 0), P(0, -2, 0), P( 1, -2, 0)] },
-    { [ROTATION.CW]: [P(0, 0, 0), P( 1, 0, 0), P( 1, -1, 0), P(0,  2, 0), P( 1,  2, 0)], [ROTATION.CCW]: [P(0, 0, 0), P( 1, 0, 0), P( 1, -1, 0), P(0,  2, 0), P( 1,  2, 0)] },
-    { [ROTATION.CW]: [P(0, 0, 0), P( 1, 0, 0), P( 1,  1, 0), P(0, -2, 0), P( 1, -2, 0)], [ROTATION.CCW]: [P(0, 0, 0), P(-1, 0, 0), P(-1,  1, 0), P(0, -2, 0), P(-1, -2, 0)] },
-    { [ROTATION.CW]: [P(0, 0, 0), P(-1, 0, 0), P(-1, -1, 0), P(0,  2, 0), P(-1,  2, 0)], [ROTATION.CCW]: [P(0, 0, 0), P(-1, 0, 0), P(-1, -1, 0), P(0,  2, 0), P(-1,  2, 0)] },
+    { [ROTATION.CW]: [P(0, 0), P(-1, 0), P(-1,  1), P(0, -2), P(-1, -2)], [ROTATION.CCW]: [P(0, 0), P( 1, 0), P( 1,  1), P(0, -2), P( 1, -2)] },
+    { [ROTATION.CW]: [P(0, 0), P( 1, 0), P( 1, -1), P(0,  2), P( 1,  2)], [ROTATION.CCW]: [P(0, 0), P( 1, 0), P( 1, -1), P(0,  2), P( 1,  2)] },
+    { [ROTATION.CW]: [P(0, 0), P( 1, 0), P( 1,  1), P(0, -2), P( 1, -2)], [ROTATION.CCW]: [P(0, 0), P(-1, 0), P(-1,  1), P(0, -2), P(-1, -2)] },
+    { [ROTATION.CW]: [P(0, 0), P(-1, 0), P(-1, -1), P(0,  2), P(-1,  2)], [ROTATION.CCW]: [P(0, 0), P(-1, 0), P(-1, -1), P(0,  2), P(-1,  2)] },
 ]
 const minoRenderTarget = new THREE.WebGLCubeRenderTarget(256)
 minoRenderTarget.texture.type = THREE.HalfFloatType
 const minoCamera = new THREE.CubeCamera(1, 1000, minoRenderTarget)
-minoCamera.position.set(5, 10, 0)
+minoCamera.position.set(5, 10)
 Tetromino.prototype.lockedMaterial = new THREE.MeshBasicMaterial({
     color: 0xffffff,
     reflectivity: 0.85,
@@ -352,47 +352,51 @@ Tetromino.prototype.lockedMaterial = new THREE.MeshBasicMaterial({
 
 class I extends Tetromino {}
 I.prototype.minoesPosition = [
-    [P(-1,  0, 0), P(0,  0, 0), P(1,  0, 0), P(2,  0, 0)],
-    [P( 1,  1, 0), P(1,  0, 0), P(1, -1, 0), P(1, -2, 0)],
-    [P(-1, -1, 0), P(0, -1, 0), P(1, -1, 0), P(2, -1, 0)],
-    [P( 0,  1, 0), P(0,  0, 0), P(0, -1, 0), P(0, -2, 0)],
+    [P(-1,  0), P(0,  0), P(1,  0), P(2,  0)],
+    [P( 1,  1), P(1,  0), P(1, -1), P(1, -2)],
+    [P(-1, -1), P(0, -1), P(1, -1), P(2, -1)],
+    [P( 0,  1), P(0,  0), P(0, -1), P(0, -2)],
 ]
 I.prototype.srs = [
-    { [ROTATION.CW]: [P(0, 0, 0), P(-2, 0, 0), P( 1, 0, 0), P(-2, -1, 0), P( 1,  2, 0)], [ROTATION.CCW]: [P(0, 0, 0), P(-1, 0, 0), P( 2, 0, 0), P(-1,  2, 0), P( 2, -1, 0)] },
-    { [ROTATION.CW]: [P(0, 0, 0), P(-1, 0, 0), P( 2, 0, 0), P(-1,  2, 0), P( 2, -1, 0)], [ROTATION.CCW]: [P(0, 0, 0), P( 2, 0, 0), P(-1, 0, 0), P( 2,  1, 0), P(-1, -2, 0)] },
-    { [ROTATION.CW]: [P(0, 0, 0), P( 2, 0, 0), P(-1, 0, 0), P( 2,  1, 0), P(-1, -2, 0)], [ROTATION.CCW]: [P(0, 0, 0), P( 1, 0, 0), P(-2, 0, 0), P( 1, -2, 0), P(-2,  1, 0)] },
-    { [ROTATION.CW]: [P(0, 0, 0), P( 1, 0, 0), P(-2, 0, 0), P( 1, -2, 0), P(-2,  1, 0)], [ROTATION.CCW]: [P(0, 0, 0), P(-2, 0, 0), P( 1, 0, 0), P(-2, -1, 0), P( 1,  2, 0)] },
+    { [ROTATION.CW]: [P(0, 0), P(-2, 0), P( 1, 0), P(-2, -1), P( 1,  2)], [ROTATION.CCW]: [P(0, 0), P(-1, 0), P( 2, 0), P(-1,  2), P( 2, -1)] },
+    { [ROTATION.CW]: [P(0, 0), P(-1, 0), P( 2, 0), P(-1,  2), P( 2, -1)], [ROTATION.CCW]: [P(0, 0), P( 2, 0), P(-1, 0), P( 2,  1), P(-1, -2)] },
+    { [ROTATION.CW]: [P(0, 0), P( 2, 0), P(-1, 0), P( 2,  1), P(-1, -2)], [ROTATION.CCW]: [P(0, 0), P( 1, 0), P(-2, 0), P( 1, -2), P(-2,  1)] },
+    { [ROTATION.CW]: [P(0, 0), P( 1, 0), P(-2, 0), P( 1, -2), P(-2,  1)], [ROTATION.CCW]: [P(0, 0), P(-2, 0), P( 1, 0), P(-2, -1), P( 1,  2)] },
 ]
 I.prototype.material = new THREE.MeshBasicMaterial({
     color: 0xafeff9,
     reflectivity: 0.85,
-    envMap: minoRenderTarget.texture
+    envMap: minoRenderTarget.texture,
+    side: THREE.DoubleSide,
+    transparent: true,
+    opacity: 0.6
 })
 I.prototype.ghostMaterial = new THREE.MeshBasicMaterial({
-    side: THREE.DoubleSide,
     color: 0xafeff9,
-    reflectivity: 0.85,
     envMap: minoRenderTarget.texture,
+    side: THREE.DoubleSide,
     transparent: true,
     opacity: 0.3
 })
 
 class J extends Tetromino {}
 J.prototype.minoesPosition = [
-    [P(-1,  1, 0), P(-1,  0, 0), P(0, 0, 0), P(1,  0, 0)],
-    [P( 0,  1, 0), P( 1,  1, 0), P(0, 0, 0), P(0, -1, 0)],
-    [P( 1, -1, 0), P(-1,  0, 0), P(0, 0, 0), P(1,  0, 0)],
-    [P( 0,  1, 0), P(-1, -1, 0), P(0, 0, 0), P(0, -1, 0)],
+    [P(-1,  1), P(-1,  0), P(0, 0), P(1,  0)],
+    [P( 0,  1), P( 1,  1), P(0, 0), P(0, -1)],
+    [P( 1, -1), P(-1,  0), P(0, 0), P(1,  0)],
+    [P( 0,  1), P(-1, -1), P(0, 0), P(0, -1)],
 ]
 J.prototype.material = new THREE.MeshBasicMaterial({
     color: 0xb8b4ff,
     reflectivity: 0.85,
-    envMap: minoRenderTarget.texture
+    envMap: minoRenderTarget.texture,
+    side: THREE.DoubleSide,
+    transparent: true,
+    opacity: 0.6
 })
 J.prototype.ghostMaterial = new THREE.MeshBasicMaterial({
     side: THREE.DoubleSide,
     color: 0xb8b4ff,
-    reflectivity: 0.85,
     envMap: minoRenderTarget.texture,
     transparent: true,
     opacity: 0.3
@@ -400,20 +404,22 @@ J.prototype.ghostMaterial = new THREE.MeshBasicMaterial({
 
 class L extends Tetromino {}
 L.prototype.minoesPosition = [
-    [P(-1, 0, 0), P(0, 0, 0), P(1,  0, 0), P( 1,  1, 0)],
-    [P(0,  1, 0), P(0, 0, 0), P(0, -1, 0), P( 1, -1, 0)],
-    [P(-1, 0, 0), P(0, 0, 0), P(1,  0, 0), P(-1, -1, 0)],
-    [P(0,  1, 0), P(0, 0, 0), P(0, -1, 0), P(-1,  1, 0)],
+    [P(-1, 0), P(0, 0), P(1,  0), P( 1,  1)],
+    [P(0,  1), P(0, 0), P(0, -1), P( 1, -1)],
+    [P(-1, 0), P(0, 0), P(1,  0), P(-1, -1)],
+    [P(0,  1), P(0, 0), P(0, -1), P(-1,  1)],
 ]
 L.prototype.material = new THREE.MeshBasicMaterial({
     color: 0xfdd0b7,
     reflectivity: 0.85,
-    envMap: minoRenderTarget.texture
+    envMap: minoRenderTarget.texture,
+    side: THREE.DoubleSide,
+    transparent: true,
+    opacity: 0.6
 })
 L.prototype.ghostMaterial = new THREE.MeshBasicMaterial({
     side: THREE.DoubleSide,
     color: 0xfdd0b7,
-    reflectivity: 0.85,
     envMap: minoRenderTarget.texture,
     transparent: true,
     opacity: 0.3
@@ -421,7 +427,7 @@ L.prototype.ghostMaterial = new THREE.MeshBasicMaterial({
 
 class O extends Tetromino {}
 O.prototype.minoesPosition = [
-    [P(0, 0, 0), P(1, 0, 0), P(0, 1, 0), P(1, 1, 0)]
+    [P(0, 0), P(1, 0), P(0, 1), P(1, 1)]
 ]
 O.prototype.srs = [
     {[ROTATION.CW]: [], [ROTATION.CCW]: []}
@@ -429,12 +435,14 @@ O.prototype.srs = [
 O.prototype.material = new THREE.MeshBasicMaterial({
     color: 0xffedac,
     reflectivity: 0.85,
-    envMap: minoRenderTarget.texture
+    envMap: minoRenderTarget.texture,
+    side: THREE.DoubleSide,
+    transparent: true,
+    opacity: 0.6
 })
 O.prototype.ghostMaterial = new THREE.MeshBasicMaterial({
     side: THREE.DoubleSide,
     color: 0xffedac,
-    reflectivity: 0.85,
     envMap: minoRenderTarget.texture,
     transparent: true,
     opacity: 0.3
@@ -442,20 +450,22 @@ O.prototype.ghostMaterial = new THREE.MeshBasicMaterial({
 
 class S extends Tetromino {}
 S.prototype.minoesPosition = [
-    [P(-1,  0, 0), P(0, 0, 0), P( 0, 1, 0), P(1,  1, 0)],
-    [P( 0,  1, 0), P(0, 0, 0), P( 1, 0, 0), P(1, -1, 0)],
-    [P(-1, -1, 0), P(0, 0, 0), P( 1, 0, 0), P(0, -1, 0)],
-    [P(-1,  1, 0), P(0, 0, 0), P(-1, 0, 0), P(0, -1, 0)],
+    [P(-1,  0), P(0, 0), P( 0, 1), P(1,  1)],
+    [P( 0,  1), P(0, 0), P( 1, 0), P(1, -1)],
+    [P(-1, -1), P(0, 0), P( 1, 0), P(0, -1)],
+    [P(-1,  1), P(0, 0), P(-1, 0), P(0, -1)],
 ]
 S.prototype.material = new THREE.MeshBasicMaterial({
     color: 0xC8FBA8,
     reflectivity: 0.85,
-    envMap: minoRenderTarget.texture
+    envMap: minoRenderTarget.texture,
+    side: THREE.DoubleSide,
+    transparent: true,
+    opacity: 0.6
 })
 S.prototype.ghostMaterial = new THREE.MeshBasicMaterial({
     side: THREE.DoubleSide,
     color: 0xC8FBA8,
-    reflectivity: 0.85,
     envMap: minoRenderTarget.texture,
     transparent: true,
     opacity: 0.3
@@ -475,26 +485,28 @@ class T extends Tetromino {
     }
 }
 T.prototype.minoesPosition = [
-    [P(-1, 0, 0), P(0, 0, 0), P(1,  0, 0), P( 0,  1, 0)],
-    [P( 0, 1, 0), P(0, 0, 0), P(1,  0, 0), P( 0, -1, 0)],
-    [P(-1, 0, 0), P(0, 0, 0), P(1,  0, 0), P( 0, -1, 0)],
-    [P( 0, 1, 0), P(0, 0, 0), P(0, -1, 0), P(-1,  0, 0)],
+    [P(-1, 0), P(0, 0), P(1,  0), P( 0,  1)],
+    [P( 0, 1), P(0, 0), P(1,  0), P( 0, -1)],
+    [P(-1, 0), P(0, 0), P(1,  0), P( 0, -1)],
+    [P( 0, 1), P(0, 0), P(0, -1), P(-1,  0)],
 ]
 T.prototype.tSlots = [
-    [P(-1,  1, 0), P( 1,  1, 0), P( 1, -1, 0), P(-1, -1, 0)],
-    [P( 1,  1, 0), P( 1, -1, 0), P(-1, -1, 0), P(-1,  1, 0)],
-    [P( 1, -1, 0), P(-1, -1, 0), P(-1,  1, 0), P( 1,  1, 0)],
-    [P(-1, -1, 0), P(-1,  1, 0), P( 1,  1, 0), P( 1, -1, 0)],
+    [P(-1,  1), P( 1,  1), P( 1, -1), P(-1, -1)],
+    [P( 1,  1), P( 1, -1), P(-1, -1), P(-1,  1)],
+    [P( 1, -1), P(-1, -1), P(-1,  1), P( 1,  1)],
+    [P(-1, -1), P(-1,  1), P( 1,  1), P( 1, -1)],
 ]
 T.prototype.material = new THREE.MeshBasicMaterial({
     color: 0xedb2ff,
     reflectivity: 0.85,
-    envMap: minoRenderTarget.texture
+    envMap: minoRenderTarget.texture,
+    side: THREE.DoubleSide,
+    transparent: true,
+    opacity: 0.6
 })
 T.prototype.ghostMaterial = new THREE.MeshBasicMaterial({
     side: THREE.DoubleSide,
     color: 0xedb2ff,
-    reflectivity: 0.85,
     envMap: minoRenderTarget.texture,
     transparent: true,
     opacity: 0.3
@@ -502,20 +514,22 @@ T.prototype.ghostMaterial = new THREE.MeshBasicMaterial({
 
 class Z extends Tetromino {}
 Z.prototype.minoesPosition = [
-    [P(-1,  1, 0), P( 0, 1, 0), P(0,  0, 0), P( 1,  0, 0)],
-    [P( 1,  1, 0), P( 1, 0, 0), P(0,  0, 0), P( 0, -1, 0)],
-    [P(-1,  0, 0), P( 0, 0, 0), P(0, -1, 0), P( 1, -1, 0)],
-    [P( 0,  1, 0), P(-1, 0, 0), P(0,  0, 0), P(-1, -1, 0)]
+    [P(-1,  1), P( 0, 1), P(0,  0), P( 1,  0)],
+    [P( 1,  1), P( 1, 0), P(0,  0), P( 0, -1)],
+    [P(-1,  0), P( 0, 0), P(0, -1), P( 1, -1)],
+    [P( 0,  1), P(-1, 0), P(0,  0), P(-1, -1)]
 ]
 Z.prototype.material = new THREE.MeshBasicMaterial({
     color: 0xffb8c5,
     reflectivity: 0.85,
-    envMap: minoRenderTarget.texture
+    envMap: minoRenderTarget.texture,
+    side: THREE.DoubleSide,
+    transparent: true,
+    opacity: 0.6
 })
 Z.prototype.ghostMaterial = new THREE.MeshBasicMaterial({
     side: THREE.DoubleSide,
     color: 0xffb8c5,
-    reflectivity: 0.85,
     envMap: minoRenderTarget.texture,
     transparent: true,
     opacity: 0.3
@@ -534,7 +548,7 @@ class Ghost extends Tetromino {
     }
 }
 Ghost.prototype.minoesPosition = [
-    [P(0, 0, 0, 0), P(0, 0, 0, 0), P(0, 0, 0, 0), P(0, 0, 0, 0)],
+    [P(0, 0, 0), P(0, 0, 0), P(0, 0, 0), P(0, 0, 0)],
 ]
 
 
@@ -819,7 +833,7 @@ controls.maxDistance = 21;
 controls.keys = {};
 controls.minPolarAngle = 0.9;
 controls.maxPolarAngle = 2.14;
-controls.target = P(5, 9, 0);
+controls.target = P(5, 9);
 controls.update();
 
 const commonCylinderGeometry = new THREE.CylinderGeometry(25, 25, 400, 20, 1, true)
@@ -890,12 +904,12 @@ const edge = new THREE.Mesh(
 scene.add(edge)
 
 const holdQueue = new THREE.Group()
-holdQueue.position.set(-5, 16, 0)
+holdQueue.position.set(-5, 16)
 scene.add(holdQueue)
 const matrix = new Matrix()
 scene.add(matrix)
 const nextQueue = new NextQueue()
-nextQueue.position.set(13, 16, 0)
+nextQueue.position.set(13, 16)
 scene.add(nextQueue)
 let ghost = new Ghost()
 
@@ -1034,7 +1048,7 @@ function generate(heldPiece) {
     } else {
         piece = nextQueue.shift()
     }
-    piece.position.set(4, SKYLINE, 0)
+    piece.position.set(4, SKYLINE)
     scene.add(piece)
     ghost.copy(piece)
     scene.add(ghost)
@@ -1075,7 +1089,7 @@ let playerActions = {
             holdQueue.piece = piece
             holdQueue.piece.holdEnabled = false
             holdQueue.piece.locked = false
-            holdQueue.piece.position.set(0, 0, 0)
+            holdQueue.piece.position.set(0, 0)
             holdQueue.piece.facing = FACING.NORTH
             holdQueue.add(holdQueue.piece)
             generate(heldpiece)
