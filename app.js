@@ -620,6 +620,7 @@ function changeKey(input) {
 class Stats {
     constructor() {
         this.modal = new bootstrap.Modal('#statsModal')
+        restartButton.onclick = restart
         this.load()
     }
 
