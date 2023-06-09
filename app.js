@@ -830,6 +830,8 @@ controls.maxDistance = 21
 controls.keys = {}
 controls.minPolarAngle = 0.9
 controls.maxPolarAngle = 2.14
+controls.minAzimuthAngle = 0.9 - Math.PI/2
+controls.maxAzimuthAngle = 2.14 - Math.PI/2
 controls.target = P(5, 9)
 controls.update()
 
