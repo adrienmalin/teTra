@@ -82,16 +82,6 @@ const CLEARED_LINES_NAMES = [
     "TETRA",
 ]
 
-const GLOBAL_ROTATION = 0.0025
-
-const DARK_TEXTURE_ROTATION = 0.0015
-const DARK_MOVE_FORWARD = -0.0007
-const DARK_OPACITY = 0.3
-
-const COLORFULL_TEXTURE_ROTATION = 0.0015
-const COLORFULL_MOVE_FORWARD = -0.002
-const COLORFULL_OPACITY = 0.3
-
 
 /* Classes */
 
@@ -346,7 +336,7 @@ const minoCamera = new THREE.CubeCamera(1, 1000, minoRenderTarget)
 minoCamera.position.set(5, 10)
 Tetromino.prototype.lockedMaterial = new THREE.MeshBasicMaterial({
     color: 0xffffff,
-    reflectivity: 0.85,
+    reflectivity: 0.9,
     envMap: minoRenderTarget.texture
 })
 
@@ -365,11 +355,11 @@ I.prototype.srs = [
 ]
 I.prototype.material = new THREE.MeshBasicMaterial({
     color: 0xafeff9,
-    reflectivity: 0.85,
+    reflectivity: 0.9,
     envMap: minoRenderTarget.texture,
     side: THREE.DoubleSide,
     transparent: true,
-    opacity: 0.6
+    opacity: 0.7
 })
 I.prototype.ghostMaterial = new THREE.MeshBasicMaterial({
     color: 0xafeff9,
@@ -388,11 +378,11 @@ J.prototype.minoesPosition = [
 ]
 J.prototype.material = new THREE.MeshBasicMaterial({
     color: 0xb8b4ff,
-    reflectivity: 0.85,
+    reflectivity: 0.9,
     envMap: minoRenderTarget.texture,
     side: THREE.DoubleSide,
     transparent: true,
-    opacity: 0.6
+    opacity: 0.7
 })
 J.prototype.ghostMaterial = new THREE.MeshBasicMaterial({
     side: THREE.DoubleSide,
@@ -411,11 +401,11 @@ L.prototype.minoesPosition = [
 ]
 L.prototype.material = new THREE.MeshBasicMaterial({
     color: 0xfdd0b7,
-    reflectivity: 0.85,
+    reflectivity: 0.9,
     envMap: minoRenderTarget.texture,
     side: THREE.DoubleSide,
     transparent: true,
-    opacity: 0.6
+    opacity: 0.7
 })
 L.prototype.ghostMaterial = new THREE.MeshBasicMaterial({
     side: THREE.DoubleSide,
@@ -434,11 +424,11 @@ O.prototype.srs = [
 ]
 O.prototype.material = new THREE.MeshBasicMaterial({
     color: 0xffedac,
-    reflectivity: 0.85,
+    reflectivity: 0.9,
     envMap: minoRenderTarget.texture,
     side: THREE.DoubleSide,
     transparent: true,
-    opacity: 0.6
+    opacity: 0.7
 })
 O.prototype.ghostMaterial = new THREE.MeshBasicMaterial({
     side: THREE.DoubleSide,
@@ -457,11 +447,11 @@ S.prototype.minoesPosition = [
 ]
 S.prototype.material = new THREE.MeshBasicMaterial({
     color: 0xC8FBA8,
-    reflectivity: 0.85,
+    reflectivity: 0.9,
     envMap: minoRenderTarget.texture,
     side: THREE.DoubleSide,
     transparent: true,
-    opacity: 0.6
+    opacity: 0.7
 })
 S.prototype.ghostMaterial = new THREE.MeshBasicMaterial({
     side: THREE.DoubleSide,
@@ -498,11 +488,11 @@ T.prototype.tSlots = [
 ]
 T.prototype.material = new THREE.MeshBasicMaterial({
     color: 0xedb2ff,
-    reflectivity: 0.85,
+    reflectivity: 0.9,
     envMap: minoRenderTarget.texture,
     side: THREE.DoubleSide,
     transparent: true,
-    opacity: 0.6
+    opacity: 0.7
 })
 T.prototype.ghostMaterial = new THREE.MeshBasicMaterial({
     side: THREE.DoubleSide,
@@ -521,11 +511,11 @@ Z.prototype.minoesPosition = [
 ]
 Z.prototype.material = new THREE.MeshBasicMaterial({
     color: 0xffb8c5,
-    reflectivity: 0.85,
+    reflectivity: 0.9,
     envMap: minoRenderTarget.texture,
     side: THREE.DoubleSide,
     transparent: true,
-    opacity: 0.6
+    opacity: 0.7
 })
 Z.prototype.ghostMaterial = new THREE.MeshBasicMaterial({
     side: THREE.DoubleSide,
@@ -821,6 +811,7 @@ const scene = new THREE.Scene()
 
 const renderer = new THREE.WebGLRenderer()
 renderer.setSize(window.innerWidth, window.innerHeight)
+renderer.setClearColor(0xffffff, 0)
 document.body.appendChild(renderer.domElement)
 
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 400)
@@ -836,50 +827,63 @@ controls.maxPolarAngle = 2.14;
 controls.target = P(5, 9);
 controls.update();
 
-const commonCylinderGeometry = new THREE.CylinderGeometry(25, 25, 400, 20, 1, true)
+
+const GLOBAL_ROTATION = 0.0025
+
+const darkTextureRotation = 0.0006
+const darkMoveForward     = -0.0006
+const darkOpacity         = 0.4
+
+const colorFullTextureRotation = 0.0006
+const colorFullMoveForward     = -0.0016
+const colorFullOpacity         = 0.4
+
+const commonCylinderGeometry = new THREE.CylinderGeometry(25, 25, 500, 12, 1, true)
 
 // dark space full of stars - background cylinder
-const darkCylinderTexture = new THREE.TextureLoader(manager).load("images/dark.jpg")
-darkCylinderTexture.wrapS = THREE.RepeatWrapping
-darkCylinderTexture.wrapT = THREE.MirroredRepeatWrapping
-darkCylinderTexture.repeat.set(1, 1)
-const darkCylinder = new THREE.Mesh(
-  commonCylinderGeometry,
-  new THREE.MeshLambertMaterial({
+const darkCylinderTexture = new THREE.TextureLoader(manager).load("images/dark.jpg");
+darkCylinderTexture.wrapS = THREE.RepeatWrapping;
+darkCylinderTexture.wrapT = THREE.MirroredRepeatWrapping;
+darkCylinderTexture.repeat.set(1, 1);
+const darkCylinderMaterial = new THREE.MeshLambertMaterial({
     side: THREE.BackSide,
     map: darkCylinderTexture,
     blending: THREE.AdditiveBlending,
-    opacity: DARK_OPACITY
-  })
-)
+    opacity: darkOpacity
+});
+const darkCylinder = new THREE.Mesh(
+    commonCylinderGeometry,
+    darkCylinderMaterial
+);
 darkCylinder.position.set(5, 10, -10)
-scene.add(darkCylinder)
+scene.add(darkCylinder);
 
 // colourfull space full of nebulas - main universe cylinder
-const colorFullCylinderTexture = new THREE.TextureLoader(manager).load("images/colorfull.jpg")
-colorFullCylinderTexture.wrapS = THREE.RepeatWrapping
-colorFullCylinderTexture.wrapT = THREE.MirroredRepeatWrapping
-colorFullCylinderTexture.repeat.set(1, 1)
-const colorFullCylinder = new THREE.Mesh(
-  commonCylinderGeometry,
-  new THREE.MeshBasicMaterial({
+const colorFullCylinderTexture = new THREE.TextureLoader(manager).load("images/colorfull.jpg");
+colorFullCylinderTexture.wrapS = THREE.RepeatWrapping;
+colorFullCylinderTexture.wrapT = THREE.MirroredRepeatWrapping;
+colorFullCylinderTexture.repeat.set(1, 1);
+const colorFullCylinderMaterial = new THREE.MeshBasicMaterial({
     side: THREE.BackSide,
     map: colorFullCylinderTexture,
     blending: THREE.AdditiveBlending,
-    opacity: COLORFULL_OPACITY
-  })
-)
+    opacity: colorFullOpacity
+});
+const colorFullCylinder = new THREE.Mesh(
+    commonCylinderGeometry,
+    colorFullCylinderMaterial
+);
 colorFullCylinder.position.set(5, 10, -10)
-scene.add(colorFullCylinder)
+scene.add(colorFullCylinder);
 
-const light = new THREE.AmbientLight(0xffffff, 10)
+const light = new THREE.AmbientLight(0xffffff, 1);
 scene.add(light)
 
 const edgeMaterial = new THREE.MeshBasicMaterial({
     color: 0x88abe0,
     transparent: true,
     opacity: 0.5,
-    reflectivity: 0.85,
+    reflectivity: 0.9,
     envMap: minoRenderTarget.texture
 })
 
@@ -930,12 +934,12 @@ function animate() {
     requestAnimationFrame(animate)
 
     darkCylinder.rotation.y += GLOBAL_ROTATION
-    darkCylinderTexture.offset.y -= DARK_MOVE_FORWARD
-    darkCylinderTexture.offset.x -= DARK_TEXTURE_ROTATION
+    darkCylinderTexture.offset.y -= darkMoveForward
+    darkCylinderTexture.offset.x -= darkTextureRotation
 
     colorFullCylinder.rotation.y += GLOBAL_ROTATION
-    colorFullCylinderTexture.offset.y -= COLORFULL_MOVE_FORWARD
-    colorFullCylinderTexture.offset.x -= COLORFULL_TEXTURE_ROTATION
+    colorFullCylinderTexture.offset.y -= colorFullMoveForward
+    colorFullCylinderTexture.offset.x -= colorFullTextureRotation
 
     controls.update()
 
@@ -1200,7 +1204,6 @@ window.onbeforeunload = function(event) {
     settings.save()
     if (playing) return false
 }
-
 
 /*if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('service-worker.js')
