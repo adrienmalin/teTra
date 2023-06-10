@@ -812,7 +812,7 @@ const scene = new THREE.Scene()
 
 const renderer = new THREE.WebGLRenderer({
     powerPreference: "high-performance",
-    antialias: false,
+    antialias: true,
     stencil: false,
     depth: false
 })
@@ -821,7 +821,7 @@ renderer.setClearColor(0xffffff, 0)
 document.body.appendChild(renderer.domElement)
 
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 400)
-camera.position.set(5, 3, 17)
+camera.position.set(5, 2, 16)
 
 const controls = new OrbitControls( camera, renderer.domElement )
 controls.autoRotate
