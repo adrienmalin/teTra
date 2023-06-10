@@ -1,5 +1,6 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
+import * as FPS from 'three/addons/libs/stats.module.js';
 
 let P = (x, y, z=0) => new THREE.Vector3(x, y, z)
 
@@ -835,6 +836,10 @@ controls.maxAzimuthAngle = 2.14 - Math.PI/2
 controls.target = P(5, 9)
 controls.update()
 
+const showFPS = window.location.search.includes("fps")
+const fps = new FPS.default();
+if (showFPS) document.body.appendChild(fps.dom);
+
 
 const GLOBAL_ROTATION = 0.0025
 
@@ -955,6 +960,8 @@ function animate() {
 
     renderer.render(scene, camera)
     minoCamera.update(renderer, scene)
+
+    if (showFPS) fps.update();
 
 }
 
