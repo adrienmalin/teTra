@@ -360,14 +360,14 @@ I.prototype.material = new THREE.MeshBasicMaterial({
     envMap: minoRenderTarget.texture,
     side: THREE.DoubleSide,
     transparent: true,
-    opacity: 0.8
+    opacity: 0.7
 })
 I.prototype.ghostMaterial = new THREE.MeshBasicMaterial({
     color: 0xafeff9,
     envMap: minoRenderTarget.texture,
     side: THREE.DoubleSide,
     transparent: true,
-    opacity: 0.3
+    opacity: 0.4
 })
 
 class J extends Tetromino {}
@@ -383,14 +383,14 @@ J.prototype.material = new THREE.MeshBasicMaterial({
     envMap: minoRenderTarget.texture,
     side: THREE.DoubleSide,
     transparent: true,
-    opacity: 0.8
+    opacity: 0.7
 })
 J.prototype.ghostMaterial = new THREE.MeshBasicMaterial({
     side: THREE.DoubleSide,
     color: 0xb8b4ff,
     envMap: minoRenderTarget.texture,
     transparent: true,
-    opacity: 0.3
+    opacity: 0.4
 })
 
 class L extends Tetromino {}
@@ -406,14 +406,14 @@ L.prototype.material = new THREE.MeshBasicMaterial({
     envMap: minoRenderTarget.texture,
     side: THREE.DoubleSide,
     transparent: true,
-    opacity: 0.8
+    opacity: 0.7
 })
 L.prototype.ghostMaterial = new THREE.MeshBasicMaterial({
     side: THREE.DoubleSide,
     color: 0xfdd0b7,
     envMap: minoRenderTarget.texture,
     transparent: true,
-    opacity: 0.3
+    opacity: 0.4
 })
 
 class O extends Tetromino {}
@@ -429,14 +429,14 @@ O.prototype.material = new THREE.MeshBasicMaterial({
     envMap: minoRenderTarget.texture,
     side: THREE.DoubleSide,
     transparent: true,
-    opacity: 0.8
+    opacity: 0.7
 })
 O.prototype.ghostMaterial = new THREE.MeshBasicMaterial({
     side: THREE.DoubleSide,
     color: 0xffedac,
     envMap: minoRenderTarget.texture,
     transparent: true,
-    opacity: 0.3
+    opacity: 0.4
 })
 
 class S extends Tetromino {}
@@ -452,14 +452,14 @@ S.prototype.material = new THREE.MeshBasicMaterial({
     envMap: minoRenderTarget.texture,
     side: THREE.DoubleSide,
     transparent: true,
-    opacity: 0.8
+    opacity: 0.7
 })
 S.prototype.ghostMaterial = new THREE.MeshBasicMaterial({
     side: THREE.DoubleSide,
     color: 0xC8FBA8,
     envMap: minoRenderTarget.texture,
     transparent: true,
-    opacity: 0.3
+    opacity: 0.4
 })
 
 class T extends Tetromino {
@@ -493,14 +493,14 @@ T.prototype.material = new THREE.MeshBasicMaterial({
     envMap: minoRenderTarget.texture,
     side: THREE.DoubleSide,
     transparent: true,
-    opacity: 0.8
+    opacity: 0.7
 })
 T.prototype.ghostMaterial = new THREE.MeshBasicMaterial({
     side: THREE.DoubleSide,
     color: 0xedb2ff,
     envMap: minoRenderTarget.texture,
     transparent: true,
-    opacity: 0.3
+    opacity: 0.4
 })
 
 class Z extends Tetromino {}
@@ -516,14 +516,14 @@ Z.prototype.material = new THREE.MeshBasicMaterial({
     envMap: minoRenderTarget.texture,
     side: THREE.DoubleSide,
     transparent: true,
-    opacity: 0.8
+    opacity: 0.7
 })
 Z.prototype.ghostMaterial = new THREE.MeshBasicMaterial({
     side: THREE.DoubleSide,
     color: 0xffb8c5,
     envMap: minoRenderTarget.texture,
     transparent: true,
-    opacity: 0.3
+    opacity: 0.4
 })
 
 class Ghost extends Tetromino {
@@ -818,7 +818,7 @@ const renderer = new THREE.WebGLRenderer({
     depth: false
 })
 renderer.setSize(window.innerWidth, window.innerHeight)
-renderer.setClearColor(0x000000, 0)
+renderer.setClearColor(0x000000, 10)
 document.body.appendChild(renderer.domElement)
 
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 400)
