@@ -360,7 +360,7 @@ I.prototype.material = new THREE.MeshBasicMaterial({
     envMap: minoRenderTarget.texture,
     side: THREE.DoubleSide,
     transparent: true,
-    opacity: 0.6
+    opacity: 0.8
 })
 I.prototype.ghostMaterial = new THREE.MeshBasicMaterial({
     color: 0xafeff9,
@@ -383,7 +383,7 @@ J.prototype.material = new THREE.MeshBasicMaterial({
     envMap: minoRenderTarget.texture,
     side: THREE.DoubleSide,
     transparent: true,
-    opacity: 0.6
+    opacity: 0.8
 })
 J.prototype.ghostMaterial = new THREE.MeshBasicMaterial({
     side: THREE.DoubleSide,
@@ -406,7 +406,7 @@ L.prototype.material = new THREE.MeshBasicMaterial({
     envMap: minoRenderTarget.texture,
     side: THREE.DoubleSide,
     transparent: true,
-    opacity: 0.6
+    opacity: 0.8
 })
 L.prototype.ghostMaterial = new THREE.MeshBasicMaterial({
     side: THREE.DoubleSide,
@@ -429,7 +429,7 @@ O.prototype.material = new THREE.MeshBasicMaterial({
     envMap: minoRenderTarget.texture,
     side: THREE.DoubleSide,
     transparent: true,
-    opacity: 0.6
+    opacity: 0.8
 })
 O.prototype.ghostMaterial = new THREE.MeshBasicMaterial({
     side: THREE.DoubleSide,
@@ -452,7 +452,7 @@ S.prototype.material = new THREE.MeshBasicMaterial({
     envMap: minoRenderTarget.texture,
     side: THREE.DoubleSide,
     transparent: true,
-    opacity: 0.6
+    opacity: 0.8
 })
 S.prototype.ghostMaterial = new THREE.MeshBasicMaterial({
     side: THREE.DoubleSide,
@@ -493,7 +493,7 @@ T.prototype.material = new THREE.MeshBasicMaterial({
     envMap: minoRenderTarget.texture,
     side: THREE.DoubleSide,
     transparent: true,
-    opacity: 0.6
+    opacity: 0.8
 })
 T.prototype.ghostMaterial = new THREE.MeshBasicMaterial({
     side: THREE.DoubleSide,
@@ -516,7 +516,7 @@ Z.prototype.material = new THREE.MeshBasicMaterial({
     envMap: minoRenderTarget.texture,
     side: THREE.DoubleSide,
     transparent: true,
-    opacity: 0.6
+    opacity: 0.8
 })
 Z.prototype.ghostMaterial = new THREE.MeshBasicMaterial({
     side: THREE.DoubleSide,
@@ -818,7 +818,7 @@ const renderer = new THREE.WebGLRenderer({
     depth: false
 })
 renderer.setSize(window.innerWidth, window.innerHeight)
-renderer.setClearColor(0xffffff, 0)
+renderer.setClearColor(0x000000, 0)
 document.body.appendChild(renderer.domElement)
 
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 400)
@@ -844,12 +844,12 @@ if (showFPS) document.body.appendChild(fps.dom);
 const GLOBAL_ROTATION = 0.0025
 
 const darkTextureRotation = 0.0006
-const darkMoveForward     = -0.0006
-const darkOpacity         = 0.4
+const darkMoveForward     = -0.0007
+const darkOpacity         = 0.3
 
 const colorFullTextureRotation = 0.0006
-const colorFullMoveForward     = -0.0016
-const colorFullOpacity         = 0.4
+const colorFullMoveForward     = -0.0012
+const colorFullOpacity         = 0.3
 
 const commonCylinderGeometry = new THREE.CylinderGeometry(25, 25, 500, 12, 1, true)
 
