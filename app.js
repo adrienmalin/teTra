@@ -237,7 +237,7 @@ class MinoMaterial extends THREE.MeshBasicMaterial {
     constructor( color ) {
         super({
             color: color,
-            reflectivity: 0.99,
+            reflectivity: 0.95,
             envMap: minoRenderTarget.texture
             /*side: THREE.DoubleSide,
             transparent: true,
@@ -779,11 +779,11 @@ const GLOBAL_ROTATION = 0.0025
 
 const darkTextureRotation = 0.0006
 const darkMoveForward     = -0.0007
-const darkOpacity         = 0.1
+const darkOpacity         = 0.3
 
 const colorFullTextureRotation = 0.0006
 const colorFullMoveForward     = -0.0012
-const colorFullOpacity         = 0.1
+const colorFullOpacity         = 0.3
 
 const commonCylinderGeometry = new THREE.CylinderGeometry(25, 25, 500, 12, 1, true)
 
@@ -829,8 +829,8 @@ scene.add(light)
 const edgeMaterial = new THREE.MeshBasicMaterial({
     color: 0x88abe0,
     transparent: true,
-    opacity: 0.4,
-    reflectivity: 0.99,
+    opacity: 0.5,
+    reflectivity: 0.9,
     envMap: minoRenderTarget.texture
 })
 
