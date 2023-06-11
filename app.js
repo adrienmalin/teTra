@@ -337,7 +337,7 @@ const minoCamera = new THREE.CubeCamera(1, 1000, minoRenderTarget)
 minoCamera.position.set(5, 10)
 Tetromino.prototype.lockedMaterial = new THREE.MeshBasicMaterial({
     color: 0xffffff,
-    reflectivity: 0.9,
+    reflectivity: 0.85,
     envMap: minoRenderTarget.texture
 })
 
@@ -356,11 +356,11 @@ I.prototype.srs = [
 ]
 I.prototype.material = new THREE.MeshBasicMaterial({
     color: 0xafeff9,
-    reflectivity: 0.9,
+    reflectivity: 0.95,
     envMap: minoRenderTarget.texture,
     side: THREE.DoubleSide,
     transparent: true,
-    opacity: 0.7
+    opacity: 0.6
 })
 I.prototype.ghostMaterial = new THREE.MeshBasicMaterial({
     color: 0xafeff9,
@@ -379,11 +379,11 @@ J.prototype.minoesPosition = [
 ]
 J.prototype.material = new THREE.MeshBasicMaterial({
     color: 0xb8b4ff,
-    reflectivity: 0.9,
+    reflectivity: 0.95,
     envMap: minoRenderTarget.texture,
     side: THREE.DoubleSide,
     transparent: true,
-    opacity: 0.7
+    opacity: 0.6
 })
 J.prototype.ghostMaterial = new THREE.MeshBasicMaterial({
     side: THREE.DoubleSide,
@@ -402,11 +402,11 @@ L.prototype.minoesPosition = [
 ]
 L.prototype.material = new THREE.MeshBasicMaterial({
     color: 0xfdd0b7,
-    reflectivity: 0.9,
+    reflectivity: 0.95,
     envMap: minoRenderTarget.texture,
     side: THREE.DoubleSide,
     transparent: true,
-    opacity: 0.7
+    opacity: 0.6
 })
 L.prototype.ghostMaterial = new THREE.MeshBasicMaterial({
     side: THREE.DoubleSide,
@@ -425,11 +425,11 @@ O.prototype.srs = [
 ]
 O.prototype.material = new THREE.MeshBasicMaterial({
     color: 0xffedac,
-    reflectivity: 0.9,
+    reflectivity: 0.95,
     envMap: minoRenderTarget.texture,
     side: THREE.DoubleSide,
     transparent: true,
-    opacity: 0.7
+    opacity: 0.6
 })
 O.prototype.ghostMaterial = new THREE.MeshBasicMaterial({
     side: THREE.DoubleSide,
@@ -448,11 +448,11 @@ S.prototype.minoesPosition = [
 ]
 S.prototype.material = new THREE.MeshBasicMaterial({
     color: 0xC8FBA8,
-    reflectivity: 0.9,
+    reflectivity: 0.95,
     envMap: minoRenderTarget.texture,
     side: THREE.DoubleSide,
     transparent: true,
-    opacity: 0.7
+    opacity: 0.6
 })
 S.prototype.ghostMaterial = new THREE.MeshBasicMaterial({
     side: THREE.DoubleSide,
@@ -489,11 +489,11 @@ T.prototype.tSlots = [
 ]
 T.prototype.material = new THREE.MeshBasicMaterial({
     color: 0xedb2ff,
-    reflectivity: 0.9,
+    reflectivity: 0.95,
     envMap: minoRenderTarget.texture,
     side: THREE.DoubleSide,
     transparent: true,
-    opacity: 0.7
+    opacity: 0.6
 })
 T.prototype.ghostMaterial = new THREE.MeshBasicMaterial({
     side: THREE.DoubleSide,
@@ -512,11 +512,11 @@ Z.prototype.minoesPosition = [
 ]
 Z.prototype.material = new THREE.MeshBasicMaterial({
     color: 0xffb8c5,
-    reflectivity: 0.9,
+    reflectivity: 0.95,
     envMap: minoRenderTarget.texture,
     side: THREE.DoubleSide,
     transparent: true,
-    opacity: 0.7
+    opacity: 0.6
 })
 Z.prototype.ghostMaterial = new THREE.MeshBasicMaterial({
     side: THREE.DoubleSide,
@@ -845,11 +845,11 @@ const GLOBAL_ROTATION = 0.0025
 
 const darkTextureRotation = 0.0006
 const darkMoveForward     = -0.0007
-const darkOpacity         = 0.3
+const darkOpacity         = 0.15
 
 const colorFullTextureRotation = 0.0006
 const colorFullMoveForward     = -0.0012
-const colorFullOpacity         = 0.3
+const colorFullOpacity         = 0.15
 
 const commonCylinderGeometry = new THREE.CylinderGeometry(25, 25, 500, 12, 1, true)
 
@@ -896,7 +896,7 @@ const edgeMaterial = new THREE.MeshBasicMaterial({
     color: 0x88abe0,
     transparent: true,
     opacity: 0.5,
-    reflectivity: 0.9,
+    reflectivity: 0.85,
     envMap: minoRenderTarget.texture
 })
 
