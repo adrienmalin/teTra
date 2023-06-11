@@ -237,7 +237,7 @@ class MinoMaterial extends THREE.MeshBasicMaterial {
     constructor( color ) {
         super({
             color: color,
-            reflectivity: 0.95,
+            reflectivity: 0.9,
             envMap: minoRenderTarget.texture
             /*side: THREE.DoubleSide,
             transparent: true,
