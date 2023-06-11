@@ -897,8 +897,8 @@ scene.add(light)
 const edgeMaterial = new THREE.MeshBasicMaterial({
     color: 0x88abe0,
     transparent: true,
-    opacity: 0.5,
-    reflectivity: 0.85,
+    opacity: 0.4,
+    reflectivity: 0.99,
     envMap: minoRenderTarget.texture
 })
 
