@@ -232,6 +232,36 @@ const minoExtrudeSettings = {
 Mino.prototype.geometry = new THREE.ExtrudeGeometry(minoFaceShape, minoExtrudeSettings)
 
 
+class MinoMaterial extends THREE.MeshBasicMaterial {
+
+    constructor( color ) {
+        super({
+            color: color,
+            reflectivity: 0.99,
+            envMap: minoRenderTarget.texture
+            /*side: THREE.DoubleSide,
+            transparent: true,
+            opacity: 0.8*/
+        })
+    }
+
+}
+
+class GhostMaterial extends THREE.MeshBasicMaterial {
+    
+    constructor( color ) {
+        super({
+            side: THREE.DoubleSide,
+            color: 0xffb8c5,
+            envMap: minoRenderTarget.texture,
+            transparent: true,
+            opacity: 0.4
+        })
+    }
+
+}
+
+
 class Tetromino extends THREE.Group {
     static randomBag = []
     static get random() {
@@ -335,14 +365,7 @@ const minoRenderTarget = new THREE.WebGLCubeRenderTarget(256)
 minoRenderTarget.texture.type = THREE.HalfFloatType
 const minoCamera = new THREE.CubeCamera(1, 1000, minoRenderTarget)
 minoCamera.position.set(5, 10)
-Tetromino.prototype.lockedMaterial = new THREE.MeshBasicMaterial({
-    color: 0xffffff,
-    reflectivity: 0.99,
-    envMap: minoRenderTarget.texture
-/*    side: THREE.DoubleSide,
-        transparent: true,
-        opacity: 0.8*/
-})
+Tetromino.prototype.lockedMaterial = new MinoMaterial( 0xffffff )
 
 class I extends Tetromino {}
 I.prototype.minoesPosition = [
@@ -357,21 +380,8 @@ I.prototype.srs = [
     { [ROTATION.CW]: [P(0, 0), P( 2, 0), P(-1, 0), P( 2,  1), P(-1, -2)], [ROTATION.CCW]: [P(0, 0), P( 1, 0), P(-2, 0), P( 1, -2), P(-2,  1)] },
     { [ROTATION.CW]: [P(0, 0), P( 1, 0), P(-2, 0), P( 1, -2), P(-2,  1)], [ROTATION.CCW]: [P(0, 0), P(-2, 0), P( 1, 0), P(-2, -1), P( 1,  2)] },
 ]
-I.prototype.material = new THREE.MeshBasicMaterial({
-    color: 0xafeff9,
-    reflectivity: 0.99,
-    envMap: minoRenderTarget.texture,
-/*    side: THREE.DoubleSide,
-    transparent: true,
-    opacity: 0.8*/
-})
-I.prototype.ghostMaterial = new THREE.MeshBasicMaterial({
-    color: 0xafeff9,
-    envMap: minoRenderTarget.texture,
-    side: THREE.DoubleSide,
-    transparent: true,
-    opacity: 0.4
-})
+I.prototype.material      = new MinoMaterial( 0xafeff9 )
+I.prototype.ghostMaterial = new GhostMaterial( 0xafeff9 )
 
 class J extends Tetromino {}
 J.prototype.minoesPosition = [
@@ -380,21 +390,8 @@ J.prototype.minoesPosition = [
     [P( 1, -1), P(-1,  0), P(0, 0), P(1,  0)],
     [P( 0,  1), P(-1, -1), P(0, 0), P(0, -1)],
 ]
-J.prototype.material = new THREE.MeshBasicMaterial({
-    color: 0xb8b4ff,
-    reflectivity: 0.99,
-    envMap: minoRenderTarget.texture,
-/*    side: THREE.DoubleSide,
-    transparent: true,
-    opacity: 0.8*/
-})
-J.prototype.ghostMaterial = new THREE.MeshBasicMaterial({
-    side: THREE.DoubleSide,
-    color: 0xb8b4ff,
-    envMap: minoRenderTarget.texture,
-    transparent: true,
-    opacity: 0.4
-})
+J.prototype.material      = new MinoMaterial( 0xb8b4ff )
+J.prototype.ghostMaterial = new GhostMaterial( 0xb8b4ff )
 
 class L extends Tetromino {}
 L.prototype.minoesPosition = [
@@ -403,21 +400,8 @@ L.prototype.minoesPosition = [
     [P(-1, 0), P(0, 0), P(1,  0), P(-1, -1)],
     [P(0,  1), P(0, 0), P(0, -1), P(-1,  1)],
 ]
-L.prototype.material = new THREE.MeshBasicMaterial({
-    color: 0xfdd0b7,
-    reflectivity: 0.99,
-    envMap: minoRenderTarget.texture,
-/*    side: THREE.DoubleSide,
-    transparent: true,
-    opacity: 0.8*/
-})
-L.prototype.ghostMaterial = new THREE.MeshBasicMaterial({
-    side: THREE.DoubleSide,
-    color: 0xfdd0b7,
-    envMap: minoRenderTarget.texture,
-    transparent: true,
-    opacity: 0.4
-})
+L.prototype.material      = new MinoMaterial( 0xfdd0b7 )
+L.prototype.ghostMaterial = new GhostMaterial( 0xfdd0b7 )
 
 class O extends Tetromino {}
 O.prototype.minoesPosition = [
@@ -426,21 +410,8 @@ O.prototype.minoesPosition = [
 O.prototype.srs = [
     {[ROTATION.CW]: [], [ROTATION.CCW]: []}
 ]
-O.prototype.material = new THREE.MeshBasicMaterial({
-    color: 0xffedac,
-    reflectivity: 0.99,
-    envMap: minoRenderTarget.texture,
-/*    side: THREE.DoubleSide,
-    transparent: true,
-    opacity: 0.8*/
-})
-O.prototype.ghostMaterial = new THREE.MeshBasicMaterial({
-    side: THREE.DoubleSide,
-    color: 0xffedac,
-    envMap: minoRenderTarget.texture,
-    transparent: true,
-    opacity: 0.4
-})
+O.prototype.material      = new MinoMaterial( 0xffedac )
+O.prototype.ghostMaterial = new GhostMaterial( 0xffedac )
 
 class S extends Tetromino {}
 S.prototype.minoesPosition = [
@@ -449,21 +420,8 @@ S.prototype.minoesPosition = [
     [P(-1, -1), P(0, 0), P( 1, 0), P(0, -1)],
     [P(-1,  1), P(0, 0), P(-1, 0), P(0, -1)],
 ]
-S.prototype.material = new THREE.MeshBasicMaterial({
-    color: 0xC8FBA8,
-    reflectivity: 0.99,
-    envMap: minoRenderTarget.texture,
-/*    side: THREE.DoubleSide,
-    transparent: true,
-    opacity: 0.8*/
-})
-S.prototype.ghostMaterial = new THREE.MeshBasicMaterial({
-    side: THREE.DoubleSide,
-    color: 0xC8FBA8,
-    envMap: minoRenderTarget.texture,
-    transparent: true,
-    opacity: 0.4
-})
+S.prototype.material      = new MinoMaterial( 0xC8FBA8 )
+S.prototype.ghostMaterial = new GhostMaterial( 0xC8FBA8 )
 
 class T extends Tetromino {
     get tSpin() {
@@ -490,21 +448,8 @@ T.prototype.tSlots = [
     [P( 1, -1), P(-1, -1), P(-1,  1), P( 1,  1)],
     [P(-1, -1), P(-1,  1), P( 1,  1), P( 1, -1)],
 ]
-T.prototype.material = new THREE.MeshBasicMaterial({
-    color: 0xedb2ff,
-    reflectivity: 0.99,
-    envMap: minoRenderTarget.texture,
-/*    side: THREE.DoubleSide,
-    transparent: true,
-    opacity: 0.8*/
-})
-T.prototype.ghostMaterial = new THREE.MeshBasicMaterial({
-    side: THREE.DoubleSide,
-    color: 0xedb2ff,
-    envMap: minoRenderTarget.texture,
-    transparent: true,
-    opacity: 0.4
-})
+T.prototype.material      = new MinoMaterial( 0xedb2ff )
+T.prototype.ghostMaterial = new GhostMaterial( 0xedb2ff )
 
 class Z extends Tetromino {}
 Z.prototype.minoesPosition = [
@@ -513,21 +458,8 @@ Z.prototype.minoesPosition = [
     [P(-1,  0), P( 0, 0), P(0, -1), P( 1, -1)],
     [P( 0,  1), P(-1, 0), P(0,  0), P(-1, -1)]
 ]
-Z.prototype.material = new THREE.MeshBasicMaterial({
-    color: 0xffb8c5,
-    reflectivity: 0.99,
-    envMap: minoRenderTarget.texture,
-/*    side: THREE.DoubleSide,
-    transparent: true,
-    opacity: 0.8*/
-})
-Z.prototype.ghostMaterial = new THREE.MeshBasicMaterial({
-    side: THREE.DoubleSide,
-    color: 0xffb8c5,
-    envMap: minoRenderTarget.texture,
-    transparent: true,
-    opacity: 0.4
-})
+Z.prototype.material      = new MinoMaterial( 0xffb8c5 )
+Z.prototype.ghostMaterial = new GhostMaterial( 0xffb8c5 )
 
 class Ghost extends Tetromino {
     copy(piece) {
