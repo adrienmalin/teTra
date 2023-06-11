@@ -508,7 +508,7 @@ class Settings {
         this.form.onsubmit = newGame
         levelInput.name = "startLevel"
         levelInput.disabled = false
-        titleHeader.innerHTML = "te<strong>T</strong>ra"
+        titleHeader.innerHTML = "teTra"
         resumeButton.innerHTML = "Jouer"
     }
 

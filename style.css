@@ -10,6 +10,10 @@ body {
     }
 }
 
+#titleHeader {
+    letter-spacing: 1rem;
+}
+
 #messagesSpan {
     position: absolute;
     top: 10%;
