@@ -489,9 +489,9 @@ class Settings {
     }
 
     load() {
-        for (let element of settingsForm.elements) {
-            if (element.name) {
-                if (localStorage[element.name]) element.value = localStorage[element.name]
+        for (let input of settingsForm.elements) {
+            if (input.name) {
+                if (localStorage[input.name]) input.value = localStorage[input.name]
             }
         }
     }
@@ -537,8 +537,8 @@ class Settings {
     }
 }
 
-function changeKey(input) {
-    prevValue = input.value
+window.changeKey = function(input) {
+    let prevValue = input.value
     input.value = ""
     input.onkeydown = function (event) {
         event.preventDefault()
