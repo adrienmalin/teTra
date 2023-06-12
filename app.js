@@ -767,7 +767,7 @@ controls.minPolarAngle = 0.9
 controls.maxPolarAngle = 2.14
 controls.minAzimuthAngle = 0.9 - Math.PI/2
 controls.maxAzimuthAngle = 2.14 - Math.PI/2
-controls.target = P(5, 9)
+controls.target = P(5, 10)
 controls.update()
 
 const showFPS = window.location.search.includes("fps")
@@ -855,12 +855,12 @@ const edge = new THREE.Mesh(
 scene.add(edge)
 
 const holdQueue = new THREE.Group()
-holdQueue.position.set(-5, 16)
+holdQueue.position.set(-5, SKYLINE)
 scene.add(holdQueue)
 const matrix = new Matrix()
 scene.add(matrix)
 const nextQueue = new NextQueue()
-nextQueue.position.set(4, SKYLINE+3)
+nextQueue.position.set(4, SKYLINE + 3)
 scene.add(nextQueue)
 let ghost = new Ghost()
 
