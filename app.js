@@ -855,7 +855,7 @@ const edge = new THREE.Mesh(
 scene.add(edge)
 
 const holdQueue = new THREE.Group()
-holdQueue.position.set(-5, SKYLINE)
+holdQueue.position.set(-4, SKYLINE)
 scene.add(holdQueue)
 const matrix = new Matrix()
 scene.add(matrix)
