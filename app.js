@@ -252,7 +252,7 @@ class GhostMaterial extends THREE.MeshBasicMaterial {
     constructor( color ) {
         super({
             side: THREE.DoubleSide,
-            color: 0xffb8c5,
+            color: color,
             envMap: minoRenderTarget.texture,
             transparent: true,
             opacity: 0.4
