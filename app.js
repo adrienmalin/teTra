@@ -556,7 +556,6 @@ window.changeKey = function(input) {
 class Stats {
     constructor() {
         this.modal = new bootstrap.Modal('#statsModal')
-        restartButton.onclick = restart
         this.load()
     }
 
@@ -912,7 +911,7 @@ let stats = new Stats()
 let playing = false
 //let favicon = document.querySelector("link[rel~='icon']")
 
-function restart() {
+window.restart = function() {
     stats.modal.hide()
     stats.init()
     settings.init()
