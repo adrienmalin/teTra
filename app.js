@@ -194,7 +194,7 @@ class NextQueue extends THREE.Group {
     }
 
 }
-NextQueue.prototype.positions = [P(0, 0), P(0, -4), P(0, -8), P(0, -12), P(0, -16)]
+NextQueue.prototype.positions = [P(0, 0), P(0, 3), P(0, 6), P(0, 9), P(0, 12)]
 
 
 const GRAVITY = -20
@@ -756,7 +756,7 @@ renderer.setClearColor(0x000000, 10)
 document.body.appendChild(renderer.domElement)
 
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
-camera.position.set(5, 2, 16)
+camera.position.set(5, 1, 16)
 
 const controls = new OrbitControls( camera, renderer.domElement )
 controls.autoRotate
@@ -860,7 +860,7 @@ scene.add(holdQueue)
 const matrix = new Matrix()
 scene.add(matrix)
 const nextQueue = new NextQueue()
-nextQueue.position.set(13, 16)
+nextQueue.position.set(4, SKYLINE+3)
 scene.add(nextQueue)
 let ghost = new Ghost()
 
