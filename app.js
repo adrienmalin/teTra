@@ -539,7 +539,7 @@ class Settings {
 
 window.changeKey = function(input) {
     let prevValue = input.value
-    input.value = ""
+    input.select()
     input.onkeydown = function (event) {
         event.preventDefault()
         input.value = KEY_NAMES[event.key] || event.key
@@ -822,8 +822,12 @@ const colorFullCylinder = new THREE.Mesh(
 colorFullCylinder.position.set(5, 10, -10)
 scene.add(colorFullCylinder)
 
-const light = new THREE.AmbientLight(0xffffff, 2)
-scene.add(light)
+const ambientLight = new THREE.AmbientLight(0xffffff, 2)
+scene.add(ambientLight)
+
+const directionalLight = new THREE.DirectionalLight(0xffffff, 2)
+directionalLight.position.set(5, -30, 0)
+scene.add(directionalLight)
 
 const edgeMaterial = new THREE.MeshBasicMaterial({
     color: 0x88abe0,
