@@ -2,11 +2,11 @@ import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import * as FPS from 'three/addons/libs/stats.module.js';
 
-let P = (x, y, z=0) => new THREE.Vector3(x, y, z)
+let P = (x, y, z = 0) => new THREE.Vector3(x, y, z)
 
-Array.prototype.pick = function() { return this.splice(Math.floor(Math.random()*this.length), 1)[0] }
+Array.prototype.pick = function () { return this.splice(Math.floor(Math.random() * this.length), 1)[0] }
 
-HTMLElement.prototype.addNewChild = function(tag, properties) {
+HTMLElement.prototype.addNewChild = function (tag, properties) {
     let child = document.createElement(tag)
     for (let key in properties) {
         child[key] = properties[key]
@@ -28,55 +28,55 @@ const DELAY = {
 
 const FACING = {
     NORTH: 0,
-    EAST:  1,
+    EAST: 1,
     SOUTH: 2,
-    WEST:  3,
+    WEST: 3,
 }
 
 const TRANSLATION = {
-    NONE:  P( 0,  0),
-    LEFT:  P(-1,  0),
-    RIGHT: P( 1,  0),
-    DOWN:  P( 0, -1),
+    NONE: P(0, 0),
+    LEFT: P(-1, 0),
+    RIGHT: P(1, 0),
+    DOWN: P(0, -1),
 }
 
 const ROTATION = {
-    CW:   1,  // ClockWise
+    CW: 1,  // ClockWise
     CCW: -1,  // CounterClockWise
 }
 
 const T_SPIN = {
-    NONE:   "",
-    MINI:   "PETITE<br/>PIROUETTE",
+    NONE: "",
+    MINI: "PETITE<br/>PIROUETTE",
     T_SPIN: "PIROUETTE"
 }
 
 // score = AWARDED_LINE_CLEARS[tSpin][nbClearedLines]
 const AWARDED_LINE_CLEARS = {
-    [T_SPIN.NONE]:   [0, 1, 3, 5, 8],
-    [T_SPIN.MINI]:   [1, 2],
+    [T_SPIN.NONE]: [0, 1, 3, 5, 8],
+    [T_SPIN.MINI]: [1, 2],
     [T_SPIN.T_SPIN]: [4, 8, 12, 16]
 }
 
 const KEY_NAMES = {
-    ["ArrowLeft"]:  "←",
+    ["ArrowLeft"]: "←",
     ["ArrowRight"]: "→",
-    ["ArrowUp"]:    "↑",
-    ["ArrowDown"]:  "↓",
-    [" "]:          "Espace",
-    ["Escape"]:     "Échap",
-    ["Enter"]:      "Entrée",
-    ["←"]:          "ArrowLeft",
-    ["→"]:          "ArrowRight",
-    ["↑"]:          "ArrowUp",
-    ["↓"]:          "ArrowDown",
-    ["Espace"]:     " ",
-    ["Échap"]:      "Escape",
-    ["Entrée"]:     "Enter",
+    ["ArrowUp"]: "↑",
+    ["ArrowDown"]: "↓",
+    [" "]: "Espace",
+    ["Escape"]: "Échap",
+    ["Enter"]: "Entrée",
+    ["←"]: "ArrowLeft",
+    ["→"]: "ArrowRight",
+    ["↑"]: "ArrowUp",
+    ["↓"]: "ArrowDown",
+    ["Espace"]: " ",
+    ["Échap"]: "Escape",
+    ["Entrée"]: "Enter",
 }
 
 const CLEARED_LINES_NAMES = [
-    "",  
+    "",
     "SOLO",
     "DUO",
     "TRIO",
@@ -103,13 +103,13 @@ class Scheduler {
     clearInterval(func) {
         if (this.intervalTasks.has(func))
             window.clearInterval(this.intervalTasks.get(func))
-            this.intervalTasks.delete(func)
+        this.intervalTasks.delete(func)
     }
 
     clearTimeout(func) {
         if (this.timeoutTasks.has(func))
             window.clearTimeout(this.timeoutTasks.get(func))
-            this.timeoutTasks.delete(func)
+        this.timeoutTasks.delete(func)
     }
 }
 
@@ -122,8 +122,8 @@ class Matrix extends THREE.Group {
 
     cellIsEmpty(p) {
         return 0 <= p.x && p.x < COLUMNS &&
-               0 <= p.y && p.y < ROWS &&
-               !this.cells[p.y][p.x]
+            0 <= p.y && p.y < ROWS &&
+            !this.cells[p.y][p.x]
     }
 
     lock(piece) {
@@ -141,7 +141,7 @@ class Matrix extends THREE.Group {
 
     clearLines() {
         let nbClearedLines = 0
-        for (let y=ROWS-1; y>=0; y--) {
+        for (let y = ROWS - 1; y >= 0; y--) {
             let row = this.cells[y]
             if (row.filter(mino => mino).length == COLUMNS) {
                 nbClearedLines++
@@ -163,7 +163,7 @@ class Matrix extends THREE.Group {
     updateUnlockedMinoes(delta) {
         this.unlockedMinoes.forEach(mino => {
             mino.update(delta)
-            if (Math.sqrt(mino.position.x*mino.position.x + mino.position.z*mino.position.z) > 25) {
+            if (Math.sqrt(mino.position.x * mino.position.x + mino.position.z * mino.position.z) > 25) {
                 this.remove(mino)
                 this.unlockedMinoes.delete(mino)
             }
@@ -202,16 +202,16 @@ const GRAVITY = -20
 class Mino extends THREE.Mesh {
     constructor() {
         super(Mino.prototype.geometry)
-        this.velocity        = P(50-100*Math.random(), 50-100*Math.random(), 50-100*Math.random())
-        this.rotationAngle   = P(Math.random(), Math.random(), Math.random()).normalize()
-        this.angularVelocity = 5-10*Math.random()
+        this.velocity = P(50 - 100 * Math.random(), 50 - 100 * Math.random(), 50 - 100 * Math.random())
+        this.rotationAngle = P(Math.random(), Math.random(), Math.random()).normalize()
+        this.angularVelocity = 5 - 10 * Math.random()
         scene.add(this)
     }
 
     update(delta) {
         this.velocity.y += delta * GRAVITY
         this.position.addScaledVector(this.velocity, delta)
-        this.rotateOnWorldAxis(this.rotationAngle, delta*this.angularVelocity)
+        this.rotateOnWorldAxis(this.rotationAngle, delta * this.angularVelocity)
     }
 }
 const minoFaceShape = new THREE.Shape()
@@ -221,20 +221,20 @@ minoFaceShape.lineTo(.9, .9)
 minoFaceShape.lineTo(.9, .1)
 minoFaceShape.lineTo(.1, .1)
 const minoExtrudeSettings = {
-	steps: 1,
-	depth: .8,
-	bevelEnabled: true,
-	bevelThickness: .1,
-	bevelSize: .1,
-	bevelOffset: 0,
-	bevelSegments: 1
+    steps: 1,
+    depth: .8,
+    bevelEnabled: true,
+    bevelThickness: .1,
+    bevelSize: .1,
+    bevelOffset: 0,
+    bevelSegments: 1
 }
 Mino.prototype.geometry = new THREE.ExtrudeGeometry(minoFaceShape, minoExtrudeSettings)
 
 
 class MinoMaterial extends THREE.MeshBasicMaterial {
 
-    constructor( color ) {
+    constructor(color) {
         super({
             color: color,
             reflectivity: 0.9,
@@ -248,8 +248,8 @@ class MinoMaterial extends THREE.MeshBasicMaterial {
 }
 
 class GhostMaterial extends THREE.MeshBasicMaterial {
-    
-    constructor( color ) {
+
+    constructor(color) {
         super({
             side: THREE.DoubleSide,
             color: color,
@@ -274,10 +274,10 @@ class Tetromino extends THREE.Group {
         this.rotatedLast = false
         this.rotationPoint4Used = false
         this.holdEnabled = true
-        for (let i=0; i<4; i++) {
+        for (let i = 0; i < 4; i++) {
             this.add(new Mino())
         }
-        this.facing = 0 
+        this.facing = 0
         this.locked = false
     }
 
@@ -305,11 +305,11 @@ class Tetromino extends THREE.Group {
         return this._locked
     }
 
-    canMove(translation, facing=this.facing) {
+    canMove(translation, facing = this.facing) {
         let testPosition = this.position.clone().add(translation)
         return this.minoesPosition[facing].every(minoPosition => matrix.cellIsEmpty(minoPosition.clone().add(testPosition)))
     }
-    
+
     move(translation, testFacing) {
         if (this.canMove(translation, testFacing)) {
             scheduler.clearTimeout(lockDown)
@@ -333,7 +333,7 @@ class Tetromino extends THREE.Group {
                 scheduler.setTimeout(lockDown, stats.lockDelay)
         }
     }
-    
+
     rotate(rotation) {
         let testFacing = (this.facing + rotation + 4) % 4
         return this.srs[this.facing][rotation].some((translation, rotationPoint) => {
@@ -356,72 +356,72 @@ class Tetromino extends THREE.Group {
 // Super Rotation System
 // freedom of movement = srs[piece.facing][rotation]
 Tetromino.prototype.srs = [
-    { [ROTATION.CW]: [P(0, 0), P(-1, 0), P(-1,  1), P(0, -2), P(-1, -2)], [ROTATION.CCW]: [P(0, 0), P( 1, 0), P( 1,  1), P(0, -2), P( 1, -2)] },
-    { [ROTATION.CW]: [P(0, 0), P( 1, 0), P( 1, -1), P(0,  2), P( 1,  2)], [ROTATION.CCW]: [P(0, 0), P( 1, 0), P( 1, -1), P(0,  2), P( 1,  2)] },
-    { [ROTATION.CW]: [P(0, 0), P( 1, 0), P( 1,  1), P(0, -2), P( 1, -2)], [ROTATION.CCW]: [P(0, 0), P(-1, 0), P(-1,  1), P(0, -2), P(-1, -2)] },
-    { [ROTATION.CW]: [P(0, 0), P(-1, 0), P(-1, -1), P(0,  2), P(-1,  2)], [ROTATION.CCW]: [P(0, 0), P(-1, 0), P(-1, -1), P(0,  2), P(-1,  2)] },
+    { [ROTATION.CW]: [P(0, 0), P(-1, 0), P(-1, 1), P(0, -2), P(-1, -2)], [ROTATION.CCW]: [P(0, 0), P(1, 0), P(1, 1), P(0, -2), P(1, -2)] },
+    { [ROTATION.CW]: [P(0, 0), P(1, 0), P(1, -1), P(0, 2), P(1, 2)], [ROTATION.CCW]: [P(0, 0), P(1, 0), P(1, -1), P(0, 2), P(1, 2)] },
+    { [ROTATION.CW]: [P(0, 0), P(1, 0), P(1, 1), P(0, -2), P(1, -2)], [ROTATION.CCW]: [P(0, 0), P(-1, 0), P(-1, 1), P(0, -2), P(-1, -2)] },
+    { [ROTATION.CW]: [P(0, 0), P(-1, 0), P(-1, -1), P(0, 2), P(-1, 2)], [ROTATION.CCW]: [P(0, 0), P(-1, 0), P(-1, -1), P(0, 2), P(-1, 2)] },
 ]
 const minoRenderTarget = new THREE.WebGLCubeRenderTarget(256)
 minoRenderTarget.texture.type = THREE.HalfFloatType
 const minoCamera = new THREE.CubeCamera(1, 1000, minoRenderTarget)
 minoCamera.position.set(5, 10)
-Tetromino.prototype.lockedMaterial = new MinoMaterial( 0xffffff )
+Tetromino.prototype.lockedMaterial = new MinoMaterial(0xffffff)
 
-class I extends Tetromino {}
+class I extends Tetromino { }
 I.prototype.minoesPosition = [
-    [P(-1,  0), P(0,  0), P(1,  0), P(2,  0)],
-    [P( 1,  1), P(1,  0), P(1, -1), P(1, -2)],
+    [P(-1, 0), P(0, 0), P(1, 0), P(2, 0)],
+    [P(1, 1), P(1, 0), P(1, -1), P(1, -2)],
     [P(-1, -1), P(0, -1), P(1, -1), P(2, -1)],
-    [P( 0,  1), P(0,  0), P(0, -1), P(0, -2)],
+    [P(0, 1), P(0, 0), P(0, -1), P(0, -2)],
 ]
 I.prototype.srs = [
-    { [ROTATION.CW]: [P(0, 0), P(-2, 0), P( 1, 0), P(-2, -1), P( 1,  2)], [ROTATION.CCW]: [P(0, 0), P(-1, 0), P( 2, 0), P(-1,  2), P( 2, -1)] },
-    { [ROTATION.CW]: [P(0, 0), P(-1, 0), P( 2, 0), P(-1,  2), P( 2, -1)], [ROTATION.CCW]: [P(0, 0), P( 2, 0), P(-1, 0), P( 2,  1), P(-1, -2)] },
-    { [ROTATION.CW]: [P(0, 0), P( 2, 0), P(-1, 0), P( 2,  1), P(-1, -2)], [ROTATION.CCW]: [P(0, 0), P( 1, 0), P(-2, 0), P( 1, -2), P(-2,  1)] },
-    { [ROTATION.CW]: [P(0, 0), P( 1, 0), P(-2, 0), P( 1, -2), P(-2,  1)], [ROTATION.CCW]: [P(0, 0), P(-2, 0), P( 1, 0), P(-2, -1), P( 1,  2)] },
+    { [ROTATION.CW]: [P(0, 0), P(-2, 0), P(1, 0), P(-2, -1), P(1, 2)], [ROTATION.CCW]: [P(0, 0), P(-1, 0), P(2, 0), P(-1, 2), P(2, -1)] },
+    { [ROTATION.CW]: [P(0, 0), P(-1, 0), P(2, 0), P(-1, 2), P(2, -1)], [ROTATION.CCW]: [P(0, 0), P(2, 0), P(-1, 0), P(2, 1), P(-1, -2)] },
+    { [ROTATION.CW]: [P(0, 0), P(2, 0), P(-1, 0), P(2, 1), P(-1, -2)], [ROTATION.CCW]: [P(0, 0), P(1, 0), P(-2, 0), P(1, -2), P(-2, 1)] },
+    { [ROTATION.CW]: [P(0, 0), P(1, 0), P(-2, 0), P(1, -2), P(-2, 1)], [ROTATION.CCW]: [P(0, 0), P(-2, 0), P(1, 0), P(-2, -1), P(1, 2)] },
 ]
-I.prototype.material      = new MinoMaterial( 0xafeff9 )
-I.prototype.ghostMaterial = new GhostMaterial( 0xafeff9 )
+I.prototype.material = new MinoMaterial(0xafeff9)
+I.prototype.ghostMaterial = new GhostMaterial(0xafeff9)
 
-class J extends Tetromino {}
+class J extends Tetromino { }
 J.prototype.minoesPosition = [
-    [P(-1,  1), P(-1,  0), P(0, 0), P(1,  0)],
-    [P( 0,  1), P( 1,  1), P(0, 0), P(0, -1)],
-    [P( 1, -1), P(-1,  0), P(0, 0), P(1,  0)],
-    [P( 0,  1), P(-1, -1), P(0, 0), P(0, -1)],
+    [P(-1, 1), P(-1, 0), P(0, 0), P(1, 0)],
+    [P(0, 1), P(1, 1), P(0, 0), P(0, -1)],
+    [P(1, -1), P(-1, 0), P(0, 0), P(1, 0)],
+    [P(0, 1), P(-1, -1), P(0, 0), P(0, -1)],
 ]
-J.prototype.material      = new MinoMaterial( 0xb8b4ff )
-J.prototype.ghostMaterial = new GhostMaterial( 0xb8b4ff )
+J.prototype.material = new MinoMaterial(0xb8b4ff)
+J.prototype.ghostMaterial = new GhostMaterial(0xb8b4ff)
 
-class L extends Tetromino {}
+class L extends Tetromino { }
 L.prototype.minoesPosition = [
-    [P(-1, 0), P(0, 0), P(1,  0), P( 1,  1)],
-    [P(0,  1), P(0, 0), P(0, -1), P( 1, -1)],
-    [P(-1, 0), P(0, 0), P(1,  0), P(-1, -1)],
-    [P(0,  1), P(0, 0), P(0, -1), P(-1,  1)],
+    [P(-1, 0), P(0, 0), P(1, 0), P(1, 1)],
+    [P(0, 1), P(0, 0), P(0, -1), P(1, -1)],
+    [P(-1, 0), P(0, 0), P(1, 0), P(-1, -1)],
+    [P(0, 1), P(0, 0), P(0, -1), P(-1, 1)],
 ]
-L.prototype.material      = new MinoMaterial( 0xfdd0b7 )
-L.prototype.ghostMaterial = new GhostMaterial( 0xfdd0b7 )
+L.prototype.material = new MinoMaterial(0xfdd0b7)
+L.prototype.ghostMaterial = new GhostMaterial(0xfdd0b7)
 
-class O extends Tetromino {}
+class O extends Tetromino { }
 O.prototype.minoesPosition = [
     [P(0, 0), P(1, 0), P(0, 1), P(1, 1)]
 ]
 O.prototype.srs = [
-    {[ROTATION.CW]: [], [ROTATION.CCW]: []}
+    { [ROTATION.CW]: [], [ROTATION.CCW]: [] }
 ]
-O.prototype.material      = new MinoMaterial( 0xffedac )
-O.prototype.ghostMaterial = new GhostMaterial( 0xffedac )
+O.prototype.material = new MinoMaterial(0xffedac)
+O.prototype.ghostMaterial = new GhostMaterial(0xffedac)
 
-class S extends Tetromino {}
+class S extends Tetromino { }
 S.prototype.minoesPosition = [
-    [P(-1,  0), P(0, 0), P( 0, 1), P(1,  1)],
-    [P( 0,  1), P(0, 0), P( 1, 0), P(1, -1)],
-    [P(-1, -1), P(0, 0), P( 1, 0), P(0, -1)],
-    [P(-1,  1), P(0, 0), P(-1, 0), P(0, -1)],
+    [P(-1, 0), P(0, 0), P(0, 1), P(1, 1)],
+    [P(0, 1), P(0, 0), P(1, 0), P(1, -1)],
+    [P(-1, -1), P(0, 0), P(1, 0), P(0, -1)],
+    [P(-1, 1), P(0, 0), P(-1, 0), P(0, -1)],
 ]
-S.prototype.material      = new MinoMaterial( 0xC8FBA8 )
-S.prototype.ghostMaterial = new GhostMaterial( 0xC8FBA8 )
+S.prototype.material = new MinoMaterial(0xC8FBA8)
+S.prototype.ghostMaterial = new GhostMaterial(0xC8FBA8)
 
 class T extends Tetromino {
     get tSpin() {
@@ -437,29 +437,29 @@ class T extends Tetromino {
     }
 }
 T.prototype.minoesPosition = [
-    [P(-1, 0), P(0, 0), P(1,  0), P( 0,  1)],
-    [P( 0, 1), P(0, 0), P(1,  0), P( 0, -1)],
-    [P(-1, 0), P(0, 0), P(1,  0), P( 0, -1)],
-    [P( 0, 1), P(0, 0), P(0, -1), P(-1,  0)],
+    [P(-1, 0), P(0, 0), P(1, 0), P(0, 1)],
+    [P(0, 1), P(0, 0), P(1, 0), P(0, -1)],
+    [P(-1, 0), P(0, 0), P(1, 0), P(0, -1)],
+    [P(0, 1), P(0, 0), P(0, -1), P(-1, 0)],
 ]
 T.prototype.tSlots = [
-    [P(-1,  1), P( 1,  1), P( 1, -1), P(-1, -1)],
-    [P( 1,  1), P( 1, -1), P(-1, -1), P(-1,  1)],
-    [P( 1, -1), P(-1, -1), P(-1,  1), P( 1,  1)],
-    [P(-1, -1), P(-1,  1), P( 1,  1), P( 1, -1)],
+    [P(-1, 1), P(1, 1), P(1, -1), P(-1, -1)],
+    [P(1, 1), P(1, -1), P(-1, -1), P(-1, 1)],
+    [P(1, -1), P(-1, -1), P(-1, 1), P(1, 1)],
+    [P(-1, -1), P(-1, 1), P(1, 1), P(1, -1)],
 ]
-T.prototype.material      = new MinoMaterial( 0xedb2ff )
-T.prototype.ghostMaterial = new GhostMaterial( 0xedb2ff )
+T.prototype.material = new MinoMaterial(0xedb2ff)
+T.prototype.ghostMaterial = new GhostMaterial(0xedb2ff)
 
-class Z extends Tetromino {}
+class Z extends Tetromino { }
 Z.prototype.minoesPosition = [
-    [P(-1,  1), P( 0, 1), P(0,  0), P( 1,  0)],
-    [P( 1,  1), P( 1, 0), P(0,  0), P( 0, -1)],
-    [P(-1,  0), P( 0, 0), P(0, -1), P( 1, -1)],
-    [P( 0,  1), P(-1, 0), P(0,  0), P(-1, -1)]
+    [P(-1, 1), P(0, 1), P(0, 0), P(1, 0)],
+    [P(1, 1), P(1, 0), P(0, 0), P(0, -1)],
+    [P(-1, 0), P(0, 0), P(0, -1), P(1, -1)],
+    [P(0, 1), P(-1, 0), P(0, 0), P(-1, -1)]
 ]
-Z.prototype.material      = new MinoMaterial( 0xffb8c5 )
-Z.prototype.ghostMaterial = new GhostMaterial( 0xffb8c5 )
+Z.prototype.material = new MinoMaterial(0xffb8c5)
+Z.prototype.ghostMaterial = new GhostMaterial(0xffb8c5)
 
 class Ghost extends Tetromino {
     copy(piece) {
@@ -529,7 +529,7 @@ class Settings {
         for (let input of this.form.querySelectorAll("input[type='checkbox']")) {
             this[input.name] = input.checked == true
         }
-    
+
         this.keyBind = {}
         for (let actionName in playerActions) {
             this.keyBind[settings[actionName]] = playerActions[actionName]
@@ -537,7 +537,7 @@ class Settings {
     }
 }
 
-window.changeKey = function(input) {
+window.changeKey = function (input) {
     let prevValue = input.value
     input.select()
     input.onkeydown = function (event) {
@@ -591,7 +591,7 @@ class Stats {
     set level(level) {
         this._level = level
         this.goal += level * 5
-        if (level <= 20){
+        if (level <= 20) {
             this.fallPeriod = 1000 * Math.pow(0.8 - ((level - 1) * 0.007), level - 1)
         }
         if (level > 15)
@@ -683,7 +683,7 @@ class Stats {
                 }
                 this.score += b2bScore
             }
-        } else if (nbClearedLines && !tSpin ) {
+        } else if (nbClearedLines && !tSpin) {
             if (this.b2b >= 1) {
                 messagesSpan.addNewChild("div", {
                     className: "zoom-in-animation",
@@ -700,16 +700,16 @@ class Stats {
 
     show() {
         let time = stats.time
-        statsModalScoreCell.innerText           = this.score.toLocaleString()
-        statsModalHighScoreCell.innerText       = this.highScore.toLocaleString()
-        statsModalLevelCell.innerText           = this.level
-        statsModalTimeCell.innerText            = this.timeFormat.format(time)
-        statsModaltotalClearedLines.innerText   = this.totalClearedLines
+        statsModalScoreCell.innerText = this.score.toLocaleString()
+        statsModalHighScoreCell.innerText = this.highScore.toLocaleString()
+        statsModalLevelCell.innerText = this.level
+        statsModalTimeCell.innerText = this.timeFormat.format(time)
+        statsModaltotalClearedLines.innerText = this.totalClearedLines
         statsModaltotalClearedLinesPM.innerText = (stats.totalClearedLines * 60000 / time).toFixed(2)
-        statsModalNbQuatris.innerText           = this.nbQuatris
-        statsModalNbTSpin.innerText             = this.nbTSpin
-        statsModalMaxCombo.innerText            = this.maxCombo
-        statsModalMaxB2B.innerText              = this.maxB2B
+        statsModalNbQuatris.innerText = this.nbQuatris
+        statsModalNbTSpin.innerText = this.nbTSpin
+        statsModalMaxCombo.innerText = this.maxCombo
+        statsModalMaxB2B.innerText = this.maxB2B
         this.modal.show()
     }
 
@@ -728,19 +728,19 @@ Stats.prototype.timeFormat = new Intl.DateTimeFormat("fr-FR", {
 /* Scene */
 
 const manager = new THREE.LoadingManager()
-manager.onStart = function ( url, itemsLoaded, itemsTotal ) {
-	messagesSpan.innerHTML = 'Chargement : 0%...'
+manager.onStart = function (url, itemsLoaded, itemsTotal) {
+    messagesSpan.innerHTML = 'Chargement : 0%...'
 }
-manager.onLoad = function ( ) {
-	restart()
+manager.onLoad = function () {
+    restart()
     messagesSpan.innerHTML = ""
     animate()
 }
-manager.onProgress = function ( url, itemsLoaded, itemsTotal ) {
-	messagesSpan.innerHTML = 'Chargement : ' + 100 * itemsLoaded / itemsTotal + '%...'
+manager.onProgress = function (url, itemsLoaded, itemsTotal) {
+    messagesSpan.innerHTML = 'Chargement : ' + 100 * itemsLoaded / itemsTotal + '%...'
 }
-manager.onError = function ( url ) {
-	messagesSpan.innerHTML = 'Erreur de chargement'
+manager.onError = function (url) {
+    messagesSpan.innerHTML = 'Erreur de chargement'
 }
 
 const scene = new THREE.Scene()
@@ -757,17 +757,20 @@ document.body.appendChild(renderer.domElement)
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
 camera.position.set(5, 1, 16)
 
-const controls = new OrbitControls( camera, renderer.domElement )
+const controls = new OrbitControls(camera, renderer.domElement)
 controls.autoRotate
 controls.enableDamping
 controls.maxDistance = 21
 controls.keys = {}
 controls.minPolarAngle = 0.9
 controls.maxPolarAngle = 2.14
-controls.minAzimuthAngle = 0.9 - Math.PI/2
-controls.maxAzimuthAngle = 2.14 - Math.PI/2
+controls.minAzimuthAngle = 0.9 - Math.PI / 2
+controls.maxAzimuthAngle = 2.14 - Math.PI / 2
 controls.target = P(5, 10)
 controls.update()
+
+controls.addEventListener("start", () => renderer.domElement.style.cursor = "grabbing")
+controls.addEventListener("end", () => renderer.domElement.style.cursor = "grab")
 
 const showFPS = window.location.search.includes("fps")
 const fps = new FPS.default();
@@ -777,12 +780,12 @@ if (showFPS) document.body.appendChild(fps.dom);
 const GLOBAL_ROTATION = 0.0025
 
 const darkTextureRotation = 0.0006
-const darkMoveForward     = -0.0007
-const darkOpacity         = 0.3
+const darkMoveForward = -0.0007
+const darkOpacity = 0.3
 
 const colorFullTextureRotation = 0.0006
-const colorFullMoveForward     = -0.0012
-const colorFullOpacity         = 0.3
+const colorFullMoveForward = -0.0012
+const colorFullOpacity = 0.3
 
 const commonCylinderGeometry = new THREE.CylinderGeometry(25, 25, 500, 12, 1, true)
 
@@ -839,17 +842,17 @@ const edgeMaterial = new THREE.MeshBasicMaterial({
 
 const edgeShape = new THREE.Shape()
 edgeShape.moveTo(-.3, SKYLINE)
-edgeShape.lineTo( 0, SKYLINE)
-edgeShape.lineTo( 0,  0)
-edgeShape.lineTo(COLUMNS,  0)
+edgeShape.lineTo(0, SKYLINE)
+edgeShape.lineTo(0, 0)
+edgeShape.lineTo(COLUMNS, 0)
 edgeShape.lineTo(COLUMNS, SKYLINE)
-edgeShape.lineTo(COLUMNS+.3, SKYLINE)
-edgeShape.lineTo(COLUMNS+.3, -.3)
+edgeShape.lineTo(COLUMNS + .3, SKYLINE)
+edgeShape.lineTo(COLUMNS + .3, -.3)
 edgeShape.lineTo(-.3, -.3)
 edgeShape.moveTo(-.3, SKYLINE)
 const edgeExtrudeSettings = {
-	depth: 1,
-	bevelEnabled: false,
+    depth: 1,
+    bevelEnabled: false,
 }
 const edge = new THREE.Mesh(
     new THREE.ExtrudeGeometry(edgeShape, edgeExtrudeSettings),
@@ -868,14 +871,14 @@ scene.add(nextQueue)
 let ghost = new Ghost()
 
 const lineClearSound = new Audio("audio/line_clear.ogg")
-const tetrisSound    = new Audio("audio/tetris.ogg")
-const music          = new Audio("https://iterations.org/files/music/remixes/Tetris_CheDDer_OC_ReMix.mp3")
+const tetrisSound = new Audio("audio/tetris.ogg")
+const music = new Audio("https://iterations.org/files/music/remixes/Tetris_CheDDer_OC_ReMix.mp3")
 music.loop = true
 
 window.addEventListener("resize", () => {
-  renderer.setSize(window.innerWidth, window.innerHeight)
-  camera.aspect = window.innerWidth / window.innerHeight
-  camera.updateProjectionMatrix()
+    renderer.setSize(window.innerWidth, window.innerHeight)
+    camera.aspect = window.innerWidth / window.innerHeight
+    camera.updateProjectionMatrix()
 })
 
 let clock = new THREE.Clock()
@@ -905,8 +908,8 @@ function animate() {
 
 /* Game logic */
 
-messagesSpan.onanimationend = function(event) {
-    event.target.remove() 
+messagesSpan.onanimationend = function (event) {
+    event.target.remove()
 }
 
 let scheduler = new Scheduler()
@@ -915,7 +918,7 @@ let stats = new Stats()
 let playing = false
 //let favicon = document.querySelector("link[rel~='icon']")
 
-window.restart = function() {
+window.restart = function () {
     stats.modal.hide()
     stats.init()
     settings.init()
@@ -941,7 +944,6 @@ function pauseSettings() {
 
     music.pause()
     document.onkeydown = null
-    renderer.domElement.style.cursor = "auto"
 
     settings.show()
 }
@@ -977,20 +979,19 @@ function resume(event) {
     if (settings.form.checkValidity()) {
         settings.modal.hide()
         settings.getInputs()
+        renderer.domElement.focus()
 
         document.onkeydown = onkeydown
         document.onkeyup = onkeyup
-    
+
         stats.time = stats.pauseTime
 
         lineClearSound.volume = settings.sfxVolume
-        tetrisSound.volume    = settings.sfxVolume
+        tetrisSound.volume = settings.sfxVolume
         if (settings.musicVolume > 0) {
-            music.volume      = settings.musicVolume
+            music.volume = settings.musicVolume
             music.play()
         }
-
-        renderer.domElement.style.cursor = "move"
 
         if (piece) scheduler.setInterval(fall, stats.fallPeriod)
         else generate()
@@ -1025,22 +1026,22 @@ let playerActions = {
 
     rotateCounterclockwise: () => piece.rotate(ROTATION.CCW),
 
-    softDrop: function() {
+    softDrop: function () {
         if (piece.move(TRANSLATION.DOWN)) stats.score++
     },
 
-    hardDrop: function() {
+    hardDrop: function () {
         scheduler.clearTimeout(lockDown)
         //hardDropSound.play()
-        while (piece.move(TRANSLATION.DOWN)) stats.score +=2
+        while (piece.move(TRANSLATION.DOWN)) stats.score += 2
         lockDown()
     },
 
-    hold: function() {
+    hold: function () {
         if (piece.holdEnabled) {
             scheduler.clearInterval(fall)
             scheduler.clearTimeout(lockDown)
-    
+
             let heldpiece = holdQueue.piece
             holdQueue.piece = piece
             holdQueue.piece.holdEnabled = false
@@ -1051,7 +1052,7 @@ let playerActions = {
             generate(heldpiece)
         }
     },
-    
+
     pause: pauseSettings,
 }
 
@@ -1075,7 +1076,7 @@ function onkeydown(event) {
                 actionsQueue.unshift(action)
                 scheduler.clearTimeout(repeat)
                 scheduler.clearInterval(autorepeat)
-                if (action == playerActions.softDrop) scheduler.setInterval(autorepeat, settings.fallPeriod/20)
+                if (action == playerActions.softDrop) scheduler.setInterval(autorepeat, settings.fallPeriod / 20)
                 else scheduler.setTimeout(repeat, settings.das)
             }
         }
@@ -1129,7 +1130,7 @@ function lockDown() {
             if (tetrisSound.volume) tetrisSound.play()
         } else if (nbClearedLines || tSpin) {
             lineClearSound.currentTime = 0
-            if(lineClearSound.volume) lineClearSound.play()
+            if (lineClearSound.volume) lineClearSound.play()
         }
         stats.lockDown(nbClearedLines, tSpin)
 
@@ -1145,18 +1146,13 @@ function gameOver() {
     document.onkeydown = null
     onblur = null
     playing = false
-    renderer.domElement.style.cursor = "auto"
     music.pause()
 
     stats.show()
 }
 
-window.onbeforeunload = function(event) {
+window.onbeforeunload = function (event) {
     stats.save()
     settings.save()
     if (playing) return false
 }
-
-/*if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('service-worker.js')
-}*/
