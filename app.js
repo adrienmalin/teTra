@@ -469,7 +469,7 @@ Z.prototype.minoesPosition = [
     [P(0, 1), P(-1, 0), P(0, 0), P(-1, -1)]
 ]
 Z.prototype.material = new MinoMaterial(COLORS.Z)
-Z.prototype.ghostMaterial = new GhostMaterial()
+Z.prototype.ghostMaterial = new GhostMaterial(COLORS.Z)
 
 class Ghost extends Tetromino {
     copy(piece) {
