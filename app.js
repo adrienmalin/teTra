@@ -74,14 +74,16 @@ const KEY_NAMES = {
     ["ArrowUp"]: "↑",
     ["ArrowDown"]: "↓",
     [" "]: "Espace",
-    ["Escape"]: "Échap",
+    ["Escape"]: "Échap.",
+    ["Backspace"]: "Ret. arrière",
     ["Enter"]: "Entrée",
     ["←"]: "ArrowLeft",
     ["→"]: "ArrowRight",
     ["↑"]: "ArrowUp",
     ["↓"]: "ArrowDown",
     ["Espace"]: " ",
-    ["Échap"]: "Escape",
+    ["Échap."]: "Escape",
+    ["Ret. arrière"]: "Backspace",
     ["Entrée"]: "Enter",
 }
 
@@ -549,7 +551,7 @@ class Settings {
 
 window.changeKey = function (input) {
     let prevValue = input.value
-    input.select()
+    input.value = ""
     input.onkeydown = function (event) {
         event.preventDefault()
         input.value = KEY_NAMES[event.key] || event.key
