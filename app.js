@@ -69,22 +69,22 @@ const AWARDED_LINE_CLEARS = {
 }
 
 const KEY_NAMES = {
-    ["ArrowLeft"]: "←",
-    ["ArrowRight"]: "→",
-    ["ArrowUp"]: "↑",
-    ["ArrowDown"]: "↓",
-    [" "]: "Espace",
-    ["Escape"]: "Échap.",
-    ["Backspace"]: "Ret. arrière",
-    ["Enter"]: "Entrée",
-    ["←"]: "ArrowLeft",
-    ["→"]: "ArrowRight",
-    ["↑"]: "ArrowUp",
-    ["↓"]: "ArrowDown",
-    ["Espace"]: " ",
-    ["Échap."]: "Escape",
+    ["ArrowLeft"]   : "←",
+    ["ArrowRight"]  : "→",
+    ["ArrowUp"]     : "↑",
+    ["ArrowDown"]   : "↓",
+    [" "]           : "Espace",
+    ["Escape"]      : "Échap.",
+    ["Backspace"]   : "Ret. arrière",
+    ["Enter"]       : "Entrée",
+    ["←"]           : "ArrowLeft",
+    ["→"]           : "ArrowRight",
+    ["↑"]           : "ArrowUp",
+    ["↓"]           : "ArrowDown",
+    ["Espace"]      : " ",
+    ["Échap."]      : "Escape",
     ["Ret. arrière"]: "Backspace",
-    ["Entrée"]: "Enter",
+    ["Entrée"]      : "Enter",
 }
 
 const CLEARED_LINES_NAMES = [
