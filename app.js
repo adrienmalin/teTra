@@ -26,6 +26,16 @@ const DELAY = {
     FALL: 1000,
 }
 
+const COLORS = {
+    I: 0xafeff9,
+    J: 0xb8b4ff,
+    L: 0xfdd0b7,
+    O: 0xffedac,
+    S: 0xC8FBA8,
+    T: 0xedb2ff,
+    Z: 0xffb8c5,
+}
+
 const FACING = {
     NORTH: 0,
     EAST: 1,
@@ -380,8 +390,8 @@ I.prototype.srs = [
     { [ROTATION.CW]: [P(0, 0), P(2, 0), P(-1, 0), P(2, 1), P(-1, -2)], [ROTATION.CCW]: [P(0, 0), P(1, 0), P(-2, 0), P(1, -2), P(-2, 1)] },
     { [ROTATION.CW]: [P(0, 0), P(1, 0), P(-2, 0), P(1, -2), P(-2, 1)], [ROTATION.CCW]: [P(0, 0), P(-2, 0), P(1, 0), P(-2, -1), P(1, 2)] },
 ]
-I.prototype.material = new MinoMaterial(0xafeff9)
-I.prototype.ghostMaterial = new GhostMaterial(0xafeff9)
+I.prototype.material = new MinoMaterial(COLORS.I)
+I.prototype.ghostMaterial = new GhostMaterial(COLORS.I)
 
 class J extends Tetromino { }
 J.prototype.minoesPosition = [
@@ -390,8 +400,8 @@ J.prototype.minoesPosition = [
     [P(1, -1), P(-1, 0), P(0, 0), P(1, 0)],
     [P(0, 1), P(-1, -1), P(0, 0), P(0, -1)],
 ]
-J.prototype.material = new MinoMaterial(0xb8b4ff)
-J.prototype.ghostMaterial = new GhostMaterial(0xb8b4ff)
+J.prototype.material = new MinoMaterial(COLORS.J)
+J.prototype.ghostMaterial = new GhostMaterial(COLORS.J)
 
 class L extends Tetromino { }
 L.prototype.minoesPosition = [
@@ -400,8 +410,8 @@ L.prototype.minoesPosition = [
     [P(-1, 0), P(0, 0), P(1, 0), P(-1, -1)],
     [P(0, 1), P(0, 0), P(0, -1), P(-1, 1)],
 ]
-L.prototype.material = new MinoMaterial(0xfdd0b7)
-L.prototype.ghostMaterial = new GhostMaterial(0xfdd0b7)
+L.prototype.material = new MinoMaterial(COLORS.L)
+L.prototype.ghostMaterial = new GhostMaterial(COLORS.L)
 
 class O extends Tetromino { }
 O.prototype.minoesPosition = [
@@ -410,8 +420,8 @@ O.prototype.minoesPosition = [
 O.prototype.srs = [
     { [ROTATION.CW]: [], [ROTATION.CCW]: [] }
 ]
-O.prototype.material = new MinoMaterial(0xffedac)
-O.prototype.ghostMaterial = new GhostMaterial(0xffedac)
+O.prototype.material = new MinoMaterial(COLORS.O)
+O.prototype.ghostMaterial = new GhostMaterial(COLORS.O)
 
 class S extends Tetromino { }
 S.prototype.minoesPosition = [
@@ -420,8 +430,8 @@ S.prototype.minoesPosition = [
     [P(-1, -1), P(0, 0), P(1, 0), P(0, -1)],
     [P(-1, 1), P(0, 0), P(-1, 0), P(0, -1)],
 ]
-S.prototype.material = new MinoMaterial(0xC8FBA8)
-S.prototype.ghostMaterial = new GhostMaterial(0xC8FBA8)
+S.prototype.material = new MinoMaterial(COLORS.S)
+S.prototype.ghostMaterial = new GhostMaterial(COLORS.S)
 
 class T extends Tetromino {
     get tSpin() {
@@ -448,8 +458,8 @@ T.prototype.tSlots = [
     [P(1, -1), P(-1, -1), P(-1, 1), P(1, 1)],
     [P(-1, -1), P(-1, 1), P(1, 1), P(1, -1)],
 ]
-T.prototype.material = new MinoMaterial(0xedb2ff)
-T.prototype.ghostMaterial = new GhostMaterial(0xedb2ff)
+T.prototype.material = new MinoMaterial(COLORS.T)
+T.prototype.ghostMaterial = new GhostMaterial(COLORS.T)
 
 class Z extends Tetromino { }
 Z.prototype.minoesPosition = [
@@ -458,8 +468,8 @@ Z.prototype.minoesPosition = [
     [P(-1, 0), P(0, 0), P(0, -1), P(1, -1)],
     [P(0, 1), P(-1, 0), P(0, 0), P(-1, -1)]
 ]
-Z.prototype.material = new MinoMaterial(0xffb8c5)
-Z.prototype.ghostMaterial = new GhostMaterial(0xffb8c5)
+Z.prototype.material = new MinoMaterial(COLORS.Z)
+Z.prototype.ghostMaterial = new GhostMaterial()
 
 class Ghost extends Tetromino {
     copy(piece) {
