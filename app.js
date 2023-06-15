@@ -616,6 +616,24 @@ class Stats {
         return this._level
     }
 
+    set combo(combo) {
+        this._combo = combo
+        if (combo > this.maxCombo) this.maxCombo = combo
+    }
+
+    get combo() {
+        return this._combo
+    }
+
+    set b2b(b2b) {
+        this._b2b = b2b
+        if (b2b > this.maxB2B) this.maxB2B = b2b
+    }
+
+    get b2b() {
+        return this._b2b
+    }
+
     set time(time) {
         this.startTime = new Date() - time
     }
@@ -652,7 +670,6 @@ class Stats {
         // Combo
         if (nbClearedLines) {
             this.combo++
-            if (this.combo > this.maxCombo) this.maxCombo = this.combo
             if (this.combo >= 1) {
                 let comboScore = (nbClearedLines == 1 ? 20 : 50) * this.combo * this.level
                 if (this.combo == 1) {
@@ -677,7 +694,6 @@ class Stats {
         // Back to back sequence
         if ((nbClearedLines == 4) || (tSpin && nbClearedLines)) {
             this.b2b++
-            if (this.b2b > this.maxB2B) this.maxB2B = this.b2b
             if (this.b2b >= 1) {
                 let b2bScore = patternScore / 2
                 if (this.b2b == 1) {
