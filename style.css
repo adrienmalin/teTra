@@ -2,6 +2,15 @@ body {
     margin: 0
 }
 
+#messagesSpan .progress {
+    margin-top: 70vh;
+    opacity: 1;
+}
+
+#messagesSpan .progress-bar {
+    opacity: inherit;
+}
+
 @supports (backdrop-filter: blur()) {
     .card,
     .modal-content {
@@ -22,6 +31,7 @@ canvas {
     position: absolute;
     top: 10%;
     left: 50%;
+    width: 50%;
     transform: translate(-50%, 0);
     color: rgba(255, 255, 255, 0.8);
     text-shadow: 1px 1px rgba(0, 0, 0, 0.8);

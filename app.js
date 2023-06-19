@@ -519,7 +519,7 @@ class Settings {
         this.form.onsubmit = newGame
         levelInput.name = "startLevel"
         levelInput.disabled = false
-        titleHeader.innerHTML = "teTrois"
+        //titleHeader.innerHTML = "teTrois"
         resumeButton.innerHTML = "Jouer"
     }
 
@@ -756,15 +756,15 @@ Stats.prototype.timeFormat = new Intl.DateTimeFormat("fr-FR", {
 
 const manager = new THREE.LoadingManager()
 manager.onStart = function (url, itemsLoaded, itemsTotal) {
-    messagesSpan.innerHTML = 'Chargement : 0%...'
+    loadingBar.style.setProperty("width", '0%')
+}
+manager.onProgress = function (url, itemsLoaded, itemsTotal) {
+    loadingBar.style.setProperty("width", 100 * itemsLoaded / itemsTotal + '%')
 }
 manager.onLoad = function () {
     restart()
     messagesSpan.innerHTML = ""
     animate()
-}
-manager.onProgress = function (url, itemsLoaded, itemsTotal) {
-    messagesSpan.innerHTML = 'Chargement : ' + 100 * itemsLoaded / itemsTotal + '%...'
 }
 manager.onError = function (url) {
     messagesSpan.innerHTML = 'Erreur de chargement'
@@ -900,7 +900,6 @@ let ghost = new Ghost()
 const lineClearSound = new Audio("audio/line-clear.wav")
 const tetrisSound    = new Audio("audio/tetris.wav")
 const hardDropSound  = new Audio("audio/hard-drop.wav")
-const tSpinSound     = new Audio("audio/t-spin.wav")
 const music          = new Audio("https://iterations.org/files/music/remixes/Tetris_CheDDer_OC_ReMix.mp3")
       music.loop     = true
 
@@ -986,7 +985,7 @@ function newGame(event) {
     } else {
         levelInput.name = "level"
         levelInput.disabled = true
-        titleHeader.innerHTML = "PAUSE"
+        //titleHeader.innerHTML = "PAUSE"
         resumeButton.innerHTML = "Reprendre"
         event.target.onsubmit = resume
         nextQueue.init()
