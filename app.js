@@ -350,7 +350,6 @@ class Tetromino extends THREE.Group {
         let testFacing = (this.facing + rotation + 4) % 4
         return this.srs[this.facing][rotation].some((translation, rotationPoint) => {
             if (this.move(translation, testFacing)) {
-                //rotateSound.play()
                 this.facing = testFacing
                 this.rotatedLast = true
                 if (rotationPoint == 4) this.rotationPoint4Used = true
@@ -898,10 +897,12 @@ nextQueue.position.set(4, SKYLINE + 3)
 scene.add(nextQueue)
 let ghost = new Ghost()
 
-const lineClearSound = new Audio("audio/line_clear.ogg")
-const tetrisSound = new Audio("audio/tetris.ogg")
-const music = new Audio("https://iterations.org/files/music/remixes/Tetris_CheDDer_OC_ReMix.mp3")
-music.loop = true
+const lineClearSound = new Audio("audio/line-clear.wav")
+const tetrisSound    = new Audio("audio/tetris.wav")
+const hardDropSound  = new Audio("audio/hard-drop.wav")
+const tSpinSound     = new Audio("audio/t-spin.wav")
+const music          = new Audio("https://iterations.org/files/music/remixes/Tetris_CheDDer_OC_ReMix.mp3")
+      music.loop     = true
 
 window.addEventListener("resize", () => {
     renderer.setSize(window.innerWidth, window.innerHeight)
@@ -1015,7 +1016,9 @@ function resume(event) {
         stats.time = stats.pauseTime
 
         lineClearSound.volume = settings.sfxVolume
-        tetrisSound.volume = settings.sfxVolume
+        tetrisSound.volume    = settings.sfxVolume
+        hardDropSound.volume  = settings.sfxVolume
+        tSpinSound.volume     = settings.sfxVolume
         if (settings.musicVolume > 0) {
             music.volume = settings.musicVolume
             music.play()
@@ -1060,7 +1063,11 @@ let playerActions = {
 
     hardDrop: function () {
         scheduler.clearTimeout(lockDown)
-        //hardDropSound.play()
+        hardDropSound.play()
+        if (settings.sfxVolume) {
+            hardDropSound.currentTime = 0
+            hardDropSound.play()
+        }
         while (piece.move(TRANSLATION.DOWN)) stats.score += 2
         lockDown()
     },
@@ -1153,12 +1160,14 @@ function lockDown() {
         scene.remove(piece)
         let tSpin = piece.tSpin
         let nbClearedLines = matrix.clearLines()
-        if (nbClearedLines == 4 || (nbClearedLines && tSpin)) {
-            tetrisSound.currentTime = 0
-            if (tetrisSound.volume) tetrisSound.play()
-        } else if (nbClearedLines || tSpin) {
-            lineClearSound.currentTime = 0
-            if (lineClearSound.volume) lineClearSound.play()
+        if (settings.sfxVolume) {
+            if (nbClearedLines == 4 || (tSpin && nbClearedLines)) {
+                tetrisSound.currentTime = 0
+                tetrisSound.play()
+            } else if (nbClearedLines || tSpin) {
+                lineClearSound.currentTime = 0
+                lineClearSound.play()
+            }
         }
         stats.lockDown(nbClearedLines, tSpin)
 
