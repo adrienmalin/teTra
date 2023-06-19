@@ -897,6 +897,17 @@ nextQueue.position.set(4, SKYLINE + 3)
 scene.add(nextQueue)
 let ghost = new Ghost()
 
+const positionKF = new THREE.VectorKeyframeTrack('.position', [0, 1, 2], [0, 0, 0, 0, -0.2, 0, 0, 0, 0])
+const clip = new THREE.AnimationClip('HardDrop', 3, [positionKF])
+const animationGroup = new THREE.AnimationObjectGroup()
+animationGroup.add(matrix)
+animationGroup.add(edge)
+const mixer = new THREE.AnimationMixer(animationGroup)
+const hardDroppedMatrix = mixer.clipAction(clip)
+hardDroppedMatrix.loop = THREE.LoopOnce
+hardDroppedMatrix.setDuration(0.2)
+
+
 const lineClearSound = new Audio("audio/line-clear.wav")
 const tetrisSound    = new Audio("audio/tetris.wav")
 const hardDropSound  = new Audio("audio/hard-drop.wav")
@@ -924,7 +935,10 @@ function animate() {
 
     controls.update()
 
-    matrix.updateUnlockedMinoes(clock.getDelta())
+    const delta = clock.getDelta()
+
+    matrix.updateUnlockedMinoes(delta)
+    if (mixer) mixer.update(delta)
 
     renderer.render(scene, camera)
     minoCamera.update(renderer, scene)
@@ -1017,7 +1031,6 @@ function resume(event) {
         lineClearSound.volume = settings.sfxVolume
         tetrisSound.volume    = settings.sfxVolume
         hardDropSound.volume  = settings.sfxVolume
-        tSpinSound.volume     = settings.sfxVolume
         if (settings.musicVolume > 0) {
             music.volume = settings.musicVolume
             music.play()
@@ -1069,6 +1082,8 @@ let playerActions = {
         }
         while (piece.move(TRANSLATION.DOWN)) stats.score += 2
         lockDown()
+        hardDroppedMatrix.reset()
+        hardDroppedMatrix.play()
     },
 
     hold: function () {
