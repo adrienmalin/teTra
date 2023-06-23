@@ -764,7 +764,7 @@ manager.onProgress = function (url, itemsLoaded, itemsTotal) {
 manager.onLoad = function () {
     restart()
     messagesSpan.innerHTML = ""
-    animate()
+    renderer.setAnimationLoop(animate)
 }
 manager.onError = function (url) {
     messagesSpan.innerHTML = 'Erreur de chargement'
@@ -779,7 +779,6 @@ const renderer = new THREE.WebGLRenderer({
 })
 renderer.setSize(window.innerWidth, window.innerHeight)
 renderer.setClearColor(0x000000, 10)
-renderer.setAnimationLoop(animate)
 document.body.appendChild(renderer.domElement)
 
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
