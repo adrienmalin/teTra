@@ -786,14 +786,15 @@ camera.position.set(5, 1, 16)
 
 const controls = new OrbitControls(camera, renderer.domElement)
 controls.autoRotate
-controls.enableDamping
-controls.maxDistance = 21
-controls.keys = {}
-controls.minPolarAngle = 0.9
-controls.maxPolarAngle = 2.14
+controls.enableDamping   = true
+controls.dampingFactor   = 0.04
+controls.maxDistance     = 21
+controls.keys            = {}
+controls.minPolarAngle   = 0.9
+controls.maxPolarAngle   = 2.14
 controls.minAzimuthAngle = 0.9 - Math.PI / 2
 controls.maxAzimuthAngle = 2.14 - Math.PI / 2
-controls.target = P(5, 10)
+controls.target          = P(5, 10)
 controls.update()
 
 controls.addEventListener("start", () => renderer.domElement.style.cursor = "grabbing")
