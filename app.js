@@ -592,6 +592,7 @@ class Stats {
         if (score > this.highScore) {
             this.highScore = score
         }
+        scoreDiv.innerText = score.toLocaleString()
     }
 
     get score() {
@@ -608,10 +609,20 @@ class Stats {
             this.lockDelay = 500 * Math.pow(0.9, level - 15)
         levelInput.value = level
         messagesSpan.addNewChild("div", { className: "show-level-animation", innerHTML: `<h1>NIVEAU<br/>${this.level}</h1>` })
+        levelDiv.innerText = level
     }
 
     get level() {
         return this._level
+    }
+
+    set goal(goal) {
+        this._goal = goal
+        goalDiv.innerText = goal
+    }
+
+    get goal() {
+        return this._goal
     }
 
     set combo(combo) {
@@ -749,6 +760,10 @@ Stats.prototype.timeFormat = new Intl.DateTimeFormat("fr-FR", {
     second: "2-digit",
     timeZone: "UTC"
 })
+
+function tick() {
+    timeDiv.innerText = stats.timeFormat.format(stats.time)
+}
 
 
 /* Scene */
@@ -983,6 +998,7 @@ function pauseSettings() {
     scheduler.clearTimeout(lockDown)
     scheduler.clearTimeout(repeat)
     scheduler.clearInterval(autorepeat)
+    scheduler.clearInterval(tick)
 
     music.pause()
     document.onkeydown = null
@@ -1035,6 +1051,8 @@ function resume(event) {
             music.volume = settings.musicVolume
             music.play()
         }
+
+        scheduler.setInterval(tick)
 
         if (piece) scheduler.setInterval(fall, stats.fallPeriod)
         else generate()
@@ -1198,6 +1216,8 @@ function gameOver() {
     onblur = null
     playing = false
     music.pause()
+
+    scheduler.clearInterval(tick)
 
     stats.show()
 }

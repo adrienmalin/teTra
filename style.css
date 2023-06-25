@@ -2,6 +2,10 @@ body {
     margin: 0
 }
 
+span {
+    position: absolute;
+}
+
 #messagesSpan .progress {
     margin-top: 70vh;
     opacity: 1;
@@ -9,6 +13,30 @@ body {
 
 #messagesSpan .progress-bar {
     opacity: inherit;
+}
+
+#scoreSpan {
+    top: 1rem;
+    left: 1rem;
+    text-align: left;
+}
+
+#timeSpan {
+    top: 1rem;
+    right: 1rem;
+    text-align: right;
+}
+
+#levelSpan {
+    bottom: 1rem;
+    left: 1rem;
+    text-align: left;
+}
+
+#goalSpan {
+    bottom: 1rem;
+    right: 1rem;
+    text-align: right;
 }
 
 @supports (backdrop-filter: blur()) {
