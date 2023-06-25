@@ -92,7 +92,7 @@ const CLEARED_LINES_NAMES = [
     "SOLO",
     "DUO",
     "TRIO",
-    "TETROIS",
+    "TETRA",
 ]
 
 
@@ -518,7 +518,7 @@ class Settings {
         this.form.onsubmit = newGame
         levelInput.name = "startLevel"
         levelInput.disabled = false
-        //titleHeader.innerHTML = "teTrois"
+        //titleHeader.innerHTML = "teTra"
         resumeButton.innerHTML = "Jouer"
     }
 
