@@ -206,8 +206,7 @@ class NextQueue extends THREE.Group {
     }
 
 }
-NextQueue.prototype.positions = [P(0, 0), P(0, 3), P(0, 6), P(0, 9), P(0, 12)]
-
+NextQueue.prototype.positions = [P(0, 0), P(0, -3), P(0, -6), P(0, -9), P(0, -12), P(0, -16)]
 
 const GRAVITY = -20
 
@@ -782,7 +781,8 @@ renderer.setClearColor(0x000000, 10)
 document.body.appendChild(renderer.domElement)
 
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
-camera.position.set(5, 1, 16)
+camera.position.set(5, 0, 16)
+window.camera = camera
 
 const controls = new OrbitControls(camera, renderer.domElement)
 controls.autoRotate
@@ -794,7 +794,7 @@ controls.minPolarAngle   = 0.9
 controls.maxPolarAngle   = 2.14
 controls.minAzimuthAngle = 0.9 - Math.PI / 2
 controls.maxAzimuthAngle = 2.14 - Math.PI / 2
-controls.target          = P(5, 10)
+controls.target          = P(5, 9)
 controls.update()
 
 controls.addEventListener("start", () => renderer.domElement.style.cursor = "grabbing")
@@ -809,11 +809,11 @@ const GLOBAL_ROTATION = 0.0025
 
 const darkTextureRotation = 0.0006
 const darkMoveForward = -0.0007
-const darkOpacity = 0.3
+const darkOpacity = 0.2
 
 const colorFullTextureRotation = 0.0006
 const colorFullMoveForward = -0.0012
-const colorFullOpacity = 0.3
+const colorFullOpacity = 0.2
 
 const commonCylinderGeometry = new THREE.CylinderGeometry(25, 25, 500, 12, 1, true)
 
@@ -889,12 +889,12 @@ const edge = new THREE.Mesh(
 scene.add(edge)
 
 const holdQueue = new THREE.Group()
-holdQueue.position.set(-4, SKYLINE)
+holdQueue.position.set(-4, SKYLINE - 2)
 scene.add(holdQueue)
 const matrix = new Matrix()
 scene.add(matrix)
 const nextQueue = new NextQueue()
-nextQueue.position.set(4, SKYLINE + 3)
+nextQueue.position.set(13, SKYLINE - 2)
 scene.add(nextQueue)
 let ghost = new Ghost()
 
