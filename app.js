@@ -793,6 +793,7 @@ const renderer = new THREE.WebGLRenderer({
 })
 renderer.setSize(window.innerWidth, window.innerHeight)
 renderer.setClearColor(0x000000, 10)
+renderer.toneMapping = THREE.ACESFilmicToneMapping
 document.body.appendChild(renderer.domElement)
 
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
@@ -871,7 +872,7 @@ scene.add(colorFullCylinder)
 const ambientLight = new THREE.AmbientLight(0xffffff, 2)
 scene.add(ambientLight)
 
-const directionalLight = new THREE.DirectionalLight(0xffffff, 2)
+const directionalLight = new THREE.DirectionalLight(0xffffff, 3)
 directionalLight.position.set(5, -30, 0)
 scene.add(directionalLight)
 
