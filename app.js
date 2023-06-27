@@ -248,11 +248,8 @@ class MinoMaterial extends THREE.MeshBasicMaterial {
     constructor(color) {
         super({
             color: color,
-            reflectivity: 0.9,
+            reflectivity: 0.95,
             envMap: minoRenderTarget.texture
-            /*side: THREE.DoubleSide,
-            transparent: true,
-            opacity: 0.8*/
         })
     }
 
@@ -265,8 +262,9 @@ class GhostMaterial extends THREE.MeshBasicMaterial {
             side: THREE.DoubleSide,
             color: color,
             envMap: minoRenderTarget.texture,
+            reflectivity: 0.9,
             transparent: true,
-            opacity: 0.4
+            opacity: 0.25
         })
     }
 
