@@ -247,9 +247,12 @@ class MinoMaterial extends THREE.MeshBasicMaterial {
 
     constructor(color) {
         super({
+            side: THREE.DoubleSide,
             color: color,
             reflectivity: 0.95,
-            envMap: minoRenderTarget.texture
+            envMap: minoRenderTarget.texture,
+            transparent: true,
+            opacity: 0.8
         })
     }
 
@@ -819,14 +822,14 @@ const fps = new FPS.default();
 if (showFPS) document.body.appendChild(fps.dom);
 
 
-const GLOBAL_ROTATION = 0.0025
+const GLOBAL_ROTATION = 0.15625
 
-const darkTextureRotation = 0.0006
-const darkMoveForward = -0.0007
+const darkTextureRotation = 0.0375
+const darkMoveForward = -0.04375
 const darkOpacity = 0.2
 
-const colorFullTextureRotation = 0.0006
-const colorFullMoveForward = -0.0012
+const colorFullTextureRotation = 0.0375
+const colorFullMoveForward = -0.075
 const colorFullOpacity = 0.2
 
 const commonCylinderGeometry = new THREE.CylinderGeometry(25, 25, 500, 12, 1, true)
@@ -939,17 +942,17 @@ let clock = new THREE.Clock()
 
 function animate() {
 
-    darkCylinder.rotation.y += GLOBAL_ROTATION
-    darkCylinderTexture.offset.y -= darkMoveForward
-    darkCylinderTexture.offset.x -= darkTextureRotation
+    const delta = clock.getDelta()
 
-    colorFullCylinder.rotation.y += GLOBAL_ROTATION
-    colorFullCylinderTexture.offset.y -= colorFullMoveForward
-    colorFullCylinderTexture.offset.x -= colorFullTextureRotation
+    darkCylinder.rotation.y      += GLOBAL_ROTATION * delta
+    darkCylinderTexture.offset.y -= darkMoveForward * delta
+    darkCylinderTexture.offset.x -= darkTextureRotation * delta
+
+    colorFullCylinder.rotation.y      += GLOBAL_ROTATION * delta
+    colorFullCylinderTexture.offset.y -= colorFullMoveForward * delta
+    colorFullCylinderTexture.offset.x -= colorFullTextureRotation * delta
 
     controls.update()
-
-    const delta = clock.getDelta()
 
     matrix.updateUnlockedMinoes(delta)
     if (mixer) mixer.update(delta)
