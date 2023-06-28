@@ -251,8 +251,8 @@ class MinoMaterial extends THREE.MeshBasicMaterial {
             color: color,
             reflectivity: 0.95,
             envMap: minoRenderTarget.texture,
-            transparent: true,
-            opacity: 0.8
+            roughness: 0,
+            metalness: 0.25
         })
     }
 
