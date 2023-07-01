@@ -71,24 +71,24 @@ const AWARDED_LINE_CLEARS = {
 
 const KEY_NAMES = new Proxy({
     ["ArrowLeft"]   : "←",
-    ["ArrowRight"]  : "→",
-    ["ArrowUp"]     : "↑",
-    ["ArrowDown"]   : "↓",
-    [" "]           : "Espace",
-    ["Escape"]      : "Échap.",
-    ["Backspace"]   : "Ret. arrière",
-    ["Enter"]       : "Entrée",
     ["←"]           : "ArrowLeft",
+    ["ArrowRight"]  : "→",
     ["→"]           : "ArrowRight",
+    ["ArrowUp"]     : "↑",
     ["↑"]           : "ArrowUp",
+    ["ArrowDown"]   : "↓",
     ["↓"]           : "ArrowDown",
+    [" "]           : "Espace",
     ["Espace"]      : " ",
+    ["Escape"]      : "Échap.",
     ["Échap."]      : "Escape",
+    ["Backspace"]   : "Ret. arrière",
     ["Ret. arrière"]: "Backspace",
+    ["Enter"]       : "Entrée",
     ["Entrée"]      : "Enter",
 }, {
     get(obj, keyName) {
-        return obj[keyName] || keyName
+        return keyName in obj? obj[keyName] : keyName
     }
 })
 
@@ -496,15 +496,13 @@ Ghost.prototype.minoesPosition = [
 function changeKey() {
     let controller = this
     let input = controller.domElement.getElementsByTagName("input")[0]
+    let action = settings.keyBind[KEY_NAMES[input.value]]
+    delete settings.keyBind[KEY_NAMES[input.value]]
     input.select()
     input.onkeydown = function (event) {
         controller.setValue(KEY_NAMES[event.key])
+        settings.keyBind[event.key] = action
         input.blur()
-    }
-    input.onblur = function (event) {
-        input.onkeydown = null
-        input.onblur = null
-        settings.bindKeys()
     }
 }
 
