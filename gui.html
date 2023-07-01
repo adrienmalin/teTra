@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.4/font/bootstrap-icons.css">
+  <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.152.2/build/three.module.js?module",
+        "three/addons/": "https://unpkg.com/three@0.152.2/examples/jsm/"
+      }
+    }
+  </script>
+  <style>
+    body {
+      background: url(https://adrien.malingrey.fr/jeux/.assets/themes/clouds/background.jpg);
+    }
+    .lil-gui {
+      --background-color: rgba(33, 37, 41, 30%);
+      backdrop-filter: blur(15px);
+    }
+    .lil-gui.autoPlace {
+      left: 15px;
+    }
+    .lil-gui .controller.disabled {
+      opacity: .8;
+    }
+    i {
+      display: inline-block;
+      width: 100%;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <script type="module">
+    import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
+
+    var game = {
+      startLevel: 1,
+      start: () => {
+        gui.gameFolder.hide()
+        gui.statsFolder.show()
+        gui.statsFolder.open()
+        gui.settingsFolder.close()
+      },
+    }
+
+    var stats = {
+      level: 1,
+      goal: 0,
+      score: 0,
+      highScore:0,
+      time: "00:00:00",
+    }
+
+    var settings = {
+      moveLeftKey : "ArrowLeft",
+      moveRightKey: "ArrowRight",
+      rotateCCWKey: "w",
+      rotateCWKey : "ArrowUp",
+      softDropKey : "ArrowDown",
+      hardDropKey : " ",
+      holdKey     : "c",
+      pauseKey    : "Escape",
+
+      arrDelay: 50,
+      dasDelay: 300,
+
+      musicVolume: 50,
+      sfxVolume  : 50,
+    };
+
+    const KEY_NAMES = {
+      ["ArrowLeft"]   : "←",
+      ["ArrowRight"]  : "→",
+      ["ArrowUp"]     : "↑",
+      ["ArrowDown"]   : "↓",
+      [" "]           : "Espace",
+      ["Escape"]      : "Échap.",
+      ["Backspace"]   : "Ret. arrière",
+      ["Enter"]       : "Entrée",
+      ["←"]           : "ArrowLeft",
+      ["→"]           : "ArrowRight",
+      ["↑"]           : "ArrowUp",
+      ["↓"]           : "ArrowDown",
+      ["Espace"]      : " ",
+      ["Échap."]      : "Escape",
+      ["Ret. arrière"]: "Backspace",
+      ["Entrée"]      : "Enter",
+    }
+
+    function changeKey(event) {
+      const input = event.target
+      let prevValue = input.value
+      input.value = ""
+      input.onkeydown = function (event) {
+        event.preventDefault()
+        input.value = KEY_NAMES[event.key] || event.key
+        input.blur()
+      }
+      input.onblur = function (event) {
+        if (input.value == "") input.value = prevValue
+        input.onkeydown = null
+        input.onblur = null
+      }
+    }
+
+    class Gui extends GUI {
+      constructor() {
+        super({title: "teTra"});
+
+        this.gameFolder = this.addFolder("Partie")
+        this.gameFolder.add(game, "startLevel").name("Niveau").min(1).max(15).step(1)
+        this.gameFolder.add(game, "start").name("Commencer")
+        this.gameFolder.open()
+
+        this.statsFolder = this.addFolder("Stats")
+        this.statsFolder.add(stats,"level").name("Niveau").disable()
+        this.statsFolder.add(stats,"goal").name("Objectif").disable()
+        this.statsFolder.add(stats,"score").name("Score").disable()
+        this.statsFolder.add(stats,"highScore").name("Meilleur score").disable()
+        this.statsFolder.add(stats,"time").name("Temps").disable()
+        this.statsFolder.hide()
+
+        this.settingsFolder = this.addFolder("Options");
+        this.settingsFolder.close()
+
+        this.settingsFolder.keyMapping = this.settingsFolder.addFolder("Commandes")
+        this.settingsFolder.keyMapping.add(settings,"moveLeftKey").name('<i class="bi bi-arrow-left"></i>').domElement.onclick = changeKey
+        this.settingsFolder.keyMapping.add(settings,"moveRightKey").name('<i class="bi bi-arrow-right"></i>').domElement.onclick = changeKey
+        this.settingsFolder.keyMapping.add(settings,"rotateCCWKey").name('<i class="bi bi-arrow-counterclockwise"></i>').domElement.onclick = changeKey
+        this.settingsFolder.keyMapping.add(settings,"rotateCWKey").name('<i class="bi bi-arrow-clockwise"></i>').domElement.onclick = changeKey
+        this.settingsFolder.keyMapping.add(settings,"softDropKey").name('<i class="bi bi-arrow-down-short"></i>').domElement.onclick = changeKey
+        this.settingsFolder.keyMapping.add(settings,"hardDropKey").name('<i class="bi bi-download"></i>').domElement.onclick = changeKey
+        this.settingsFolder.keyMapping.add(settings,"holdKey").name('<i class="bi bi-arrow-left-right"></i>').domElement.onclick = changeKey
+        this.settingsFolder.keyMapping.add(settings,"pauseKey").name('<i class="bi bi-pause"></i>').domElement.onclick = changeKey
+        this.settingsFolder.keyMapping.open()
+
+        this.settingsFolder.delayFolder = this.settingsFolder.addFolder("Répétition automatique")
+        this.settingsFolder.delayFolder.add(settings,"arrDelay").name("ARR (ms)").min(2).max(200);
+        this.settingsFolder.delayFolder.add(settings,"dasDelay").name("DAS (ms)").min(100).max(500).step(5);
+        this.settingsFolder.delayFolder.open()
+
+        this.settingsFolder.volumeFolder = this.settingsFolder.addFolder("Volume")
+        this.settingsFolder.volumeFolder.add(settings,"musicVolume").name("Musique").min(0).max(100);
+        this.settingsFolder.volumeFolder.add(settings,"sfxVolume").name("SFX").min(0).max(100)
+        this.settingsFolder.volumeFolder.open()
+
+      }
+    }
+
+    var gui = new Gui();
+
+  </script>
+</body>
+</html>

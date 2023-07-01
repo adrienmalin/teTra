@@ -1,58 +1,34 @@
 body {
-    margin: 0
+    margin: 0;
+    background-color: #222;
 }
 
 span {
     position: absolute;
 }
 
-#messagesSpan .progress {
-    margin-top: 70vh;
-    opacity: 1;
+.lil-gui {
+    --background-color: rgba(33, 37, 41, 30%);
+    --width: 200px;
 }
-
-#messagesSpan .progress-bar {
-    opacity: inherit;
-}
-
-#scoreSpan {
-    top: 1rem;
-    left: 1rem;
-    text-align: left;
-}
-
-#timeSpan {
-    top: 1rem;
-    right: 1rem;
-    text-align: right;
-}
-
-#levelSpan {
-    bottom: 1rem;
-    left: 1rem;
-    text-align: left;
-}
-
-#goalSpan {
-    bottom: 1rem;
-    right: 1rem;
-    text-align: right;
-}
-
 @supports (backdrop-filter: blur()) {
-    .card,
-    .modal-content {
-        background-color: rgba(33, 37, 41, 30%);
+    .lil-gui {
         backdrop-filter: blur(15px);
     }
 }
 
-canvas {
-    cursor: grab;
+.lil-gui.autoPlace {
+    top: inherit;
+    bottom: 15px;
+    left: 15px;
 }
 
-#titleHeader {
-    letter-spacing: 1rem;
+.lil-gui .controller.disabled {
+    opacity: .8;
+}
+
+canvas {
+    cursor: grab;
 }
 
 #messagesSpan {
@@ -63,13 +39,22 @@ canvas {
     transform: translate(-50%, 0);
     color: rgba(255, 255, 255, 0.8);
     text-shadow: 1px 1px rgba(0, 0, 0, 0.8);
-    font-size: 4vmin;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
+        "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji",
+        "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    font-weight: 400;
+    line-height: 1.5;
+    font-size: 3vmin;
     text-align: center;
 }
 
 #messagesSpan div {
     opacity: 0;
     overflow: hidden;
+}
+
+h1 {
+    font-size: calc(1.375rem + 1.5vw);
 }
 
 @keyframes show-level-animation {

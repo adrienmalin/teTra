@@ -1,5 +1,6 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
+import { GUI } from 'three/addons/libs/lil-gui.module.min.js'
 import * as FPS from 'three/addons/libs/stats.module.js';
 
 let P = (x, y, z = 0) => new THREE.Vector3(x, y, z)
@@ -15,7 +16,7 @@ HTMLElement.prototype.addNewChild = function (tag, properties) {
 }
 
 
-/* Contants */
+/* Constants */
 
 const ROWS = 24
 const SKYLINE = 20
@@ -251,7 +252,7 @@ class MinoMaterial extends THREE.MeshBasicMaterial {
             color: color,
             reflectivity: 0.95,
             envMap: minoRenderTarget.texture,
-            roughness: 0,
+            roughness: 0.1,
             metalness: 0.25
         })
     }
@@ -324,7 +325,7 @@ class Tetromino extends THREE.Group {
 
     move(translation, testFacing) {
         if (this.canMove(translation, testFacing)) {
-            scheduler.clearTimeout(lockDown)
+            scheduler.clearTimeout(game.lockDown)
             this.position.add(translation)
             if (!testFacing) {
                 this.rotatedLast = false
@@ -336,13 +337,13 @@ class Tetromino extends THREE.Group {
             } else {
                 this.locked = true
                 scene.remove(ghost)
-                scheduler.setTimeout(lockDown, stats.lockDelay)
+                scheduler.setTimeout(game.lockDown, stats.lockDelay)
             }
             return true
         } else if (translation == TRANSLATION.DOWN) {
             this.locked = true
-            if (!scheduler.timeoutTasks.has(lockDown))
-                scheduler.setTimeout(lockDown, stats.lockDelay)
+            if (!scheduler.timeoutTasks.has(game.lockDown))
+                scheduler.setTimeout(game.lockDown, stats.lockDelay)
         }
     }
 
@@ -488,95 +489,124 @@ Ghost.prototype.minoesPosition = [
     [P(0, 0, 0), P(0, 0, 0), P(0, 0, 0), P(0, 0, 0)],
 ]
 
-
-class Settings {
-    constructor() {
-        this.form = settingsForm
-        this.load()
-        this.modal = new bootstrap.Modal('#settingsModal')
-        settingsModal.addEventListener('shown.bs.modal', () => {
-            resumeButton.focus()
-        })
-    }
-
-    load() {
-        for (let input of settingsForm.elements) {
-            if (input.name) {
-                if (localStorage[input.name]) input.value = localStorage[input.name]
-            }
-        }
-    }
-
-    save() {
-        for (let element of settingsForm.elements) {
-            if (element.name) {
-                localStorage[element.name] = element.value
-            }
-        }
-    }
-
-    init() {
-        this.form.onsubmit = newGame
-        levelInput.name = "startLevel"
-        levelInput.disabled = false
-        //titleHeader.innerHTML = "teTra"
-        resumeButton.innerHTML = "Jouer"
-    }
-
-    show() {
-        resumeButton.disabled = false
-        settings.form.classList.remove('was-validated')
-        settings.modal.show()
-        settings.form.reportValidity()
-    }
-
-    getInputs() {
-        for (let input of this.form.querySelectorAll("input[type='text']")) {
-            this[input.name] = KEY_NAMES[input.value] || input.value
-        }
-        for (let input of this.form.querySelectorAll("input[type='number'], input[type='range']")) {
-            this[input.name] = input.valueAsNumber
-        }
-        for (let input of this.form.querySelectorAll("input[type='checkbox']")) {
-            this[input.name] = input.checked == true
-        }
-
-        this.keyBind = {}
-        for (let actionName in playerActions) {
-            this.keyBind[settings[actionName]] = playerActions[actionName]
-        }
-    }
-}
-
-window.changeKey = function (input) {
-    let prevValue = input.value
-    input.value = ""
+function changeKey() {
+    let controller = this
+    let input = controller.domElement.getElementsByTagName("input")[0]
+    input.select()
     input.onkeydown = function (event) {
-        event.preventDefault()
-        input.value = KEY_NAMES[event.key] || event.key
+        controller.setValue(KEY_NAMES[event.key] || event.key)
         input.blur()
     }
     input.onblur = function (event) {
-        if (input.value == "") input.value = prevValue
         input.onkeydown = null
         input.onblur = null
+        settings.bindKeys()
+    }
+}
+
+
+class Settings {
+    constructor(gui) {
+        this.startLevel = 1
+
+        this.moveLeft  = "←"
+        this.moveRight = "→"
+        this.rotateCCW = "w"
+        this.rotateCW  = "↑"
+        this.softDrop  = "↓"
+        this.hardDrop  = "Espace"
+        this.hold      = "c"
+        this.pause     = "Échap."
+
+        this.arrDelay = 50
+        this.dasDelay = 300
+        
+        this.musicVolume = 50
+        this.sfxVolume   = 50
+
+        this.gui = gui.addFolder("Options").close()
+
+        this.gui.add(this, "startLevel").name("Niveau initial").min(1).max(15).step(1)
+
+        this.gui.keyFolder = this.gui.addFolder("Commandes").open()
+        let moveLeftController = this.gui.keyFolder.add(this,"moveLeft").name('Gauche')
+        moveLeftController.domElement.onclick = changeKey.bind(moveLeftController)
+        let moveRightController = this.gui.keyFolder.add(this,"moveRight").name('Droite')
+        moveRightController.domElement.onclick = changeKey.bind(moveRightController)
+        let rotateCWController = this.gui.keyFolder.add(this,"rotateCW").name('Rotation horaire')
+        rotateCWController.domElement.onclick = changeKey.bind(rotateCWController)
+        let rotateCCWController = this.gui.keyFolder.add(this,"rotateCCW").name('anti-horaire')
+        rotateCCWController.domElement.onclick = changeKey.bind(rotateCCWController)
+        let softDropController = this.gui.keyFolder.add(this,"softDrop").name('Chute lente')
+        softDropController.domElement.onclick = changeKey.bind(softDropController)
+        let hardDropController = this.gui.keyFolder.add(this,"hardDrop").name('Chute rapide')
+        hardDropController.domElement.onclick = changeKey.bind(hardDropController)
+        let holdController = this.gui.keyFolder.add(this,"hold").name('Garder')
+        holdController.domElement.onclick = changeKey.bind(holdController)
+        let pauseController = this.gui.keyFolder.add(this,"pause").name('Pause')
+        pauseController.domElement.onclick = changeKey.bind(pauseController)
+
+        this.gui.delayFolder = this.gui.addFolder("Répétition automatique").open()
+        this.gui.delayFolder.add(this,"arrDelay").name("ARR (ms)").min(2).max(200).step(1);
+        this.gui.delayFolder.add(this,"dasDelay").name("DAS (ms)").min(100).max(500).step(5);
+
+        this.gui.volumeFolder = this.gui.addFolder("Volume").open()
+        this.gui.volumeFolder.add(this,"musicVolume").name("Musique").min(0).max(100).step(1).onChange((volume) => {
+            music.setVolume(volume/100)
+        })
+        this.gui.volumeFolder.add(this,"sfxVolume").name("SFX").min(0).max(100).step(1).onChange((volume) => {
+            lineClearSound.setVolume(volume/100)
+            tetrisSound.setVolume(volume/100)
+            hardDropSound.setVolume(volume/100)
+        })
+
+        this.load()
+        this.bindKeys()
+    }
+
+    bindKeys() {
+        this.keyBind = {}
+        for (let actionName in playerActions) {
+            this.keyBind[KEY_NAMES[this[actionName]] || this[actionName]] = playerActions[actionName]
+        }
+    }
+
+    load() {
+        if (localStorage["teTraSettings"]) this.gui.load(JSON.parse(localStorage["teTraSettings"]))
+    }
+
+    save() {
+        localStorage["teTraSettings"] = JSON.stringify(this.gui.save())
     }
 }
 
 
 class Stats {
-    constructor() {
-        this.modal = new bootstrap.Modal('#statsModal')
-        this.load()
-    }
+    constructor(parentGui) {
+        this.clock = new THREE.Clock(false)
+        this.clock.timeFormat = new Intl.DateTimeFormat("fr-FR", {
+            hour: "numeric",
+            minute: "2-digit",
+            second: "2-digit",
+            timeZone: "UTC"
+        })
+        this.elapsedTime = 0
 
-    load() {
-        this.highScore = Number(localStorage["highScore"]) || 0
+        this.init()
+
+        this.gui = parentGui.addFolder("Stats")
+        this.gui.add(this, "level").name("Niveau").disable().listen()
+        this.gui.add(this, "goal").name("Objectif").disable().listen()
+        this.gui.add(this, "score").name("Score").disable().listen()
+        this.gui.add(this, "highScore").name("Meilleur score").disable().listen()
+        this.gui.timeController = this.gui.add(this, "time").name("Temps").disable().listen()
     }
 
     init() {
-        this.score = 0
+        this._level = 0
+        this._score = 0
         this.goal = 0
+        this.highScore = Number(localStorage["teTraHighScore"]) || 0
         this.combo = 0
         this.b2b = 0
         this.startTime = new Date()
@@ -593,7 +623,6 @@ class Stats {
         if (score > this.highScore) {
             this.highScore = score
         }
-        scoreDiv.innerText = score.toLocaleString()
     }
 
     get score() {
@@ -603,27 +632,13 @@ class Stats {
     set level(level) {
         this._level = level
         this.goal += level * 5
-        if (level <= 20) {
-            this.fallPeriod = 1000 * Math.pow(0.8 - ((level - 1) * 0.007), level - 1)
-        }
-        if (level > 15)
-            this.lockDelay = 500 * Math.pow(0.9, level - 15)
-        levelInput.value = level
+        if (level <= 20) this.fallPeriod = 1000 * Math.pow(0.8 - ((level - 1) * 0.007), level - 1)
+        if (level > 15) this.lockDelay = 500 * Math.pow(0.9, level - 15)
         messagesSpan.addNewChild("div", { className: "show-level-animation", innerHTML: `<h1>NIVEAU<br/>${this.level}</h1>` })
-        levelDiv.innerText = level
     }
 
     get level() {
         return this._level
-    }
-
-    set goal(goal) {
-        this._goal = goal
-        goalDiv.innerText = goal
-    }
-
-    get goal() {
-        return this._goal
     }
 
     set combo(combo) {
@@ -644,12 +659,8 @@ class Stats {
         return this._b2b
     }
 
-    set time(time) {
-        this.startTime = new Date() - time
-    }
-
     get time() {
-        return new Date() - this.startTime
+        return this.clock.timeFormat.format(this.clock.elapsedTime * 1000)
     }
 
     lockDown(nbClearedLines, tSpin) {
@@ -735,53 +746,23 @@ class Stats {
         this.goal -= awardedLineClears
         if (this.goal <= 0) this.level++
     }
-
-    show() {
-        let time = stats.time
-        statsModalScoreCell.innerText = this.score.toLocaleString()
-        statsModalHighScoreCell.innerText = this.highScore.toLocaleString()
-        statsModalLevelCell.innerText = this.level
-        statsModalTimeCell.innerText = this.timeFormat.format(time)
-        statsModaltotalClearedLines.innerText = this.totalClearedLines
-        statsModaltotalClearedLinesPM.innerText = (stats.totalClearedLines * 60000 / time).toFixed(2)
-        statsModalNbQuatris.innerText = this.nbQuatris
-        statsModalNbTSpin.innerText = this.nbTSpin
-        statsModalMaxCombo.innerText = this.maxCombo
-        statsModalMaxB2B.innerText = this.maxB2B
-        this.modal.show()
-    }
-
-    save() {
-        localStorage["highScore"] = this.highScore
-    }
-}
-Stats.prototype.timeFormat = new Intl.DateTimeFormat("fr-FR", {
-    hour: "numeric",
-    minute: "2-digit",
-    second: "2-digit",
-    timeZone: "UTC"
-})
-
-function tick() {
-    timeDiv.innerText = stats.timeFormat.format(stats.time)
 }
 
 
 /* Scene */
 
-const manager = new THREE.LoadingManager()
-manager.onStart = function (url, itemsLoaded, itemsTotal) {
-    loadingBar.style.setProperty("width", '0%')
+const loadManager = new THREE.LoadingManager()
+loadManager.onStart = function (url, itemsLoaded, itemsTotal) {
+    loadingPercent.innerText = "0%"
 }
-manager.onProgress = function (url, itemsLoaded, itemsTotal) {
-    loadingBar.style.setProperty("width", 100 * itemsLoaded / itemsTotal + '%')
+loadManager.onProgress = function (url, itemsLoaded, itemsTotal) {
+    loadingPercent.innerText = 100 * itemsLoaded / itemsTotal + '%'
 }
-manager.onLoad = function () {
-    restart()
-    messagesSpan.innerHTML = ""
+loadManager.onLoad = function () {
+    loaddingCircle.remove()
     renderer.setAnimationLoop(animate)
 }
-manager.onError = function (url) {
+loadManager.onError = function (url) {
     messagesSpan.innerHTML = 'Erreur de chargement'
 }
 
@@ -835,7 +816,7 @@ const colorFullOpacity = 0.2
 const commonCylinderGeometry = new THREE.CylinderGeometry(25, 25, 500, 12, 1, true)
 
 // dark space full of stars - background cylinder
-const darkCylinderTexture = new THREE.TextureLoader(manager).load("images/dark.jpg")
+const darkCylinderTexture = new THREE.TextureLoader(loadManager).load("images/dark.jpg")
 darkCylinderTexture.wrapS = THREE.RepeatWrapping
 darkCylinderTexture.wrapT = THREE.MirroredRepeatWrapping
 darkCylinderTexture.repeat.set(1, 1)
@@ -853,7 +834,7 @@ darkCylinder.position.set(5, 10, -10)
 scene.add(darkCylinder)
 
 // colourfull space full of nebulas - main universe cylinder
-const colorFullCylinderTexture = new THREE.TextureLoader(manager).load("images/colorfull.jpg")
+const colorFullCylinderTexture = new THREE.TextureLoader(loadManager).load("images/colorfull.jpg")
 colorFullCylinderTexture.wrapS = THREE.RepeatWrapping
 colorFullCylinderTexture.wrapT = THREE.MirroredRepeatWrapping
 colorFullCylinderTexture.repeat.set(1, 1)
@@ -925,19 +906,6 @@ const hardDroppedMatrix = mixer.clipAction(clip)
 hardDroppedMatrix.loop = THREE.LoopOnce
 hardDroppedMatrix.setDuration(0.2)
 
-
-const lineClearSound = new Audio("audio/line-clear.wav")
-const tetrisSound    = new Audio("audio/tetris.wav")
-const hardDropSound  = new Audio("audio/hard-drop.wav")
-const music          = new Audio("https://iterations.org/files/music/remixes/Tetris_CheDDer_OC_ReMix.mp3")
-      music.loop     = true
-
-window.addEventListener("resize", () => {
-    renderer.setSize(window.innerWidth, window.innerHeight)
-    camera.aspect = window.innerWidth / window.innerHeight
-    camera.updateProjectionMatrix()
-})
-
 let clock = new THREE.Clock()
 
 function animate() {
@@ -961,8 +929,13 @@ function animate() {
     minoCamera.update(renderer, scene)
 
     if (showFPS) fps.update();
-
 }
+
+window.addEventListener("resize", () => {
+    renderer.setSize(window.innerWidth, window.innerHeight)
+    camera.aspect = window.innerWidth / window.innerHeight
+    camera.updateProjectionMatrix()
+})
 
 
 /* Game logic */
@@ -971,113 +944,127 @@ messagesSpan.onanimationend = function (event) {
     event.target.remove()
 }
 
-let scheduler = new Scheduler()
-let settings = new Settings()
-let stats = new Stats()
-let playing = false
-//let favicon = document.querySelector("link[rel~='icon']")
+let piece = null
 
-window.restart = function () {
-    stats.modal.hide()
-    stats.init()
-    settings.init()
-    holdQueue.remove(holdQueue.piece)
-    holdQueue.piece = null
-    if (nextQueue.pieces) nextQueue.pieces.forEach(piece => nextQueue.remove(piece))
-    Array.from(matrix.children).forEach(mino => matrix.remove(mino))
-    matrix.init()
-    scene.remove(piece)
-    piece = null
-    scene.remove(ghost)
-    music.currentTime = 0
-    pauseSettings()
-}
+let game = {
+    init: function() {
+        this.playing = false
 
-function pauseSettings() {
-    stats.pauseTime = stats.time
+        stats.init()
+        
+        holdQueue.remove(holdQueue.piece)
+        holdQueue.piece = null
+        if (nextQueue.pieces) nextQueue.pieces.forEach(piece => nextQueue.remove(piece))
+        Array.from(matrix.children).forEach(mino => matrix.remove(mino))
+        matrix.init()
+        scene.remove(piece)
+        piece = null
+        scene.remove(ghost)
+        music.currentTime = 0
+    },
 
-    scheduler.clearInterval(fall)
-    scheduler.clearTimeout(lockDown)
-    scheduler.clearTimeout(repeat)
-    scheduler.clearInterval(autorepeat)
-    scheduler.clearInterval(tick)
+    start: function() {
+        startButton.hide()
 
-    music.pause()
-    document.onkeydown = null
+        this.playing = true
+        stats.clock.start()
 
-    settings.show()
-}
+        onblur = this.pause
 
-function newGame(event) {
-    if (!settings.form.checkValidity()) {
-        event.preventDefault()
-        event.stopPropagation()
-        settings.form.reportValidity()
-        settings.form.classList.add('was-validated')
-    } else {
-        levelInput.name = "level"
-        levelInput.disabled = true
-        //titleHeader.innerHTML = "PAUSE"
-        resumeButton.innerHTML = "Reprendre"
-        event.target.onsubmit = resume
         nextQueue.init()
-        stats.level = levelInput.valueAsNumber
-        localStorage["startLevel"] = levelInput.value
-        playing = true
-        onblur = pauseSettings
-        resume(event)
-    }
-}
 
-function resume(event) {
-    event.preventDefault()
-    event.stopPropagation()
+        stats.level = settings.startLevel
+        this.resume()
+    },
 
-    settings.form.reportValidity()
-    settings.form.classList.add('was-validated')
-
-    if (settings.form.checkValidity()) {
-        settings.modal.hide()
-        settings.getInputs()
-        renderer.domElement.focus()
-
+    resume: function(event) {
         document.onkeydown = onkeydown
         document.onkeyup = onkeyup
 
-        stats.time = stats.pauseTime
+        stats.clock.start()
+        stats.clock.elapsedTime = stats.elapsedTime
+        music.play()
 
-        lineClearSound.volume = settings.sfxVolume
-        tetrisSound.volume    = settings.sfxVolume
-        hardDropSound.volume  = settings.sfxVolume
-        if (settings.musicVolume > 0) {
-            music.volume = settings.musicVolume
-            music.play()
+        if (piece) scheduler.setInterval(game.fall, stats.fallPeriod)
+        else this.generate()
+    },
+
+    generate: function(heldPiece) {
+        if (heldPiece) {
+            piece = heldPiece
+        } else {
+            piece = nextQueue.shift()
         }
+        piece.position.set(4, SKYLINE)
+        scene.add(piece)
+        ghost.copy(piece)
+        scene.add(ghost)
+    
+        if (piece.canMove(TRANSLATION.NONE)) {
+            scheduler.setInterval(game.fall, stats.fallPeriod)
+        } else {
+            game.over() // block out
+        }
+    },
 
-        scheduler.setInterval(tick)
+    fall: function() {
+        piece.move(TRANSLATION.DOWN)
+    },
+    
+    lockDown: function() {
+        scheduler.clearTimeout(game.lockDown)
+        scheduler.clearInterval(game.fall)
+    
+        if (matrix.lock(piece)) {
+            scene.remove(piece)
+            let tSpin = piece.tSpin
+            let nbClearedLines = matrix.clearLines()
+            if (settings.sfxVolume) {
+                if (nbClearedLines == 4 || (tSpin && nbClearedLines)) {
+                    tetrisSound.currentTime = 0
+                    tetrisSound.play()
+                } else if (nbClearedLines || tSpin) {
+                    lineClearSound.currentTime = 0
+                    lineClearSound.play()
+                }
+            }
+            stats.lockDown(nbClearedLines, tSpin)
+    
+            game.generate()
+        } else {
+            game.over() // lock out
+        }
+    },
 
-        if (piece) scheduler.setInterval(fall, stats.fallPeriod)
-        else generate()
-    }
-}
+    pause: function() {
+        stats.elapsedTime = stats.clock.elapsedTime
+        stats.clock.stop()
+    
+        scheduler.clearInterval(game.fall)
+        scheduler.clearTimeout(game.lockDown)
+        scheduler.clearTimeout(repeat)
+        scheduler.clearInterval(autorepeat)
+    
+        music.pause()
+        document.onkeydown = null
+        renderer.domElement.tabIndex = 1
+        renderer.domElement.onfocus = game.resume
 
-var piece = null
-function generate(heldPiece) {
-    if (heldPiece) {
-        piece = heldPiece
-    } else {
-        piece = nextQueue.shift()
-    }
-    piece.position.set(4, SKYLINE)
-    scene.add(piece)
-    ghost.copy(piece)
-    scene.add(ghost)
+        messagesSpan.addNewChild("div", { className: "show-level-animation", innerHTML: `<h1>PAUSE</h1>` })
+    },
 
-    if (piece.canMove(TRANSLATION.NONE)) {
-        scheduler.setInterval(fall, stats.fallPeriod)
-    } else {
-        gameOver() // block out
-    }
+    over: function() {
+        piece.locked = false
+
+        document.onkeydown = null
+        renderer.domElement.onblur = null
+        renderer.domElement.onfocus = null
+        game.playing = false
+        music.pause()
+        stats.clock.stop()
+        localStorage["teTraHighScore"] = stats.highScore
+        messagesSpan.addNewChild("div", { className: "show-level-animation", innerHTML: `<h1>GAME<br/>OVER</h1>` })
+    },
 }
 
 let playerActions = {
@@ -1085,31 +1072,31 @@ let playerActions = {
 
     moveRight: () => piece.move(TRANSLATION.RIGHT),
 
-    rotateClockwise: () => piece.rotate(ROTATION.CW),
+    rotateCW: () => piece.rotate(ROTATION.CW),
 
-    rotateCounterclockwise: () => piece.rotate(ROTATION.CCW),
+    rotateCCW: () => piece.rotate(ROTATION.CCW),
 
     softDrop: function () {
         if (piece.move(TRANSLATION.DOWN)) stats.score++
     },
 
     hardDrop: function () {
-        scheduler.clearTimeout(lockDown)
+        scheduler.clearTimeout(game.lockDown)
         hardDropSound.play()
         if (settings.sfxVolume) {
             hardDropSound.currentTime = 0
             hardDropSound.play()
         }
         while (piece.move(TRANSLATION.DOWN)) stats.score += 2
-        lockDown()
+        game.lockDown()
         hardDroppedMatrix.reset()
         hardDroppedMatrix.play()
     },
 
     hold: function () {
         if (piece.holdEnabled) {
-            scheduler.clearInterval(fall)
-            scheduler.clearTimeout(lockDown)
+            scheduler.clearInterval(game.fall)
+            scheduler.clearTimeout(game.lockDown)
 
             let heldpiece = holdQueue.piece
             holdQueue.piece = piece
@@ -1118,12 +1105,47 @@ let playerActions = {
             holdQueue.piece.position.set(0, 0)
             holdQueue.piece.facing = FACING.NORTH
             holdQueue.add(holdQueue.piece)
-            generate(heldpiece)
+            game.generate(heldpiece)
         }
     },
 
-    pause: pauseSettings,
+    pause: game.pause,
 }
+
+// Sounds
+const listener = new THREE.AudioListener()
+camera.add( listener )
+const audioLoader = new THREE.AudioLoader()
+const music = new THREE.Audio(listener)
+audioLoader.load('audio/Tetris_CheDDer_OC_ReMix.mp3', function( buffer ) {
+	music.setBuffer(buffer)
+	music.setLoop(true)
+    music.setVolume(settings.musicVolume/100)
+	music.play()
+})
+const lineClearSound = new THREE.Audio(listener)
+audioLoader.load('audio/line-clear.wav', function( buffer ) {
+    lineClearSound.setBuffer(buffer)
+    lineClearSound.setVolume(settings.sfxVolume/100)
+})
+const tetrisSound = new THREE.Audio(listener)
+audioLoader.load('audio/tetris.wav', function( buffer ) {
+    tetrisSound.setBuffer(buffer)
+    tetrisSound.setVolume(settings.sfxVolume/100)
+})
+const hardDropSound = new THREE.Audio(listener)
+audioLoader.load('audio/hard-drop.wav', function( buffer ) {
+    hardDropSound.setBuffer(buffer)
+    hardDropSound.setVolume(settings.sfxVolume/100)
+})
+
+let scheduler = new Scheduler()
+var gui = new GUI().title("teTra")
+let startButton = gui.add(game, "start").name("Démarrer")
+let settings  = new Settings(gui)
+let stats = new Stats(gui)
+
+game.init()
 
 // Handle player inputs
 const REPEATABLE_ACTIONS = [
@@ -1135,18 +1157,19 @@ let pressedKeys = new Set()
 let actionsQueue = []
 
 function onkeydown(event) {
-    if (event.key in settings.keyBind) {
+    let key = event.key
+    if (key in settings.keyBind) {
         event.preventDefault()
-        if (!pressedKeys.has(event.key)) {
-            pressedKeys.add(event.key)
-            let action = settings.keyBind[event.key]
+        if (!pressedKeys.has(key)) {
+            pressedKeys.add(key)
+            let action = settings.keyBind[key]
             action()
             if (REPEATABLE_ACTIONS.includes(action)) {
                 actionsQueue.unshift(action)
                 scheduler.clearTimeout(repeat)
                 scheduler.clearInterval(autorepeat)
                 if (action == playerActions.softDrop) scheduler.setInterval(autorepeat, settings.fallPeriod / 20)
-                else scheduler.setTimeout(repeat, settings.das)
+                else scheduler.setTimeout(repeat, settings.dasDelay)
             }
         }
     }
@@ -1155,7 +1178,7 @@ function onkeydown(event) {
 function repeat() {
     if (actionsQueue.length) {
         actionsQueue[0]()
-        scheduler.setInterval(autorepeat, settings.arr)
+        scheduler.setInterval(autorepeat, settings.arrDelay)
     }
 }
 
@@ -1168,10 +1191,11 @@ function autorepeat() {
 }
 
 function onkeyup(event) {
-    if (event.key in settings.keyBind) {
+    let key = event.key
+    if (key in settings.keyBind) {
         event.preventDefault()
-        pressedKeys.delete(event.key)
-        let action = settings.keyBind[event.key]
+        pressedKeys.delete(key)
+        let action = settings.keyBind[key]
         if (actionsQueue.includes(action)) {
             actionsQueue.splice(actionsQueue.indexOf(action), 1)
             if (!actionsQueue.length) {
@@ -1182,52 +1206,9 @@ function onkeyup(event) {
     }
 }
 
-function fall() {
-    piece.move(TRANSLATION.DOWN)
-}
-
-function lockDown() {
-    scheduler.clearTimeout(lockDown)
-    scheduler.clearInterval(fall)
-
-    if (matrix.lock(piece)) {
-        scene.remove(piece)
-        let tSpin = piece.tSpin
-        let nbClearedLines = matrix.clearLines()
-        if (settings.sfxVolume) {
-            if (nbClearedLines == 4 || (tSpin && nbClearedLines)) {
-                tetrisSound.currentTime = 0
-                tetrisSound.play()
-            } else if (nbClearedLines || tSpin) {
-                lineClearSound.currentTime = 0
-                lineClearSound.play()
-            }
-        }
-        stats.lockDown(nbClearedLines, tSpin)
-
-        generate()
-    } else {
-        gameOver() // lock out
-    }
-}
-
-function gameOver() {
-    piece.locked = false
-
-    document.onkeydown = null
-    onblur = null
-    playing = false
-    music.pause()
-
-    scheduler.clearInterval(tick)
-
-    stats.show()
-}
-
 window.onbeforeunload = function (event) {
-    stats.save()
     settings.save()
-    if (playing) return false
+    if (game.playing) return false
 }
 
 
