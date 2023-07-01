@@ -990,6 +990,7 @@ let game = {
         document.onkeydown = onkeydown
         document.onkeyup = onkeyup
 
+        pauseSpan.className = ""
         stats.clock.start()
         stats.clock.elapsedTime = stats.elapsedTime
         music.play()
@@ -1056,10 +1057,10 @@ let game = {
     
         music.pause()
         document.onkeydown = null
-        renderer.domElement.tabIndex = 1
-        renderer.domElement.onfocus = game.resume
-
-        messagesSpan.addNewChild("div", { className: "show-level-animation", innerHTML: `<h1>PAUSE</h1>` })
+        
+        pauseSpan.tabIndex = 1
+        pauseSpan.onfocus = game.resume
+        pauseSpan.className = "pause"
     },
 
     over: function() {
