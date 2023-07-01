@@ -769,7 +769,7 @@ loadingManager.onLoad = function () {
     startButton.show()
 }
 loadingManager.onError = function (url) {
-    messagesSpan.innerHTML = 'Erreur de chargement'
+    loadingPercent.innerText = "Erreur"
 }
 
 const scene = new THREE.Scene()
