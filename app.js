@@ -1058,7 +1058,6 @@ let game = {
         music.pause()
         document.onkeydown = null
         
-        pauseSpan.tabIndex = 1
         pauseSpan.onfocus = game.resume
         pauseSpan.className = "pause"
     },
