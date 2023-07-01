@@ -594,7 +594,7 @@ class Stats {
 
         this.init()
 
-        this.gui = parentGui.addFolder("Stats")
+        this.gui = parentGui.addFolder("Stats").hide()
         this.gui.add(this, "time").name("Temps").disable().listen()
         this.gui.add(this, "score").name("Score").disable().listen()
         this.gui.add(this, "highScore").name("Meilleur score").disable().listen()
@@ -756,18 +756,19 @@ class Stats {
 
 /* Scene */
 
-const loadManager = new THREE.LoadingManager()
-loadManager.onStart = function (url, itemsLoaded, itemsTotal) {
+const loadingManager = new THREE.LoadingManager()
+loadingManager.onStart = function (url, itemsLoaded, itemsTotal) {
     loadingPercent.innerText = "0%"
 }
-loadManager.onProgress = function (url, itemsLoaded, itemsTotal) {
-    loadingPercent.innerText = 100 * itemsLoaded / itemsTotal + '%'
+loadingManager.onProgress = function (url, itemsLoaded, itemsTotal) {
+    loadingPercent.innerText = Math.floor(100 * itemsLoaded / itemsTotal) + '%'
 }
-loadManager.onLoad = function () {
+loadingManager.onLoad = function () {
     loaddingCircle.remove()
     renderer.setAnimationLoop(animate)
+    startButton.show()
 }
-loadManager.onError = function (url) {
+loadingManager.onError = function (url) {
     messagesSpan.innerHTML = 'Erreur de chargement'
 }
 
@@ -821,7 +822,7 @@ const colorFullOpacity = 0.2
 const commonCylinderGeometry = new THREE.CylinderGeometry(25, 25, 500, 12, 1, true)
 
 // dark space full of stars - background cylinder
-const darkCylinderTexture = new THREE.TextureLoader(loadManager).load("images/dark.jpg")
+const darkCylinderTexture = new THREE.TextureLoader(loadingManager).load("images/dark.jpg")
 darkCylinderTexture.wrapS = THREE.RepeatWrapping
 darkCylinderTexture.wrapT = THREE.MirroredRepeatWrapping
 darkCylinderTexture.repeat.set(1, 1)
@@ -839,7 +840,7 @@ darkCylinder.position.set(5, 10, -10)
 scene.add(darkCylinder)
 
 // colourfull space full of nebulas - main universe cylinder
-const colorFullCylinderTexture = new THREE.TextureLoader(loadManager).load("images/colorfull.jpg")
+const colorFullCylinderTexture = new THREE.TextureLoader(loadingManager).load("images/colorfull.jpg")
 colorFullCylinderTexture.wrapS = THREE.RepeatWrapping
 colorFullCylinderTexture.wrapT = THREE.MirroredRepeatWrapping
 colorFullCylinderTexture.repeat.set(1, 1)
@@ -970,6 +971,7 @@ let game = {
 
     start: function() {
         startButton.hide()
+        stats.gui.show()
 
         this.playing = true
         stats.clock.start()
@@ -1120,13 +1122,13 @@ let playerActions = {
 // Sounds
 const listener = new THREE.AudioListener()
 camera.add( listener )
-const audioLoader = new THREE.AudioLoader()
+const audioLoader = new THREE.AudioLoader(loadingManager)
 const music = new THREE.Audio(listener)
 audioLoader.load('audio/Tetris_CheDDer_OC_ReMix.mp3', function( buffer ) {
 	music.setBuffer(buffer)
 	music.setLoop(true)
     music.setVolume(settings.musicVolume/100)
-	music.play()
+	if (game.playing) music.play()
 })
 const lineClearSound = new THREE.Audio(listener)
 audioLoader.load('audio/line-clear.wav', function( buffer ) {
@@ -1146,9 +1148,9 @@ audioLoader.load('audio/hard-drop.wav', function( buffer ) {
 
 let scheduler = new Scheduler()
 var gui = new GUI().title("teTra")
-let startButton = gui.add(game, "start").name("Démarrer")
-let settings  = new Settings(gui)
+let startButton = gui.add(game, "start").name("Démarrer").hide()
 let stats = new Stats(gui)
+let settings  = new Settings(gui)
 
 if (debug) {
     let debugFolder = gui.addFolder("debug")
