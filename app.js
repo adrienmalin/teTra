@@ -595,11 +595,16 @@ class Stats {
         this.init()
 
         this.gui = parentGui.addFolder("Stats")
-        this.gui.add(this, "level").name("Niveau").disable().listen()
-        this.gui.add(this, "goal").name("Objectif").disable().listen()
+        this.gui.add(this, "time").name("Temps").disable().listen()
         this.gui.add(this, "score").name("Score").disable().listen()
         this.gui.add(this, "highScore").name("Meilleur score").disable().listen()
-        this.gui.timeController = this.gui.add(this, "time").name("Temps").disable().listen()
+        this.gui.add(this, "level").name("Niveau").disable().listen()
+        this.gui.add(this, "totalClearedLines").name("Lignes").disable().listen()
+        this.gui.add(this, "goal").name("Objectif").disable().listen()
+        this.gui.add(this, "nbTetra").name("teTras").disable().listen()
+        this.gui.add(this, "nbTSpin").name("Pirouettes").disable().listen()
+        this.gui.add(this, "maxCombo").name("Combos max").disable().listen()
+        this.gui.add(this, "maxB2B").name("BàB max").disable().listen()
     }
 
     init() {
@@ -612,7 +617,7 @@ class Stats {
         this.startTime = new Date()
         this.lockDelay = DELAY.LOCK
         this.totalClearedLines = 0
-        this.nbQuatris = 0
+        this.nbTetra = 0
         this.nbTSpin = 0
         this.maxCombo = 0
         this.maxB2B = 0
@@ -665,7 +670,7 @@ class Stats {
 
     lockDown(nbClearedLines, tSpin) {
         this.totalClearedLines += nbClearedLines
-        if (nbClearedLines == 4) this.nbQuatris++
+        if (nbClearedLines == 4) this.nbTetra++
         if (tSpin == T_SPIN.T_SPIN) this.nbTSpin++
 
         // Cleared lines & T-Spin
