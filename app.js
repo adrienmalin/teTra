@@ -803,9 +803,9 @@ controls.update()
 controls.addEventListener("start", () => renderer.domElement.style.cursor = "grabbing")
 controls.addEventListener("end", () => renderer.domElement.style.cursor = "grab")
 
-const showFPS = window.location.search.includes("fps")
+const debug = window.location.search.includes("debug")
 const fps = new FPS.default();
-if (showFPS) document.body.appendChild(fps.dom);
+if (debug) document.body.appendChild(fps.dom);
 
 
 const GLOBAL_ROTATION = 0.15625
@@ -933,7 +933,7 @@ function animate() {
     renderer.render(scene, camera)
     minoCamera.update(renderer, scene)
 
-    if (showFPS) fps.update();
+    if (debug) fps.update();
 }
 
 window.addEventListener("resize", () => {
@@ -1149,6 +1149,14 @@ var gui = new GUI().title("teTra")
 let startButton = gui.add(game, "start").name("Démarrer")
 let settings  = new Settings(gui)
 let stats = new Stats(gui)
+
+if (debug) {
+    let debugFolder = gui.addFolder("debug")
+    let cameraPosition = debugFolder.addFolder("camera.position")
+    cameraPosition.add(camera.position, "x")
+    cameraPosition.add(camera.position, "y")
+    cameraPosition.add(camera.position, "z")
+}
 
 game.init()
 
