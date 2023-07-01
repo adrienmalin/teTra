@@ -69,7 +69,7 @@ const AWARDED_LINE_CLEARS = {
     [T_SPIN.T_SPIN]: [4, 8, 12, 16]
 }
 
-const KEY_NAMES = {
+const KEY_NAMES = new Proxy({
     ["ArrowLeft"]   : "←",
     ["ArrowRight"]  : "→",
     ["ArrowUp"]     : "↑",
@@ -86,7 +86,11 @@ const KEY_NAMES = {
     ["Échap."]      : "Escape",
     ["Ret. arrière"]: "Backspace",
     ["Entrée"]      : "Enter",
-}
+}, {
+    get(obj, keyName) {
+        return obj[keyName] || keyName
+    }
+})
 
 const CLEARED_LINES_NAMES = [
     "",
@@ -494,7 +498,7 @@ function changeKey() {
     let input = controller.domElement.getElementsByTagName("input")[0]
     input.select()
     input.onkeydown = function (event) {
-        controller.setValue(KEY_NAMES[event.key] || event.key)
+        controller.setValue(KEY_NAMES[event.key])
         input.blur()
     }
     input.onblur = function (event) {
@@ -567,7 +571,7 @@ class Settings {
     bindKeys() {
         this.keyBind = {}
         for (let actionName in playerActions) {
-            this.keyBind[KEY_NAMES[this[actionName]] || this[actionName]] = playerActions[actionName]
+            this.keyBind[KEY_NAMES[this[actionName]]] = playerActions[actionName]
         }
     }
 
