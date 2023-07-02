@@ -504,12 +504,12 @@ class KeyMapper {
 
     set key(key) {
         key = KEY_NAMES[key]
-        if (this._key in this.constructor.actions) delete this.constructor.actions[this._key]
-        this._key = key
+        if (this.constructor.actions[this.prevKey] == this.action) delete this.constructor.actions[this.prevKey]
+        this.prevKey = key
         this.constructor.actions[key] = this.action
     }
     get key() {
-        return KEY_NAMES[this._key]
+        return KEY_NAMES[this.prevKey]
     }
 }
 
@@ -583,7 +583,9 @@ class Settings {
     }
 
     load() {
-        if (localStorage["teTraSettings"]) this.gui.load(JSON.parse(localStorage["teTraSettings"]))
+        if (localStorage["teTraSettings"]) {
+            this.gui.load(JSON.parse(localStorage["teTraSettings"]))
+        }
     }
 
     save() {
