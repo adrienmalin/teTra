@@ -493,15 +493,32 @@ Ghost.prototype.minoesPosition = [
     [P(0, 0, 0), P(0, 0, 0), P(0, 0, 0), P(0, 0, 0)],
 ]
 
+
+class KeyMapper {
+    static actions = {}
+
+    constructor(action, key) {
+        this.action = action
+        this.key    = key
+    }
+
+    set key(key) {
+        key = KEY_NAMES[key]
+        if (this._key in this.constructor.actions) delete this.constructor.actions[this._key]
+        this._key = key
+        this.constructor.actions[key] = this.action
+    }
+    get key() {
+        return KEY_NAMES[this._key]
+    }
+}
+
 function changeKey() {
     let controller = this
     let input = controller.domElement.getElementsByTagName("input")[0]
-    let action = settings.keyBind[KEY_NAMES[input.value]]
-    delete settings.keyBind[KEY_NAMES[input.value]]
     input.select()
     input.onkeydown = function (event) {
         controller.setValue(KEY_NAMES[event.key])
-        settings.keyBind[event.key] = action
         input.blur()
     }
 }
@@ -511,14 +528,14 @@ class Settings {
     constructor(gui) {
         this.startLevel = 1
 
-        this.moveLeft  = "←"
-        this.moveRight = "→"
-        this.rotateCCW = "w"
-        this.rotateCW  = "↑"
-        this.softDrop  = "↓"
-        this.hardDrop  = "Espace"
-        this.hold      = "c"
-        this.pause     = "Échap."
+        this.moveLeftKeymap  = new KeyMapper(playerActions.moveLeft, "←")
+        this.moveRightKeymap = new KeyMapper(playerActions.moveRight, "→")
+        this.rotateCCWKeymap = new KeyMapper(playerActions.rotateCCW, "w")
+        this.rotateCWKeymap  = new KeyMapper(playerActions.rotateCW, "↑")
+        this.softDropKeymap  = new KeyMapper(playerActions.softDrop, "↓")
+        this.hardDropKeymap  = new KeyMapper(playerActions.hardDrop, "Espace")
+        this.holdKeymap      = new KeyMapper(playerActions.hold, "c")
+        this.pauseKeymap     = new KeyMapper(playerActions.pause, "Échap.")
 
         this.arrDelay = 50
         this.dasDelay = 300
@@ -531,22 +548,22 @@ class Settings {
         this.gui.add(this, "startLevel").name("Niveau initial").min(1).max(15).step(1)
 
         this.gui.keyFolder = this.gui.addFolder("Commandes").open()
-        let moveLeftController = this.gui.keyFolder.add(this,"moveLeft").name('Gauche')
-        moveLeftController.domElement.onclick = changeKey.bind(moveLeftController)
-        let moveRightController = this.gui.keyFolder.add(this,"moveRight").name('Droite')
-        moveRightController.domElement.onclick = changeKey.bind(moveRightController)
-        let rotateCWController = this.gui.keyFolder.add(this,"rotateCW").name('Rotation horaire')
-        rotateCWController.domElement.onclick = changeKey.bind(rotateCWController)
-        let rotateCCWController = this.gui.keyFolder.add(this,"rotateCCW").name('anti-horaire')
-        rotateCCWController.domElement.onclick = changeKey.bind(rotateCCWController)
-        let softDropController = this.gui.keyFolder.add(this,"softDrop").name('Chute lente')
-        softDropController.domElement.onclick = changeKey.bind(softDropController)
-        let hardDropController = this.gui.keyFolder.add(this,"hardDrop").name('Chute rapide')
-        hardDropController.domElement.onclick = changeKey.bind(hardDropController)
-        let holdController = this.gui.keyFolder.add(this,"hold").name('Garder')
-        holdController.domElement.onclick = changeKey.bind(holdController)
-        let pauseController = this.gui.keyFolder.add(this,"pause").name('Pause')
-        pauseController.domElement.onclick = changeKey.bind(pauseController)
+        let moveLeftKeyController = this.gui.keyFolder.add(this.moveLeftKeymap, "key").name('Gauche')
+        moveLeftKeyController.domElement.onclick = changeKey.bind(moveLeftKeyController)
+        let moveRightKeyController = this.gui.keyFolder.add(this.moveRightKeymap, "key").name('Droite')
+        moveRightKeyController.domElement.onclick = changeKey.bind(moveRightKeyController)
+        let rotateCWKeyController = this.gui.keyFolder.add(this.rotateCWKeymap, "key").name('Rotation horaire')
+        rotateCWKeyController.domElement.onclick = changeKey.bind(rotateCWKeyController)
+        let rotateCCWKeyController = this.gui.keyFolder.add(this.rotateCCWKeymap, "key").name('anti-horaire')
+        rotateCCWKeyController.domElement.onclick = changeKey.bind(rotateCCWKeyController)
+        let softDropKeyController = this.gui.keyFolder.add(this.softDropKeymap, "key").name('Chute lente')
+        softDropKeyController.domElement.onclick = changeKey.bind(softDropKeyController)
+        let hardDropKeyController = this.gui.keyFolder.add(this.hardDropKeymap, "key").name('Chute rapide')
+        hardDropKeyController.domElement.onclick = changeKey.bind(hardDropKeyController)
+        let holdKeyController = this.gui.keyFolder.add(this.holdKeymap, "key").name('Garder')
+        holdKeyController.domElement.onclick = changeKey.bind(holdKeyController)
+        let pauseKeyController = this.gui.keyFolder.add(this.pauseKeymap, "key").name('Pause')
+        pauseKeyController.domElement.onclick = changeKey.bind(pauseKeyController)
 
         this.gui.delayFolder = this.gui.addFolder("Répétition automatique").open()
         this.gui.delayFolder.add(this,"arrDelay").name("ARR (ms)").min(2).max(200).step(1);
@@ -563,14 +580,6 @@ class Settings {
         })
 
         this.load()
-        this.bindKeys()
-    }
-
-    bindKeys() {
-        this.keyBind = {}
-        for (let actionName in playerActions) {
-            this.keyBind[KEY_NAMES[this[actionName]]] = playerActions[actionName]
-        }
     }
 
     load() {
@@ -1175,11 +1184,11 @@ let actionsQueue = []
 
 function onkeydown(event) {
     let key = event.key
-    if (key in settings.keyBind) {
+    if (key in KeyMapper.actions) {
         event.preventDefault()
         if (!pressedKeys.has(key)) {
             pressedKeys.add(key)
-            let action = settings.keyBind[key]
+            let action = KeyMapper.actions[key]
             action()
             if (REPEATABLE_ACTIONS.includes(action)) {
                 actionsQueue.unshift(action)
@@ -1209,10 +1218,10 @@ function autorepeat() {
 
 function onkeyup(event) {
     let key = event.key
-    if (key in settings.keyBind) {
+    if (key in KeyMapper.actions) {
         event.preventDefault()
         pressedKeys.delete(key)
-        let action = settings.keyBind[key]
+        let action = KeyMapper.actions[key]
         if (actionsQueue.includes(action)) {
             actionsQueue.splice(actionsQueue.indexOf(action), 1)
             if (!actionsQueue.length) {
