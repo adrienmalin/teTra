@@ -841,7 +841,7 @@ const commonCylinderGeometry = new THREE.CylinderGeometry(25, 25, 500, 12, 1, tr
 const darkCylinderTexture = new THREE.TextureLoader(loadingManager).load("images/plasma2.jpg", (texture) => {
     texture.wrapS = THREE.RepeatWrapping
     texture.wrapT = THREE.MirroredRepeatWrapping
-    texture.repeat.set(1, 1)
+    texture.repeat.set(2, 1)
 })
 const darkCylinderMaterial = new THREE.MeshLambertMaterial({
     side: THREE.BackSide,
@@ -865,7 +865,7 @@ const colorFullCylinderMaterial = new THREE.MeshBasicMaterial({
     side: THREE.BackSide,
     map: colorFullCylinderTexture,
     blending: THREE.AdditiveBlending,
-    opacity: 0.05
+    opacity: 0.1
 })
 const colorFullCylinder = new THREE.Mesh(
     commonCylinderGeometry,
@@ -874,10 +874,10 @@ const colorFullCylinder = new THREE.Mesh(
 colorFullCylinder.position.set(5, 10, -10)
 scene.add(colorFullCylinder)
 
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.3)
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.2)
 scene.add(ambientLight)
 
-const directionalLight = new THREE.DirectionalLight(0xffffff, 5)
+const directionalLight = new THREE.DirectionalLight(0xffffff, 6)
 directionalLight.position.set(5, -100, -16)
 scene.add(directionalLight)
 
@@ -1091,6 +1091,7 @@ let game = {
         localStorage["teTraHighScore"] = stats.highScore
         messagesSpan.addNewChild("div", { className: "show-level-animation", innerHTML: `<h1>GAME<br/>OVER</h1>` })
 
+        startButton.name("Rejouer")
         startButton.show()
     },
 }
@@ -1169,7 +1170,7 @@ audioLoader.load('audio/hard-drop.wav', function( buffer ) {
 
 let scheduler = new Scheduler()
 var gui = new GUI().title("teTra")
-let startButton = gui.add(game, "start").name("Démarrer").hide()
+let startButton = gui.add(game, "start").name("Jouer").hide()
 let stats = new Stats(gui)
 let settings  = new Settings(gui)
 
