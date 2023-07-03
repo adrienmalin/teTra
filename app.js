@@ -543,7 +543,7 @@ class Settings {
         this.musicVolume = 50
         this.sfxVolume   = 50
 
-        this.gui = gui.addFolder("Options").close()
+        this.gui = gui.addFolder("Options").open()
 
         this.gui.add(this, "startLevel").name("Niveau initial").min(1).max(15).step(1)
 
@@ -985,6 +985,7 @@ let game = {
     start: function() {
         startButton.hide()
         stats.gui.show()
+        settings.gui.close()
 
         this.playing = true
         stats.clock.start()
