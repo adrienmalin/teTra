@@ -254,10 +254,11 @@ class MinoMaterial extends THREE.MeshBasicMaterial {
         super({
             side: THREE.DoubleSide,
             color: color,
-            reflectivity: 0.95,
             envMap: minoRenderTarget.texture,
-            roughness: 0.1,
-            metalness: 0.25
+            reflectivity: 0.97,
+            //roughness: 0,
+            //metalness: 0.85,
+
         })
     }
 
@@ -504,7 +505,8 @@ class KeyMapper {
 
     set key(key) {
         key = KEY_NAMES[key]
-        if (this.constructor.actions[this.prevKey] == this.action) delete this.constructor.actions[this.prevKey]
+        if (this.constructor.actions[this.prevKey] == this.action)
+            delete this.constructor.actions[this.prevKey]
         this.prevKey = key
         this.constructor.actions[key] = this.action
     }
@@ -573,7 +575,7 @@ class Settings {
         this.gui.volumeFolder.add(this,"musicVolume").name("Musique").min(0).max(100).step(1).onChange((volume) => {
             music.setVolume(volume/100)
         })
-        this.gui.volumeFolder.add(this,"sfxVolume").name("SFX").min(0).max(100).step(1).onChange((volume) => {
+        this.gui.volumeFolder.add(this,"sfxVolume").name("Effets").min(0).max(100).step(1).onChange((volume) => {
             lineClearSound.setVolume(volume/100)
             tetrisSound.setVolume(volume/100)
             hardDropSound.setVolume(volume/100)
@@ -811,7 +813,7 @@ controls.minPolarAngle   = 0.9
 controls.maxPolarAngle   = 2.14
 controls.minAzimuthAngle = 0.9 - Math.PI / 2
 controls.maxAzimuthAngle = 2.14 - Math.PI / 2
-controls.target          = P(5, 9)
+controls.target.set(5, 9, 0)
 controls.update()
 
 controls.addEventListener("start", () => renderer.domElement.style.cursor = "grabbing")
@@ -821,29 +823,26 @@ const debug = window.location.search.includes("debug")
 const fps = new FPS.default();
 if (debug) document.body.appendChild(fps.dom);
 
+const GLOBAL_ROTATION = 0.028
 
-const GLOBAL_ROTATION = 0.15625
+const darkTextureRotation = 0.006
+const darkMoveForward = -0.017
 
-const darkTextureRotation = 0.0375
-const darkMoveForward = -0.04375
-const darkOpacity = 0.2
-
-const colorFullTextureRotation = 0.0375
-const colorFullMoveForward = -0.075
-const colorFullOpacity = 0.2
+const colorFullTextureRotation = 0.006
+const colorFullMoveForward = -0.01
 
 const commonCylinderGeometry = new THREE.CylinderGeometry(25, 25, 500, 12, 1, true)
 
-// dark space full of stars - background cylinder
-const darkCylinderTexture = new THREE.TextureLoader(loadingManager).load("images/dark.jpg")
-darkCylinderTexture.wrapS = THREE.RepeatWrapping
-darkCylinderTexture.wrapT = THREE.MirroredRepeatWrapping
-darkCylinderTexture.repeat.set(1, 1)
+const darkCylinderTexture = new THREE.TextureLoader(loadingManager).load("images/plasma2.jpg", (texture) => {
+    texture.wrapS = THREE.RepeatWrapping
+    texture.wrapT = THREE.MirroredRepeatWrapping
+    texture.repeat.set(1, 1)
+})
 const darkCylinderMaterial = new THREE.MeshLambertMaterial({
     side: THREE.BackSide,
     map: darkCylinderTexture,
     blending: THREE.AdditiveBlending,
-    opacity: darkOpacity
+    opacity: 1
 })
 const darkCylinder = new THREE.Mesh(
     commonCylinderGeometry,
@@ -852,16 +851,16 @@ const darkCylinder = new THREE.Mesh(
 darkCylinder.position.set(5, 10, -10)
 scene.add(darkCylinder)
 
-// colourfull space full of nebulas - main universe cylinder
-const colorFullCylinderTexture = new THREE.TextureLoader(loadingManager).load("images/colorfull.jpg")
-colorFullCylinderTexture.wrapS = THREE.RepeatWrapping
-colorFullCylinderTexture.wrapT = THREE.MirroredRepeatWrapping
-colorFullCylinderTexture.repeat.set(1, 1)
+const colorFullCylinderTexture = new THREE.TextureLoader(loadingManager).load("images/plasma.jpg", (texture) => {
+    texture.wrapS = THREE.RepeatWrapping
+    texture.wrapT = THREE.MirroredRepeatWrapping
+    texture.repeat.set(1, 1)
+})
 const colorFullCylinderMaterial = new THREE.MeshBasicMaterial({
     side: THREE.BackSide,
     map: colorFullCylinderTexture,
     blending: THREE.AdditiveBlending,
-    opacity: colorFullOpacity
+    opacity: 0.05
 })
 const colorFullCylinder = new THREE.Mesh(
     commonCylinderGeometry,
@@ -870,18 +869,19 @@ const colorFullCylinder = new THREE.Mesh(
 colorFullCylinder.position.set(5, 10, -10)
 scene.add(colorFullCylinder)
 
-const ambientLight = new THREE.AmbientLight(0xffffff, 2)
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.3)
 scene.add(ambientLight)
 
-const directionalLight = new THREE.DirectionalLight(0xffffff, 3)
-directionalLight.position.set(5, -30, 0)
+const directionalLight = new THREE.DirectionalLight(0xffffff, 5)
+directionalLight.position.set(5, -100, -16)
 scene.add(directionalLight)
 
 const edgeMaterial = new THREE.MeshBasicMaterial({
     color: 0x88abe0,
     transparent: true,
-    opacity: 0.5,
+    opacity: 0.3,
     reflectivity: 0.9,
+    refractionRatio: 0.5,
     envMap: minoRenderTarget.texture
 })
 
@@ -903,6 +903,7 @@ const edge = new THREE.Mesh(
     new THREE.ExtrudeGeometry(edgeShape, edgeExtrudeSettings),
     edgeMaterial
 )
+edge.visible = false
 scene.add(edge)
 
 const holdQueue = new THREE.Group()
@@ -987,6 +988,8 @@ let game = {
         stats.gui.show()
         settings.gui.close()
 
+        edge.visible = true
+
         this.playing = true
         stats.clock.start()
 
@@ -1020,6 +1023,7 @@ let game = {
         piece.position.set(4, SKYLINE)
         scene.add(piece)
         ghost.copy(piece)
+        //directionalLight.target = piece
         scene.add(ghost)
     
         if (piece.canMove(TRANSLATION.NONE)) {
@@ -1145,12 +1149,12 @@ audioLoader.load('audio/Tetris_CheDDer_OC_ReMix.mp3', function( buffer ) {
 	if (game.playing) music.play()
 })
 const lineClearSound = new THREE.Audio(listener)
-audioLoader.load('audio/line-clear.wav', function( buffer ) {
+audioLoader.load('audio/line-clear.ogg', function( buffer ) {
     lineClearSound.setBuffer(buffer)
     lineClearSound.setVolume(settings.sfxVolume/100)
 })
 const tetrisSound = new THREE.Audio(listener)
-audioLoader.load('audio/tetris.wav', function( buffer ) {
+audioLoader.load('audio/tetris.ogg', function( buffer ) {
     tetrisSound.setBuffer(buffer)
     tetrisSound.setVolume(settings.sfxVolume/100)
 })
@@ -1168,10 +1172,26 @@ let settings  = new Settings(gui)
 
 if (debug) {
     let debugFolder = gui.addFolder("debug")
-    let cameraPosition = debugFolder.addFolder("camera.position")
-    cameraPosition.add(camera.position, "x")
-    cameraPosition.add(camera.position, "y")
-    cameraPosition.add(camera.position, "z")
+    let cameraPositionFolder = debugFolder.addFolder("camera.position")
+    cameraPositionFolder.add(camera.position, "x")
+    cameraPositionFolder.add(camera.position, "y")
+    cameraPositionFolder.add(camera.position, "z")
+
+    let lightFolder = debugFolder.addFolder("lights intensity")
+    lightFolder.add(ambientLight, "intensity").name("ambient").min(-15).max(15)
+    lightFolder.add(directionalLight, "intensity").name("directional").min(-15).max(15)
+
+    let materialsFolder = debugFolder.addFolder("materials opacity")
+    materialsFolder.add(darkCylinderMaterial, "opacity").name("dark").min(0).max(1)
+    materialsFolder.add(colorFullCylinderMaterial, "opacity").name("colorFull").min(0).max(1)
+    materialsFolder.add(I.prototype.material, "reflectivity").min(0).max(2).onChange(() => {
+        J.prototype.material.reflectivity = I.prototype.material.reflectivity
+        L.prototype.material.reflectivity = I.prototype.material.reflectivity
+        O.prototype.material.reflectivity = I.prototype.material.reflectivity
+        S.prototype.material.reflectivity = I.prototype.material.reflectivity
+        T.prototype.material.reflectivity = I.prototype.material.reflectivity
+        Z.prototype.material.reflectivity = I.prototype.material.reflectivity
+    })
 }
 
 game.init()
