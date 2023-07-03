@@ -132,6 +132,11 @@ class Scheduler {
 
 
 class Matrix extends THREE.Group {
+    constructor() {
+        super()
+        this.init()
+    }
+
     init() {
         this.cells = Array(ROWS).fill().map(() => Array(COLUMNS))
         this.unlockedMinoes = new Set()
@@ -967,10 +972,13 @@ messagesSpan.onanimationend = function (event) {
 let piece = null
 
 let game = {
-    init: function() {
-        this.playing = false
+    playing: false,
 
+    start: function() {
+        startButton.hide()
         stats.init()
+        stats.gui.show()
+        settings.gui.close()
         
         holdQueue.remove(holdQueue.piece)
         holdQueue.piece = null
@@ -981,13 +989,6 @@ let game = {
         piece = null
         scene.remove(ghost)
         music.currentTime = 0
-    },
-
-    start: function() {
-        startButton.hide()
-        stats.gui.show()
-        settings.gui.close()
-
         edge.visible = true
 
         this.playing = true
@@ -1089,6 +1090,8 @@ let game = {
         stats.clock.stop()
         localStorage["teTraHighScore"] = stats.highScore
         messagesSpan.addNewChild("div", { className: "show-level-animation", innerHTML: `<h1>GAME<br/>OVER</h1>` })
+
+        startButton.show()
     },
 }
 
@@ -1193,8 +1196,6 @@ if (debug) {
         Z.prototype.material.reflectivity = I.prototype.material.reflectivity
     })
 }
-
-game.init()
 
 // Handle player inputs
 const REPEATABLE_ACTIONS = [
