@@ -2,6 +2,10 @@ import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { GUI } from 'three/addons/libs/lil-gui.module.min.js'
 import * as FPS from 'three/addons/libs/stats.module.js';
+import { T_SPIN } from './jsm/common.js'
+import { Settings } from './jsm/settings.js'
+import { Stats } from './jsm/stats.js'
+import { Scheduler } from './jsm/utils.js'
 
 let P = (x, y, z = 0) => new THREE.Vector3(x, y, z)
 
@@ -21,11 +25,6 @@ HTMLElement.prototype.addNewChild = function (tag, properties) {
 const ROWS = 24
 const SKYLINE = 20
 const COLUMNS = 10
-
-const DELAY = {
-    LOCK: 500,
-    FALL: 1000,
-}
 
 const COLORS = {
     I: 0xafeff9,
@@ -54,57 +53,6 @@ const TRANSLATION = {
 const ROTATION = {
     CW: 1,  // ClockWise
     CCW: -1,  // CounterClockWise
-}
-
-const T_SPIN = {
-    NONE: "",
-    MINI: "PETITE<br/>PIROUETTE",
-    T_SPIN: "PIROUETTE"
-}
-
-// score = AWARDED_LINE_CLEARS[tSpin][nbClearedLines]
-const AWARDED_LINE_CLEARS = {
-    [T_SPIN.NONE]: [0, 1, 3, 5, 8],
-    [T_SPIN.MINI]: [1, 2],
-    [T_SPIN.T_SPIN]: [4, 8, 12, 16]
-}
-
-const CLEARED_LINES_NAMES = [
-    "",
-    "SOLO",
-    "DUO",
-    "TRIO",
-    "TETRA",
-]
-
-
-/* Classes */
-
-class Scheduler {
-    constructor() {
-        this.intervalTasks = new Map()
-        this.timeoutTasks = new Map()
-    }
-
-    setInterval(func, delay, ...args) {
-        this.intervalTasks.set(func, window.setInterval(func, delay, ...args))
-    }
-
-    setTimeout(func, delay, ...args) {
-        this.timeoutTasks.set(func, window.setTimeout(func, delay, ...args))
-    }
-
-    clearInterval(func) {
-        if (this.intervalTasks.has(func))
-            window.clearInterval(this.intervalTasks.get(func))
-        this.intervalTasks.delete(func)
-    }
-
-    clearTimeout(func) {
-        if (this.timeoutTasks.has(func))
-            window.clearTimeout(this.timeoutTasks.get(func))
-        this.timeoutTasks.delete(func)
-    }
 }
 
 
@@ -231,23 +179,17 @@ Mino.prototype.geometry = new THREE.ExtrudeGeometry(minoFaceShape, minoExtrudeSe
 
 
 class MinoMaterial extends THREE.MeshBasicMaterial {
-
     constructor(color) {
         super({
             side: THREE.DoubleSide,
             color: color,
             envMap: minoRenderTarget.texture,
             reflectivity: 0.9,
-            //roughness: 0,
-            //metalness: 0.85,
-
         })
     }
-
 }
 
 class GhostMaterial extends THREE.MeshBasicMaterial {
-
     constructor(color) {
         super({
             side: THREE.DoubleSide,
@@ -258,7 +200,6 @@ class GhostMaterial extends THREE.MeshBasicMaterial {
             opacity: 0.25
         })
     }
-
 }
 
 
@@ -475,249 +416,6 @@ class Ghost extends Tetromino {
 Ghost.prototype.minoesPosition = [
     [P(0, 0, 0), P(0, 0, 0), P(0, 0, 0), P(0, 0, 0)],
 ]
-
-
-class Stats {
-    constructor() {
-        this.clock = new THREE.Clock(false)
-        this.clock.timeFormat = new Intl.DateTimeFormat("fr-FR", {
-            hour: "numeric",
-            minute: "2-digit",
-            second: "2-digit",
-            timeZone: "UTC"
-        })
-        this.elapsedTime = 0
-
-        this.init()
-    }
-
-    init() {
-        this._level = 0
-        this._score = 0
-        this.goal = 0
-        this.highScore = Number(localStorage["teTraHighScore"]) || 0
-        this.combo = 0
-        this.b2b = 0
-        this.startTime = new Date()
-        this.lockDelay = DELAY.LOCK
-        this.totalClearedLines = 0
-        this.nbTetra = 0
-        this.nbTSpin = 0
-        this.maxCombo = 0
-        this.maxB2B = 0
-    }
-
-    set score(score) {
-        this._score = score
-        if (score > this.highScore) {
-            this.highScore = score
-        }
-    }
-
-    get score() {
-        return this._score
-    }
-
-    set level(level) {
-        this._level = level
-        this.goal += level * 5
-        if (level <= 20) this.fallPeriod = 1000 * Math.pow(0.8 - ((level - 1) * 0.007), level - 1)
-        if (level > 15) this.lockDelay = 500 * Math.pow(0.9, level - 15)
-        messagesSpan.addNewChild("div", { className: "show-level-animation", innerHTML: `<h1>NIVEAU<br/>${this.level}</h1>` })
-    }
-
-    get level() {
-        return this._level
-    }
-
-    set combo(combo) {
-        this._combo = combo
-        if (combo > this.maxCombo) this.maxCombo = combo
-    }
-
-    get combo() {
-        return this._combo
-    }
-
-    set b2b(b2b) {
-        this._b2b = b2b
-        if (b2b > this.maxB2B) this.maxB2B = b2b
-    }
-
-    get b2b() {
-        return this._b2b
-    }
-
-    get time() {
-        return this.clock.timeFormat.format(this.clock.elapsedTime * 1000)
-    }
-
-    lockDown(nbClearedLines, tSpin) {
-        this.totalClearedLines += nbClearedLines
-        if (nbClearedLines == 4) this.nbTetra++
-        if (tSpin == T_SPIN.T_SPIN) this.nbTSpin++
-
-        // Cleared lines & T-Spin
-        let awardedLineClears = AWARDED_LINE_CLEARS[tSpin][nbClearedLines]
-        let patternScore = 100 * this.level * awardedLineClears
-        if (tSpin) messagesSpan.addNewChild("div", {
-            className: "rotate-in-animation",
-            innerHTML: tSpin
-        })
-        if (nbClearedLines) messagesSpan.addNewChild("div", {
-            className: "zoom-in-animation",
-            innerHTML: CLEARED_LINES_NAMES[nbClearedLines]
-        })
-        if (patternScore) {
-            messagesSpan.addNewChild("div", {
-                className: "zoom-in-animation",
-                style: "animation-delay: .2s",
-                innerHTML: patternScore
-            })
-            this.score += patternScore
-        }
-
-        // Combo
-        if (nbClearedLines) {
-            this.combo++
-            if (this.combo >= 1) {
-                let comboScore = (nbClearedLines == 1 ? 20 : 50) * this.combo * this.level
-                if (this.combo == 1) {
-                    messagesSpan.addNewChild("div", {
-                        className: "zoom-in-animation",
-                        style: "animation-delay: .4s",
-                        innerHTML: `COMBO<br/>${comboScore}`
-                    })
-                } else {
-                    messagesSpan.addNewChild("div", {
-                        className: "zoom-in-animation",
-                        style: "animation-delay: .4s",
-                        innerHTML: `COMBO x${this.combo}<br/>${comboScore}`
-                    })
-                }
-                this.score += comboScore
-            }
-        } else {
-            this.combo = -1
-        }
-
-        // Back to back sequence
-        if ((nbClearedLines == 4) || (tSpin && nbClearedLines)) {
-            this.b2b++
-            if (this.b2b >= 1) {
-                let b2bScore = patternScore / 2
-                if (this.b2b == 1) {
-                    messagesSpan.addNewChild("div", {
-                        className: "zoom-in-animation",
-                        style: "animation-delay: .4s",
-                        innerHTML: `BOUT À BOUT<br/>${b2bScore}`
-                    })
-                } else {
-                    messagesSpan.addNewChild("div", {
-                        className: "zoom-in-animation",
-                        style: "animation-delay: .4s",
-                        innerHTML: `BOUT À BOUT x${this.b2b}<br/>${b2bScore}`
-                    })
-                }
-                this.score += b2bScore
-            }
-        } else if (nbClearedLines && !tSpin) {
-            if (this.b2b >= 1) {
-                messagesSpan.addNewChild("div", {
-                    className: "zoom-in-animation",
-                    style: "animation-delay: .4s",
-                    innerHTML: `FIN DU BOUT À BOUT`
-                })
-            }
-            this.b2b = -1
-        }
-
-        this.goal -= awardedLineClears
-        if (this.goal <= 0) this.level++
-    }
-}
-
-
-
-let jsKeyRenamer = new Proxy({
-    ["←"]           : "ArrowLeft",
-    ["→"]           : "ArrowRight",
-    ["↑"]           : "ArrowUp",
-    ["↓"]           : "ArrowDown",
-    ["Espace"]      : " ",
-    ["Échap."]      : "Escape",
-    ["Ret. arrière"]: "Backspace",
-    ["Entrée"]      : "Enter",
-}, {
-    get(obj, keyName) {
-        return keyName in obj? obj[keyName] : keyName
-    }
-})
-let friendyKeyRenamer = new Proxy({
-    ["ArrowLeft"]   : "←",
-    ["ArrowRight"]  : "→",
-    ["ArrowUp"]     : "↑",
-    ["ArrowDown"]   : "↓",
-    [" "]           : "Espace",
-    ["Escape"]      : "Échap.",
-    ["Backspace"]   : "Ret. arrière",
-    ["Enter"]       : "Entrée",
-}, {
-    get(obj, keyName) {
-        return keyName in obj? obj[keyName] : keyName
-    }
-})
-
-class Settings {
-    constructor() {
-        this.startLevel = 1
-
-        let keyMaps = {
-			key: {},
-			action: {}
-		}
-
-        this.key = new Proxy(keyMaps, {
-			set(km, action, key) {
-				km.action[key] = action
-                return km.key[action] = jsKeyRenamer[key]
-			},
-            has(km, action) {
-                return action in km.key
-            },
-			get(km, action) {
-				return friendyKeyRenamer[km.key[action]]
-			}
-		})
-		this.action = new Proxy(keyMaps, {
-			set(km, key, action) {
-				km.key[action] = key
-                return km.action[key] = action
-			},
-            has(km, key) {
-                return key in km.action
-            },
-			get(km, key) {
-				return km.action[key]
-			}
-		})
-
-        this.key.moveLeft  = "ArrowLeft"
-        this.key.moveRight = "ArrowRight"
-        this.key.rotateCCW = "w"
-        this.key.rotateCW  = "ArrowUp"
-        this.key.softDrop  = "ArrowDown"
-        this.key.hardDrop  = " "
-        this.key.hold      = "c"
-        this.key.pause     = "Escape"
-
-        this.arrDelay = 50
-        this.dasDelay = 300
-        
-        this.musicVolume = 50
-        this.sfxVolume   = 50
-    }
-}
 
 
 class TetraGUI extends GUI {
@@ -1288,5 +986,5 @@ window.onbeforeunload = function (event) {
 
 
 if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('service-worker.js');
+    navigator.serviceWorker.register('jsm/service-worker.js');
 }
