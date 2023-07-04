@@ -532,7 +532,7 @@ function changeKey() {
 
 
 class Settings {
-    constructor(gui) {
+    constructor() {
         this.startLevel = 1
 
         this.moveLeftKeymap  = new KeyMapper(playerActions.moveLeft, "←")
@@ -549,54 +549,6 @@ class Settings {
         
         this.musicVolume = 50
         this.sfxVolume   = 50
-
-        this.gui = gui.addFolder("Options").open()
-
-        this.gui.add(this, "startLevel").name("Niveau initial").min(1).max(15).step(1)
-
-        this.gui.keyFolder = this.gui.addFolder("Commandes").open()
-        let moveLeftKeyController = this.gui.keyFolder.add(this.moveLeftKeymap, "key").name('Gauche')
-        moveLeftKeyController.domElement.onclick = changeKey.bind(moveLeftKeyController)
-        let moveRightKeyController = this.gui.keyFolder.add(this.moveRightKeymap, "key").name('Droite')
-        moveRightKeyController.domElement.onclick = changeKey.bind(moveRightKeyController)
-        let rotateCWKeyController = this.gui.keyFolder.add(this.rotateCWKeymap, "key").name('Rotation horaire')
-        rotateCWKeyController.domElement.onclick = changeKey.bind(rotateCWKeyController)
-        let rotateCCWKeyController = this.gui.keyFolder.add(this.rotateCCWKeymap, "key").name('anti-horaire')
-        rotateCCWKeyController.domElement.onclick = changeKey.bind(rotateCCWKeyController)
-        let softDropKeyController = this.gui.keyFolder.add(this.softDropKeymap, "key").name('Chute lente')
-        softDropKeyController.domElement.onclick = changeKey.bind(softDropKeyController)
-        let hardDropKeyController = this.gui.keyFolder.add(this.hardDropKeymap, "key").name('Chute rapide')
-        hardDropKeyController.domElement.onclick = changeKey.bind(hardDropKeyController)
-        let holdKeyController = this.gui.keyFolder.add(this.holdKeymap, "key").name('Garder')
-        holdKeyController.domElement.onclick = changeKey.bind(holdKeyController)
-        let pauseKeyController = this.gui.keyFolder.add(this.pauseKeymap, "key").name('Pause')
-        pauseKeyController.domElement.onclick = changeKey.bind(pauseKeyController)
-
-        this.gui.delayFolder = this.gui.addFolder("Répétition automatique").open()
-        this.gui.delayFolder.add(this,"arrDelay").name("ARR (ms)").min(2).max(200).step(1);
-        this.gui.delayFolder.add(this,"dasDelay").name("DAS (ms)").min(100).max(500).step(5);
-
-        this.gui.volumeFolder = this.gui.addFolder("Volume").open()
-        this.gui.volumeFolder.add(this,"musicVolume").name("Musique").min(0).max(100).step(1).onChange((volume) => {
-            music.setVolume(volume/100)
-        })
-        this.gui.volumeFolder.add(this,"sfxVolume").name("Effets").min(0).max(100).step(1).onChange((volume) => {
-            lineClearSound.setVolume(volume/100)
-            tetrisSound.setVolume(volume/100)
-            hardDropSound.setVolume(volume/100)
-        })
-
-        this.load()
-    }
-
-    load() {
-        if (localStorage["teTraSettings"]) {
-            this.gui.load(JSON.parse(localStorage["teTraSettings"]))
-        }
-    }
-
-    save() {
-        localStorage["teTraSettings"] = JSON.stringify(this.gui.save())
     }
 }
 
@@ -613,18 +565,6 @@ class Stats {
         this.elapsedTime = 0
 
         this.init()
-
-        this.gui = parentGui.addFolder("Stats").hide()
-        this.gui.add(this, "time").name("Temps").disable().listen()
-        this.gui.add(this, "score").name("Score").disable().listen()
-        this.gui.add(this, "highScore").name("Meilleur score").disable().listen()
-        this.gui.add(this, "level").name("Niveau").disable().listen()
-        this.gui.add(this, "totalClearedLines").name("Lignes").disable().listen()
-        this.gui.add(this, "goal").name("Objectif").disable().listen()
-        this.gui.add(this, "nbTetra").name("teTras").disable().listen()
-        this.gui.add(this, "nbTSpin").name("Pirouettes").disable().listen()
-        this.gui.add(this, "maxCombo").name("Combos max").disable().listen()
-        this.gui.add(this, "maxB2B").name("BàB max").disable().listen()
     }
 
     init() {
@@ -774,6 +714,97 @@ class Stats {
 }
 
 
+class TetraGUI extends GUI {
+    constructor(game, settings, stats, debug=false) {
+        super({title: "teTra"})
+
+        this.startButton = this.add(game, "start").name("Jouer").hide()
+
+        this.settings = this.addFolder("Options").open()
+
+        this.settings.add(settings, "startLevel").name("Niveau initial").min(1).max(15).step(1)
+
+        this.settings.key = this.settings.addFolder("Commandes").open()
+        let moveLeftKeyController = this.settings.key.add(settings.moveLeftKeymap, "key").name('Gauche')
+        moveLeftKeyController.domElement.onclick = changeKey.bind(moveLeftKeyController)
+        let moveRightKeyController = this.settings.key.add(settings.moveRightKeymap, "key").name('Droite')
+        moveRightKeyController.domElement.onclick = changeKey.bind(moveRightKeyController)
+        let rotateCWKeyController = this.settings.key.add(settings.rotateCWKeymap, "key").name('Rotation horaire')
+        rotateCWKeyController.domElement.onclick = changeKey.bind(rotateCWKeyController)
+        let rotateCCWKeyController = this.settings.key.add(settings.rotateCCWKeymap, "key").name('anti-horaire')
+        rotateCCWKeyController.domElement.onclick = changeKey.bind(rotateCCWKeyController)
+        let softDropKeyController = this.settings.key.add(settings.softDropKeymap, "key").name('Chute lente')
+        softDropKeyController.domElement.onclick = changeKey.bind(softDropKeyController)
+        let hardDropKeyController = this.settings.key.add(settings.hardDropKeymap, "key").name('Chute rapide')
+        hardDropKeyController.domElement.onclick = changeKey.bind(hardDropKeyController)
+        let holdKeyController = this.settings.key.add(settings.holdKeymap, "key").name('Garder')
+        holdKeyController.domElement.onclick = changeKey.bind(holdKeyController)
+        let pauseKeyController = this.settings.key.add(settings.pauseKeymap, "key").name('Pause')
+        pauseKeyController.domElement.onclick = changeKey.bind(pauseKeyController)
+
+        this.settings.delay = this.settings.addFolder("Répétition automatique").open()
+        this.settings.delay.add(settings,"arrDelay").name("ARR (ms)").min(2).max(200).step(1);
+        this.settings.delay.add(settings,"dasDelay").name("DAS (ms)").min(100).max(500).step(5);
+
+        this.settings.volume = this.settings.addFolder("Volume").open()
+        this.settings.volume.add(settings,"musicVolume").name("Musique").min(0).max(100).step(1).onChange((volume) => {
+            music.setVolume(volume/100)
+        })
+        this.settings.volume.add(settings,"sfxVolume").name("Effets").min(0).max(100).step(1).onChange((volume) => {
+            lineClearSound.setVolume(volume/100)
+            tetrisSound.setVolume(volume/100)
+            hardDropSound.setVolume(volume/100)
+        })
+
+        this.stats = this.addFolder("Stats").hide()
+        this.stats.add(stats, "time").name("Temps").disable().listen()
+        this.stats.add(stats, "score").name("Score").disable().listen()
+        this.stats.add(stats, "highScore").name("Meilleur score").disable().listen()
+        this.stats.add(stats, "level").name("Niveau").disable().listen()
+        this.stats.add(stats, "totalClearedLines").name("Lignes").disable().listen()
+        this.stats.add(stats, "goal").name("Objectif").disable().listen()
+        this.stats.add(stats, "nbTetra").name("teTras").disable().listen()
+        this.stats.add(stats, "nbTSpin").name("Pirouettes").disable().listen()
+        this.stats.add(stats, "maxCombo").name("Combos max").disable().listen()
+        this.stats.add(stats, "maxB2B").name("BàB max").disable().listen()
+
+        if (debug) {
+            this.debug = this.addFolder("debug")
+            let cameraPositionFolder = this.debug.addFolder("camera.position")
+            cameraPositionFolder.add(camera.position, "x")
+            cameraPositionFolder.add(camera.position, "y")
+            cameraPositionFolder.add(camera.position, "z")
+        
+            let lightFolder = this.debug.addFolder("lights intensity")
+            lightFolder.add(ambientLight, "intensity").name("ambient").min(0).max(20)
+            lightFolder.add(directionalLight, "intensity").name("directional").min(0).max(20)
+        
+            let materialsFolder = this.debug.addFolder("materials opacity")
+            materialsFolder.add(darkCylinderMaterial, "opacity").name("dark").min(0).max(1)
+            materialsFolder.add(colorFullCylinderMaterial, "opacity").name("colorFull").min(0).max(1)
+            materialsFolder.add(I.prototype.material, "reflectivity").min(0).max(2).onChange(() => {
+                J.prototype.material.reflectivity = I.prototype.material.reflectivity
+                L.prototype.material.reflectivity = I.prototype.material.reflectivity
+                O.prototype.material.reflectivity = I.prototype.material.reflectivity
+                S.prototype.material.reflectivity = I.prototype.material.reflectivity
+                T.prototype.material.reflectivity = I.prototype.material.reflectivity
+                Z.prototype.material.reflectivity = I.prototype.material.reflectivity
+            })
+        }
+    }
+
+    load() {
+        if (localStorage["teTraSettings"]) {
+            this.settings.load(JSON.parse(localStorage["teTraSettings"]))
+        }
+    }
+
+    save() {
+        localStorage["teTraSettings"] = JSON.stringify(this.settings.save())
+    }
+}
+
+
 /* Scene */
 
 const loadingManager = new THREE.LoadingManager()
@@ -786,7 +817,7 @@ loadingManager.onProgress = function (url, itemsLoaded, itemsTotal) {
 loadingManager.onLoad = function () {
     loaddingCircle.remove()
     renderer.setAnimationLoop(animate)
-    startButton.show()
+    gui.startButton.show()
 }
 loadingManager.onError = function (url) {
     loadingPercent.innerText = "Erreur"
@@ -831,23 +862,23 @@ if (debug) document.body.appendChild(fps.dom);
 const GLOBAL_ROTATION = 0.028
 
 const darkTextureRotation = 0.006
-const darkMoveForward = -0.017
+const darkMoveForward = -0.007
 
 const colorFullTextureRotation = 0.006
-const colorFullMoveForward = -0.01
+const colorFullMoveForward = -0.02
 
 const commonCylinderGeometry = new THREE.CylinderGeometry(25, 25, 500, 12, 1, true)
 
-const darkCylinderTexture = new THREE.TextureLoader(loadingManager).load("images/plasma2.jpg", (texture) => {
+const darkCylinderTexture = new THREE.TextureLoader(loadingManager).load("images/plasma.jpg", (texture) => {
     texture.wrapS = THREE.RepeatWrapping
     texture.wrapT = THREE.MirroredRepeatWrapping
-    texture.repeat.set(2, 1)
+    texture.repeat.set(1, 1)
 })
 const darkCylinderMaterial = new THREE.MeshLambertMaterial({
     side: THREE.BackSide,
     map: darkCylinderTexture,
     blending: THREE.AdditiveBlending,
-    opacity: 1
+    opacity: 0.15
 })
 const darkCylinder = new THREE.Mesh(
     commonCylinderGeometry,
@@ -856,16 +887,16 @@ const darkCylinder = new THREE.Mesh(
 darkCylinder.position.set(5, 10, -10)
 scene.add(darkCylinder)
 
-const colorFullCylinderTexture = new THREE.TextureLoader(loadingManager).load("images/plasma.jpg", (texture) => {
+const colorFullCylinderTexture = new THREE.TextureLoader(loadingManager).load("images/plasma2.jpg", (texture) => {
     texture.wrapS = THREE.RepeatWrapping
     texture.wrapT = THREE.MirroredRepeatWrapping
-    texture.repeat.set(1, 1)
+    texture.repeat.set(2, 1)
 })
 const colorFullCylinderMaterial = new THREE.MeshBasicMaterial({
     side: THREE.BackSide,
     map: colorFullCylinderTexture,
     blending: THREE.AdditiveBlending,
-    opacity: 0.1
+    opacity: 0.5
 })
 const colorFullCylinder = new THREE.Mesh(
     commonCylinderGeometry,
@@ -874,17 +905,17 @@ const colorFullCylinder = new THREE.Mesh(
 colorFullCylinder.position.set(5, 10, -10)
 scene.add(colorFullCylinder)
 
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.2)
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.3)
 scene.add(ambientLight)
 
-const directionalLight = new THREE.DirectionalLight(0xffffff, 6)
+const directionalLight = new THREE.DirectionalLight(0xffffff, 15)
 directionalLight.position.set(5, -100, -16)
 scene.add(directionalLight)
 
 const edgeMaterial = new THREE.MeshBasicMaterial({
     color: 0x88abe0,
     transparent: true,
-    opacity: 0.3,
+    opacity: 0.4,
     reflectivity: 0.9,
     refractionRatio: 0.5,
     envMap: minoRenderTarget.texture
@@ -975,10 +1006,10 @@ let game = {
     playing: false,
 
     start: function() {
-        startButton.hide()
+        gui.startButton.hide()
         stats.init()
-        stats.gui.show()
-        settings.gui.close()
+        gui.stats.show()
+        gui.settings.close()
         
         holdQueue.remove(holdQueue.piece)
         holdQueue.piece = null
@@ -1091,8 +1122,8 @@ let game = {
         localStorage["teTraHighScore"] = stats.highScore
         messagesSpan.addNewChild("div", { className: "show-level-animation", innerHTML: `<h1>GAME<br/>OVER</h1>` })
 
-        startButton.name("Rejouer")
-        startButton.show()
+        gui.startButton.name("Rejouer")
+        gui.startButton.show()
     },
 }
 
@@ -1169,34 +1200,12 @@ audioLoader.load('audio/hard-drop.wav', function( buffer ) {
 })
 
 let scheduler = new Scheduler()
-var gui = new GUI().title("teTra")
-let startButton = gui.add(game, "start").name("Jouer").hide()
 let stats = new Stats(gui)
 let settings  = new Settings(gui)
 
-if (debug) {
-    let debugFolder = gui.addFolder("debug")
-    let cameraPositionFolder = debugFolder.addFolder("camera.position")
-    cameraPositionFolder.add(camera.position, "x")
-    cameraPositionFolder.add(camera.position, "y")
-    cameraPositionFolder.add(camera.position, "z")
+var gui = new TetraGUI(game, settings, stats, debug)
 
-    let lightFolder = debugFolder.addFolder("lights intensity")
-    lightFolder.add(ambientLight, "intensity").name("ambient").min(-15).max(15)
-    lightFolder.add(directionalLight, "intensity").name("directional").min(-15).max(15)
-
-    let materialsFolder = debugFolder.addFolder("materials opacity")
-    materialsFolder.add(darkCylinderMaterial, "opacity").name("dark").min(0).max(1)
-    materialsFolder.add(colorFullCylinderMaterial, "opacity").name("colorFull").min(0).max(1)
-    materialsFolder.add(I.prototype.material, "reflectivity").min(0).max(2).onChange(() => {
-        J.prototype.material.reflectivity = I.prototype.material.reflectivity
-        L.prototype.material.reflectivity = I.prototype.material.reflectivity
-        O.prototype.material.reflectivity = I.prototype.material.reflectivity
-        S.prototype.material.reflectivity = I.prototype.material.reflectivity
-        T.prototype.material.reflectivity = I.prototype.material.reflectivity
-        Z.prototype.material.reflectivity = I.prototype.material.reflectivity
-    })
-}
+gui.load(gui.settings)
 
 // Handle player inputs
 const REPEATABLE_ACTIONS = [
@@ -1258,7 +1267,7 @@ function onkeyup(event) {
 }
 
 window.onbeforeunload = function (event) {
-    settings.save()
+    gui.save()
     if (game.playing) return false
 }
 
