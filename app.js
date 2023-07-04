@@ -45,10 +45,10 @@ const FACING = {
 }
 
 const TRANSLATION = {
-    NONE: P(0, 0),
-    LEFT: P(-1, 0),
-    RIGHT: P(1, 0),
-    DOWN: P(0, -1),
+    NONE : P( 0,  0),
+    LEFT : P(-1,  0),
+    RIGHT: P( 1,  0),
+    DOWN : P( 0, -1),
 }
 
 const ROTATION = {
@@ -68,29 +68,6 @@ const AWARDED_LINE_CLEARS = {
     [T_SPIN.MINI]: [1, 2],
     [T_SPIN.T_SPIN]: [4, 8, 12, 16]
 }
-
-const KEY_NAMES = new Proxy({
-    ["ArrowLeft"]   : "←",
-    ["←"]           : "ArrowLeft",
-    ["ArrowRight"]  : "→",
-    ["→"]           : "ArrowRight",
-    ["ArrowUp"]     : "↑",
-    ["↑"]           : "ArrowUp",
-    ["ArrowDown"]   : "↓",
-    ["↓"]           : "ArrowDown",
-    [" "]           : "Espace",
-    ["Espace"]      : " ",
-    ["Escape"]      : "Échap.",
-    ["Échap."]      : "Escape",
-    ["Backspace"]   : "Ret. arrière",
-    ["Ret. arrière"]: "Backspace",
-    ["Enter"]       : "Entrée",
-    ["Entrée"]      : "Enter",
-}, {
-    get(obj, keyName) {
-        return keyName in obj? obj[keyName] : keyName
-    }
-})
 
 const CLEARED_LINES_NAMES = [
     "",
@@ -260,7 +237,7 @@ class MinoMaterial extends THREE.MeshBasicMaterial {
             side: THREE.DoubleSide,
             color: color,
             envMap: minoRenderTarget.texture,
-            reflectivity: 0.97,
+            reflectivity: 0.9,
             //roughness: 0,
             //metalness: 0.85,
 
@@ -500,23 +477,46 @@ Ghost.prototype.minoesPosition = [
 ]
 
 
+const KEY_NAMES = new Proxy({
+    ["ArrowLeft"]   : "←",
+    ["←"]           : "ArrowLeft",
+    ["ArrowRight"]  : "→",
+    ["→"]           : "ArrowRight",
+    ["ArrowUp"]     : "↑",
+    ["↑"]           : "ArrowUp",
+    ["ArrowDown"]   : "↓",
+    ["↓"]           : "ArrowDown",
+    [" "]           : "Espace",
+    ["Espace"]      : " ",
+    ["Escape"]      : "Échap.",
+    ["Échap."]      : "Escape",
+    ["Backspace"]   : "Ret. arrière",
+    ["Ret. arrière"]: "Backspace",
+    ["Enter"]       : "Entrée",
+    ["Entrée"]      : "Enter",
+}, {
+    get(obj, keyName) {
+        return keyName in obj? obj[keyName] : keyName
+    }
+})
+
+
 class KeyMapper {
     static actions = {}
 
     constructor(action, key) {
-        this.action = action
-        this.key    = key
+        this.action  = action
+        this.key = key
     }
 
     set key(key) {
-        key = KEY_NAMES[key]
         if (this.constructor.actions[this.prevKey] == this.action)
             delete this.constructor.actions[this.prevKey]
         this.prevKey = key
-        this.constructor.actions[key] = this.action
+        this.constructor.actions[KEY_NAMES[key]] = this.action
     }
     get key() {
-        return KEY_NAMES[this.prevKey]
+        return this.prevKey
     }
 }
 
@@ -554,7 +554,7 @@ class Settings {
 
 
 class Stats {
-    constructor(parentGui) {
+    constructor() {
         this.clock = new THREE.Clock(false)
         this.clock.timeFormat = new Intl.DateTimeFormat("fr-FR", {
             hour: "numeric",
@@ -720,6 +720,18 @@ class TetraGUI extends GUI {
 
         this.startButton = this.add(game, "start").name("Jouer").hide()
 
+        this.stats = this.addFolder("Stats").hide()
+        this.stats.add(stats, "time").name("Temps").disable().listen()
+        this.stats.add(stats, "score").name("Score").disable().listen()
+        this.stats.add(stats, "highScore").name("Meilleur score").disable().listen()
+        this.stats.add(stats, "level").name("Niveau").disable().listen()
+        this.stats.add(stats, "totalClearedLines").name("Lignes").disable().listen()
+        this.stats.add(stats, "goal").name("Objectif").disable().listen()
+        this.stats.add(stats, "nbTetra").name("teTras").disable().listen()
+        this.stats.add(stats, "nbTSpin").name("Pirouettes").disable().listen()
+        this.stats.add(stats, "maxCombo").name("Combos max").disable().listen()
+        this.stats.add(stats, "maxB2B").name("BàB max").disable().listen()
+
         this.settings = this.addFolder("Options").open()
 
         this.settings.add(settings, "startLevel").name("Niveau initial").min(1).max(15).step(1)
@@ -755,18 +767,6 @@ class TetraGUI extends GUI {
             tetrisSound.setVolume(volume/100)
             hardDropSound.setVolume(volume/100)
         })
-
-        this.stats = this.addFolder("Stats").hide()
-        this.stats.add(stats, "time").name("Temps").disable().listen()
-        this.stats.add(stats, "score").name("Score").disable().listen()
-        this.stats.add(stats, "highScore").name("Meilleur score").disable().listen()
-        this.stats.add(stats, "level").name("Niveau").disable().listen()
-        this.stats.add(stats, "totalClearedLines").name("Lignes").disable().listen()
-        this.stats.add(stats, "goal").name("Objectif").disable().listen()
-        this.stats.add(stats, "nbTetra").name("teTras").disable().listen()
-        this.stats.add(stats, "nbTSpin").name("Pirouettes").disable().listen()
-        this.stats.add(stats, "maxCombo").name("Combos max").disable().listen()
-        this.stats.add(stats, "maxB2B").name("BàB max").disable().listen()
 
         if (debug) {
             this.debug = this.addFolder("debug")
@@ -837,7 +837,6 @@ document.body.appendChild(renderer.domElement)
 
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
 camera.position.set(5, 0, 16)
-window.camera = camera
 
 const controls = new OrbitControls(camera, renderer.domElement)
 controls.autoRotate
@@ -878,7 +877,7 @@ const darkCylinderMaterial = new THREE.MeshLambertMaterial({
     side: THREE.BackSide,
     map: darkCylinderTexture,
     blending: THREE.AdditiveBlending,
-    opacity: 0.15
+    opacity: 0.1
 })
 const darkCylinder = new THREE.Mesh(
     commonCylinderGeometry,
@@ -896,7 +895,7 @@ const colorFullCylinderMaterial = new THREE.MeshBasicMaterial({
     side: THREE.BackSide,
     map: colorFullCylinderTexture,
     blending: THREE.AdditiveBlending,
-    opacity: 0.5
+    opacity: 0.6
 })
 const colorFullCylinder = new THREE.Mesh(
     commonCylinderGeometry,
@@ -905,10 +904,10 @@ const colorFullCylinder = new THREE.Mesh(
 colorFullCylinder.position.set(5, 10, -10)
 scene.add(colorFullCylinder)
 
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.3)
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.2)
 scene.add(ambientLight)
 
-const directionalLight = new THREE.DirectionalLight(0xffffff, 15)
+const directionalLight = new THREE.DirectionalLight(0xffffff, 20)
 directionalLight.position.set(5, -100, -16)
 scene.add(directionalLight)
 
@@ -1200,8 +1199,8 @@ audioLoader.load('audio/hard-drop.wav', function( buffer ) {
 })
 
 let scheduler = new Scheduler()
-let stats = new Stats(gui)
-let settings  = new Settings(gui)
+let stats = new Stats()
+let settings  = new Settings()
 
 var gui = new TetraGUI(game, settings, stats, debug)
 
