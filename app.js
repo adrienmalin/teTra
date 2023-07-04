@@ -477,82 +477,6 @@ Ghost.prototype.minoesPosition = [
 ]
 
 
-const KEY_NAMES = new Proxy({
-    ["ArrowLeft"]   : "←",
-    ["←"]           : "ArrowLeft",
-    ["ArrowRight"]  : "→",
-    ["→"]           : "ArrowRight",
-    ["ArrowUp"]     : "↑",
-    ["↑"]           : "ArrowUp",
-    ["ArrowDown"]   : "↓",
-    ["↓"]           : "ArrowDown",
-    [" "]           : "Espace",
-    ["Espace"]      : " ",
-    ["Escape"]      : "Échap.",
-    ["Échap."]      : "Escape",
-    ["Backspace"]   : "Ret. arrière",
-    ["Ret. arrière"]: "Backspace",
-    ["Enter"]       : "Entrée",
-    ["Entrée"]      : "Enter",
-}, {
-    get(obj, keyName) {
-        return keyName in obj? obj[keyName] : keyName
-    }
-})
-
-
-class KeyMapper {
-    static actions = {}
-
-    constructor(action, key) {
-        this.action  = action
-        this.key = key
-    }
-
-    set key(key) {
-        if (this.constructor.actions[this.prevKey] == this.action)
-            delete this.constructor.actions[this.prevKey]
-        this.prevKey = key
-        this.constructor.actions[KEY_NAMES[key]] = this.action
-    }
-    get key() {
-        return this.prevKey
-    }
-}
-
-function changeKey() {
-    let controller = this
-    let input = controller.domElement.getElementsByTagName("input")[0]
-    input.select()
-    input.onkeydown = function (event) {
-        controller.setValue(KEY_NAMES[event.key])
-        input.blur()
-    }
-}
-
-
-class Settings {
-    constructor() {
-        this.startLevel = 1
-
-        this.moveLeftKeymap  = new KeyMapper(playerActions.moveLeft, "←")
-        this.moveRightKeymap = new KeyMapper(playerActions.moveRight, "→")
-        this.rotateCCWKeymap = new KeyMapper(playerActions.rotateCCW, "w")
-        this.rotateCWKeymap  = new KeyMapper(playerActions.rotateCW, "↑")
-        this.softDropKeymap  = new KeyMapper(playerActions.softDrop, "↓")
-        this.hardDropKeymap  = new KeyMapper(playerActions.hardDrop, "Espace")
-        this.holdKeymap      = new KeyMapper(playerActions.hold, "c")
-        this.pauseKeymap     = new KeyMapper(playerActions.pause, "Échap.")
-
-        this.arrDelay = 50
-        this.dasDelay = 300
-        
-        this.musicVolume = 50
-        this.sfxVolume   = 50
-    }
-}
-
-
 class Stats {
     constructor() {
         this.clock = new THREE.Clock(false)
@@ -714,6 +638,88 @@ class Stats {
 }
 
 
+
+let jsKeyRenamer = new Proxy({
+    ["←"]           : "ArrowLeft",
+    ["→"]           : "ArrowRight",
+    ["↑"]           : "ArrowUp",
+    ["↓"]           : "ArrowDown",
+    ["Espace"]      : " ",
+    ["Échap."]      : "Escape",
+    ["Ret. arrière"]: "Backspace",
+    ["Entrée"]      : "Enter",
+}, {
+    get(obj, keyName) {
+        return keyName in obj? obj[keyName] : keyName
+    }
+})
+let friendyKeyRenamer = new Proxy({
+    ["ArrowLeft"]   : "←",
+    ["ArrowRight"]  : "→",
+    ["ArrowUp"]     : "↑",
+    ["ArrowDown"]   : "↓",
+    [" "]           : "Espace",
+    ["Escape"]      : "Échap.",
+    ["Backspace"]   : "Ret. arrière",
+    ["Enter"]       : "Entrée",
+}, {
+    get(obj, keyName) {
+        return keyName in obj? obj[keyName] : keyName
+    }
+})
+
+class Settings {
+    constructor() {
+        this.startLevel = 1
+
+        let keyMaps = {
+			key: {},
+			action: {}
+		}
+
+        this.key = new Proxy(keyMaps, {
+			set(km, action, key) {
+				km.action[key] = action
+                return km.key[action] = jsKeyRenamer[key]
+			},
+            has(km, action) {
+                return action in km.key
+            },
+			get(km, action) {
+				return friendyKeyRenamer[km.key[action]]
+			}
+		})
+		this.action = new Proxy(keyMaps, {
+			set(km, key, action) {
+				km.key[action] = key
+                return km.action[key] = action
+			},
+            has(km, key) {
+                return key in km.action
+            },
+			get(km, key) {
+				return km.action[key]
+			}
+		})
+
+        this.key.moveLeft  = "ArrowLeft"
+        this.key.moveRight = "ArrowRight"
+        this.key.rotateCCW = "w"
+        this.key.rotateCW  = "ArrowUp"
+        this.key.softDrop  = "ArrowDown"
+        this.key.hardDrop  = " "
+        this.key.hold      = "c"
+        this.key.pause     = "Escape"
+
+        this.arrDelay = 50
+        this.dasDelay = 300
+        
+        this.musicVolume = 50
+        this.sfxVolume   = 50
+    }
+}
+
+
 class TetraGUI extends GUI {
     constructor(game, settings, stats, debug=false) {
         super({title: "teTra"})
@@ -737,22 +743,22 @@ class TetraGUI extends GUI {
         this.settings.add(settings, "startLevel").name("Niveau initial").min(1).max(15).step(1)
 
         this.settings.key = this.settings.addFolder("Commandes").open()
-        let moveLeftKeyController = this.settings.key.add(settings.moveLeftKeymap, "key").name('Gauche')
-        moveLeftKeyController.domElement.onclick = changeKey.bind(moveLeftKeyController)
-        let moveRightKeyController = this.settings.key.add(settings.moveRightKeymap, "key").name('Droite')
-        moveRightKeyController.domElement.onclick = changeKey.bind(moveRightKeyController)
-        let rotateCWKeyController = this.settings.key.add(settings.rotateCWKeymap, "key").name('Rotation horaire')
-        rotateCWKeyController.domElement.onclick = changeKey.bind(rotateCWKeyController)
-        let rotateCCWKeyController = this.settings.key.add(settings.rotateCCWKeymap, "key").name('anti-horaire')
-        rotateCCWKeyController.domElement.onclick = changeKey.bind(rotateCCWKeyController)
-        let softDropKeyController = this.settings.key.add(settings.softDropKeymap, "key").name('Chute lente')
-        softDropKeyController.domElement.onclick = changeKey.bind(softDropKeyController)
-        let hardDropKeyController = this.settings.key.add(settings.hardDropKeymap, "key").name('Chute rapide')
-        hardDropKeyController.domElement.onclick = changeKey.bind(hardDropKeyController)
-        let holdKeyController = this.settings.key.add(settings.holdKeymap, "key").name('Garder')
-        holdKeyController.domElement.onclick = changeKey.bind(holdKeyController)
-        let pauseKeyController = this.settings.key.add(settings.pauseKeymap, "key").name('Pause')
-        pauseKeyController.domElement.onclick = changeKey.bind(pauseKeyController)
+        let moveLeftKeyController = this.settings.key.add(settings.key, "moveLeft").name('Gauche')
+        moveLeftKeyController.domElement.onclick = this.changeKey.bind(moveLeftKeyController)
+        let moveRightKeyController = this.settings.key.add(settings.key, "moveRight").name('Droite')
+        moveRightKeyController.domElement.onclick = this.changeKey.bind(moveRightKeyController)
+        let rotateCWKeyController = this.settings.key.add(settings.key, "rotateCW").name('Rotation horaire')
+        rotateCWKeyController.domElement.onclick = this.changeKey.bind(rotateCWKeyController)
+        let rotateCCWKeyController = this.settings.key.add(settings.key, "rotateCCW").name('anti-horaire')
+        rotateCCWKeyController.domElement.onclick = this.changeKey.bind(rotateCCWKeyController)
+        let softDropKeyController = this.settings.key.add(settings.key, "softDrop").name('Chute lente')
+        softDropKeyController.domElement.onclick = this.changeKey.bind(softDropKeyController)
+        let hardDropKeyController = this.settings.key.add(settings.key, "hardDrop").name('Chute rapide')
+        hardDropKeyController.domElement.onclick = this.changeKey.bind(hardDropKeyController)
+        let holdKeyController = this.settings.key.add(settings.key, "hold").name('Garder')
+        holdKeyController.domElement.onclick = this.changeKey.bind(holdKeyController)
+        let pauseKeyController = this.settings.key.add(settings.key, "pause").name('Pause')
+        pauseKeyController.domElement.onclick = this.changeKey.bind(pauseKeyController)
 
         this.settings.delay = this.settings.addFolder("Répétition automatique").open()
         this.settings.delay.add(settings,"arrDelay").name("ARR (ms)").min(2).max(200).step(1);
@@ -801,6 +807,16 @@ class TetraGUI extends GUI {
 
     save() {
         localStorage["teTraSettings"] = JSON.stringify(this.settings.save())
+    }
+
+    changeKey() {
+        let controller = this
+        let input = controller.domElement.getElementsByTagName("input")[0]
+        input.select()
+        input.onkeydown = function (event) {
+            controller.setValue(event.key)
+            input.blur()
+        }
     }
 }
 
@@ -1200,7 +1216,7 @@ audioLoader.load('audio/hard-drop.wav', function( buffer ) {
 
 let scheduler = new Scheduler()
 let stats = new Stats()
-let settings  = new Settings()
+let settings  = new Settings(playerActions)
 
 var gui = new TetraGUI(game, settings, stats, debug)
 
@@ -1217,11 +1233,11 @@ let actionsQueue = []
 
 function onkeydown(event) {
     let key = event.key
-    if (key in KeyMapper.actions) {
+    if (key in settings.action) {
         event.preventDefault()
         if (!pressedKeys.has(key)) {
             pressedKeys.add(key)
-            let action = KeyMapper.actions[key]
+            let action = playerActions[settings.action[key]]
             action()
             if (REPEATABLE_ACTIONS.includes(action)) {
                 actionsQueue.unshift(action)
@@ -1251,10 +1267,10 @@ function autorepeat() {
 
 function onkeyup(event) {
     let key = event.key
-    if (key in KeyMapper.actions) {
+    if (key in settings.action) {
         event.preventDefault()
         pressedKeys.delete(key)
-        let action = KeyMapper.actions[key]
+        let action = playerActions[settings.action[key]]
         if (actionsQueue.includes(action)) {
             actionsQueue.splice(actionsQueue.indexOf(action), 1)
             if (!actionsQueue.length) {
