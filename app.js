@@ -1,11 +1,10 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
-import { GUI } from 'three/addons/libs/lil-gui.module.min.js'
-import * as FPS from 'three/addons/libs/stats.module.js';
 import { T_SPIN } from './jsm/common.js'
 import { Settings } from './jsm/settings.js'
 import { Stats } from './jsm/stats.js'
 import { Scheduler } from './jsm/utils.js'
+import { TetraGUI } from './jsm/gui.js'
 
 let P = (x, y, z = 0) => new THREE.Vector3(x, y, z)
 
@@ -87,16 +86,15 @@ class Matrix extends THREE.Group {
     }
 
     clearLines() {
-        let nbClearedLines = 0
-        for (let y = ROWS - 1; y >= 0; y--) {
-            let row = this.cells[y]
+        let nbClearedLines = this.cells.reduceRight((nbClearedLines, row, y) => {
             if (row.filter(mino => mino).length == COLUMNS) {
-                nbClearedLines++
                 row.forEach(mino => this.unlockedMinoes.add(mino))
                 this.cells.splice(y, 1)
                 this.cells.push(Array(COLUMNS))
+                return ++nbClearedLines
             }
-        }
+            return nbClearedLines
+        }, 0)
         if (nbClearedLines) {
             this.cells.forEach((rows, y) => {
                 rows.forEach((mino, x) => {
@@ -178,12 +176,17 @@ const minoExtrudeSettings = {
 Mino.prototype.geometry = new THREE.ExtrudeGeometry(minoFaceShape, minoExtrudeSettings)
 
 
+const envRenderTarget = new THREE.WebGLCubeRenderTarget(256)
+envRenderTarget.texture.type = THREE.HalfFloatType
+const envCamera = new THREE.CubeCamera(1, 1000, envRenderTarget)
+envCamera.position.set(5, 10)
+
 class MinoMaterial extends THREE.MeshBasicMaterial {
     constructor(color) {
         super({
             side: THREE.DoubleSide,
             color: color,
-            envMap: minoRenderTarget.texture,
+            envMap: envRenderTarget.texture,
             reflectivity: 0.9,
         })
     }
@@ -194,10 +197,10 @@ class GhostMaterial extends THREE.MeshBasicMaterial {
         super({
             side: THREE.DoubleSide,
             color: color,
-            envMap: minoRenderTarget.texture,
+            envMap: envRenderTarget.texture,
             reflectivity: 0.9,
             transparent: true,
-            opacity: 0.25
+            opacity: 0.2
         })
     }
 }
@@ -301,10 +304,7 @@ Tetromino.prototype.srs = [
     { [ROTATION.CW]: [P(0, 0), P(1, 0), P(1, 1), P(0, -2), P(1, -2)], [ROTATION.CCW]: [P(0, 0), P(-1, 0), P(-1, 1), P(0, -2), P(-1, -2)] },
     { [ROTATION.CW]: [P(0, 0), P(-1, 0), P(-1, -1), P(0, 2), P(-1, 2)], [ROTATION.CCW]: [P(0, 0), P(-1, 0), P(-1, -1), P(0, 2), P(-1, 2)] },
 ]
-const minoRenderTarget = new THREE.WebGLCubeRenderTarget(256)
-minoRenderTarget.texture.type = THREE.HalfFloatType
-const minoCamera = new THREE.CubeCamera(1, 1000, minoRenderTarget)
-minoCamera.position.set(5, 10)
+
 Tetromino.prototype.lockedMaterial = new MinoMaterial(0xffffff)
 
 class I extends Tetromino { }
@@ -418,107 +418,6 @@ Ghost.prototype.minoesPosition = [
 ]
 
 
-class TetraGUI extends GUI {
-    constructor(game, settings, stats, debug=false) {
-        super({title: "teTra"})
-
-        this.startButton = this.add(game, "start").name("Jouer").hide()
-
-        this.stats = this.addFolder("Stats").hide()
-        this.stats.add(stats, "time").name("Temps").disable().listen()
-        this.stats.add(stats, "score").name("Score").disable().listen()
-        this.stats.add(stats, "highScore").name("Meilleur score").disable().listen()
-        this.stats.add(stats, "level").name("Niveau").disable().listen()
-        this.stats.add(stats, "totalClearedLines").name("Lignes").disable().listen()
-        this.stats.add(stats, "goal").name("Objectif").disable().listen()
-        this.stats.add(stats, "nbTetra").name("teTras").disable().listen()
-        this.stats.add(stats, "nbTSpin").name("Pirouettes").disable().listen()
-        this.stats.add(stats, "maxCombo").name("Combos max").disable().listen()
-        this.stats.add(stats, "maxB2B").name("BàB max").disable().listen()
-
-        this.settings = this.addFolder("Options").open()
-
-        this.settings.add(settings, "startLevel").name("Niveau initial").min(1).max(15).step(1)
-
-        this.settings.key = this.settings.addFolder("Commandes").open()
-        let moveLeftKeyController = this.settings.key.add(settings.key, "moveLeft").name('Gauche')
-        moveLeftKeyController.domElement.onclick = this.changeKey.bind(moveLeftKeyController)
-        let moveRightKeyController = this.settings.key.add(settings.key, "moveRight").name('Droite')
-        moveRightKeyController.domElement.onclick = this.changeKey.bind(moveRightKeyController)
-        let rotateCWKeyController = this.settings.key.add(settings.key, "rotateCW").name('Rotation horaire')
-        rotateCWKeyController.domElement.onclick = this.changeKey.bind(rotateCWKeyController)
-        let rotateCCWKeyController = this.settings.key.add(settings.key, "rotateCCW").name('anti-horaire')
-        rotateCCWKeyController.domElement.onclick = this.changeKey.bind(rotateCCWKeyController)
-        let softDropKeyController = this.settings.key.add(settings.key, "softDrop").name('Chute lente')
-        softDropKeyController.domElement.onclick = this.changeKey.bind(softDropKeyController)
-        let hardDropKeyController = this.settings.key.add(settings.key, "hardDrop").name('Chute rapide')
-        hardDropKeyController.domElement.onclick = this.changeKey.bind(hardDropKeyController)
-        let holdKeyController = this.settings.key.add(settings.key, "hold").name('Garder')
-        holdKeyController.domElement.onclick = this.changeKey.bind(holdKeyController)
-        let pauseKeyController = this.settings.key.add(settings.key, "pause").name('Pause')
-        pauseKeyController.domElement.onclick = this.changeKey.bind(pauseKeyController)
-
-        this.settings.delay = this.settings.addFolder("Répétition automatique").open()
-        this.settings.delay.add(settings,"arrDelay").name("ARR (ms)").min(2).max(200).step(1);
-        this.settings.delay.add(settings,"dasDelay").name("DAS (ms)").min(100).max(500).step(5);
-
-        this.settings.volume = this.settings.addFolder("Volume").open()
-        this.settings.volume.add(settings,"musicVolume").name("Musique").min(0).max(100).step(1).onChange((volume) => {
-            music.setVolume(volume/100)
-        })
-        this.settings.volume.add(settings,"sfxVolume").name("Effets").min(0).max(100).step(1).onChange((volume) => {
-            lineClearSound.setVolume(volume/100)
-            tetrisSound.setVolume(volume/100)
-            hardDropSound.setVolume(volume/100)
-        })
-
-        if (debug) {
-            this.debug = this.addFolder("debug")
-            let cameraPositionFolder = this.debug.addFolder("camera.position")
-            cameraPositionFolder.add(camera.position, "x")
-            cameraPositionFolder.add(camera.position, "y")
-            cameraPositionFolder.add(camera.position, "z")
-        
-            let lightFolder = this.debug.addFolder("lights intensity")
-            lightFolder.add(ambientLight, "intensity").name("ambient").min(0).max(20)
-            lightFolder.add(directionalLight, "intensity").name("directional").min(0).max(20)
-        
-            let materialsFolder = this.debug.addFolder("materials opacity")
-            materialsFolder.add(darkCylinderMaterial, "opacity").name("dark").min(0).max(1)
-            materialsFolder.add(colorFullCylinderMaterial, "opacity").name("colorFull").min(0).max(1)
-            materialsFolder.add(I.prototype.material, "reflectivity").min(0).max(2).onChange(() => {
-                J.prototype.material.reflectivity = I.prototype.material.reflectivity
-                L.prototype.material.reflectivity = I.prototype.material.reflectivity
-                O.prototype.material.reflectivity = I.prototype.material.reflectivity
-                S.prototype.material.reflectivity = I.prototype.material.reflectivity
-                T.prototype.material.reflectivity = I.prototype.material.reflectivity
-                Z.prototype.material.reflectivity = I.prototype.material.reflectivity
-            })
-        }
-    }
-
-    load() {
-        if (localStorage["teTraSettings"]) {
-            this.settings.load(JSON.parse(localStorage["teTraSettings"]))
-        }
-    }
-
-    save() {
-        localStorage["teTraSettings"] = JSON.stringify(this.settings.save())
-    }
-
-    changeKey() {
-        let controller = this
-        let input = controller.domElement.getElementsByTagName("input")[0]
-        input.select()
-        input.onkeydown = function (event) {
-            controller.setValue(event.key)
-            input.blur()
-        }
-    }
-}
-
-
 /* Scene */
 
 const loadingManager = new THREE.LoadingManager()
@@ -549,10 +448,10 @@ renderer.setClearColor(0x000000, 10)
 renderer.toneMapping = THREE.ACESFilmicToneMapping
 document.body.appendChild(renderer.domElement)
 
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
-camera.position.set(5, 0, 16)
+scene.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
+scene.camera.position.set(5, 0, 16)
 
-const controls = new OrbitControls(camera, renderer.domElement)
+const controls = new OrbitControls(scene.camera, renderer.domElement)
 controls.autoRotate
 controls.enableDamping   = true
 controls.dampingFactor   = 0.04
@@ -568,70 +467,73 @@ controls.update()
 controls.addEventListener("start", () => renderer.domElement.style.cursor = "grabbing")
 controls.addEventListener("end", () => renderer.domElement.style.cursor = "grab")
 
-const debug = window.location.search.includes("debug")
-const fps = new FPS.default();
-if (debug) document.body.appendChild(fps.dom);
 
 const GLOBAL_ROTATION = 0.028
 
 const darkTextureRotation = 0.006
-const darkMoveForward = -0.007
+const darkMoveForward = 0.007
 
 const colorFullTextureRotation = 0.006
-const colorFullMoveForward = -0.02
+const colorFullMoveForward = 0.02
 
 const commonCylinderGeometry = new THREE.CylinderGeometry(25, 25, 500, 12, 1, true)
 
-const darkCylinderTexture = new THREE.TextureLoader(loadingManager).load("images/plasma.jpg", (texture) => {
-    texture.wrapS = THREE.RepeatWrapping
-    texture.wrapT = THREE.MirroredRepeatWrapping
-    texture.repeat.set(1, 1)
-})
-const darkCylinderMaterial = new THREE.MeshLambertMaterial({
-    side: THREE.BackSide,
-    map: darkCylinderTexture,
-    blending: THREE.AdditiveBlending,
-    opacity: 0.1
-})
-const darkCylinder = new THREE.Mesh(
+scene.darkCylinder = new THREE.Mesh(
     commonCylinderGeometry,
-    darkCylinderMaterial
+    new THREE.MeshLambertMaterial({
+        side: THREE.BackSide,
+        map: new THREE.TextureLoader(loadingManager).load("images/plasma.jpg", (texture) => {
+            texture.wrapS = THREE.RepeatWrapping
+            texture.wrapT = THREE.MirroredRepeatWrapping
+            texture.repeat.set(1, 1)
+        }),
+        blending: THREE.AdditiveBlending,
+        opacity: 0.1
+    })
 )
-darkCylinder.position.set(5, 10, -10)
-scene.add(darkCylinder)
+scene.darkCylinder.position.set(5, 10, -10)
+scene.add(scene.darkCylinder)
 
-const colorFullCylinderTexture = new THREE.TextureLoader(loadingManager).load("images/plasma2.jpg", (texture) => {
-    texture.wrapS = THREE.RepeatWrapping
-    texture.wrapT = THREE.MirroredRepeatWrapping
-    texture.repeat.set(2, 1)
-})
-const colorFullCylinderMaterial = new THREE.MeshBasicMaterial({
-    side: THREE.BackSide,
-    map: colorFullCylinderTexture,
-    blending: THREE.AdditiveBlending,
-    opacity: 0.6
-})
-const colorFullCylinder = new THREE.Mesh(
+scene.colorFullCylinder = new THREE.Mesh(
     commonCylinderGeometry,
-    colorFullCylinderMaterial
+    new THREE.MeshBasicMaterial({
+        side: THREE.BackSide,
+        map: new THREE.TextureLoader(loadingManager).load("images/plasma2.jpg", (texture) => {
+            texture.wrapS = THREE.RepeatWrapping
+            texture.wrapT = THREE.MirroredRepeatWrapping
+            texture.repeat.set(2, 1)
+        }),
+        blending: THREE.AdditiveBlending,
+        opacity: 0.6
+    })
 )
-colorFullCylinder.position.set(5, 10, -10)
-scene.add(colorFullCylinder)
+scene.colorFullCylinder.position.set(5, 10, -10)
+scene.add(scene.colorFullCylinder)
 
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.2)
-scene.add(ambientLight)
+scene.ambientLight = new THREE.AmbientLight(0xffffff, 0.2)
+scene.add(scene.ambientLight)
 
-const directionalLight = new THREE.DirectionalLight(0xffffff, 20)
-directionalLight.position.set(5, -100, -16)
-scene.add(directionalLight)
+scene.directionalLight = new THREE.DirectionalLight(0xffffff, 20)
+scene.directionalLight.position.set(5, -100, -16)
+scene.add(scene.directionalLight)
+
+const holdQueue = new THREE.Group()
+holdQueue.position.set(-4, SKYLINE - 2)
+scene.add(holdQueue)
+const matrix = new Matrix()
+scene.add(matrix)
+const nextQueue = new NextQueue()
+nextQueue.position.set(13, SKYLINE - 2)
+scene.add(nextQueue)
+let ghost = new Ghost()
 
 const edgeMaterial = new THREE.MeshBasicMaterial({
     color: 0x88abe0,
+    envMap: envRenderTarget.texture,
     transparent: true,
     opacity: 0.4,
     reflectivity: 0.9,
-    refractionRatio: 0.5,
-    envMap: minoRenderTarget.texture
+    refractionRatio: 0.5
 })
 
 const edgeShape = new THREE.Shape()
@@ -644,34 +546,23 @@ edgeShape.lineTo(COLUMNS + .3, SKYLINE)
 edgeShape.lineTo(COLUMNS + .3, -.3)
 edgeShape.lineTo(-.3, -.3)
 edgeShape.moveTo(-.3, SKYLINE)
-const edgeExtrudeSettings = {
-    depth: 1,
-    bevelEnabled: false,
-}
-const edge = new THREE.Mesh(
-    new THREE.ExtrudeGeometry(edgeShape, edgeExtrudeSettings),
+matrix.edge = new THREE.Mesh(
+    new THREE.ExtrudeGeometry(edgeShape, {
+        depth: 1,
+        bevelEnabled: false,
+    }),
     edgeMaterial
 )
-edge.visible = false
-scene.add(edge)
-
-const holdQueue = new THREE.Group()
-holdQueue.position.set(-4, SKYLINE - 2)
-scene.add(holdQueue)
-const matrix = new Matrix()
-scene.add(matrix)
-const nextQueue = new NextQueue()
-nextQueue.position.set(13, SKYLINE - 2)
-scene.add(nextQueue)
-let ghost = new Ghost()
+matrix.edge.visible = false
+scene.add(matrix.edge)
 
 const positionKF = new THREE.VectorKeyframeTrack('.position', [0, 1, 2], [0, 0, 0, 0, -0.2, 0, 0, 0, 0])
 const clip = new THREE.AnimationClip('HardDrop', 3, [positionKF])
 const animationGroup = new THREE.AnimationObjectGroup()
 animationGroup.add(matrix)
-animationGroup.add(edge)
-const mixer = new THREE.AnimationMixer(animationGroup)
-const hardDroppedMatrix = mixer.clipAction(clip)
+animationGroup.add(matrix.edge)
+matrix.mixer = new THREE.AnimationMixer(animationGroup)
+const hardDroppedMatrix = matrix.mixer.clipAction(clip)
 hardDroppedMatrix.loop = THREE.LoopOnce
 hardDroppedMatrix.setDuration(0.2)
 
@@ -681,29 +572,29 @@ function animate() {
 
     const delta = clock.getDelta()
 
-    darkCylinder.rotation.y      += GLOBAL_ROTATION * delta
-    darkCylinderTexture.offset.y -= darkMoveForward * delta
-    darkCylinderTexture.offset.x -= darkTextureRotation * delta
+    scene.darkCylinder.rotation.y            += GLOBAL_ROTATION * delta
+    scene.darkCylinder.material.map.offset.y += darkMoveForward * delta
+    scene.darkCylinder.material.map.offset.x += darkTextureRotation * delta
 
-    colorFullCylinder.rotation.y      += GLOBAL_ROTATION * delta
-    colorFullCylinderTexture.offset.y -= colorFullMoveForward * delta
-    colorFullCylinderTexture.offset.x -= colorFullTextureRotation * delta
+    scene.colorFullCylinder.rotation.y            += GLOBAL_ROTATION * delta
+    scene.colorFullCylinder.material.map.offset.y += colorFullMoveForward * delta
+    scene.colorFullCylinder.material.map.offset.x += colorFullTextureRotation * delta
 
     controls.update()
 
     matrix.updateUnlockedMinoes(delta)
-    if (mixer) mixer.update(delta)
+    matrix.mixer?.update(delta)
 
-    renderer.render(scene, camera)
-    minoCamera.update(renderer, scene)
+    renderer.render(scene, scene.camera)
+    envCamera.update(renderer, scene)
 
-    if (debug) fps.update();
+    gui.update();
 }
 
 window.addEventListener("resize", () => {
     renderer.setSize(window.innerWidth, window.innerHeight)
-    camera.aspect = window.innerWidth / window.innerHeight
-    camera.updateProjectionMatrix()
+    scene.camera.aspect = window.innerWidth / window.innerHeight
+    scene.camera.updateProjectionMatrix()
 })
 
 
@@ -732,8 +623,8 @@ let game = {
         scene.remove(piece)
         piece = null
         scene.remove(ghost)
-        music.currentTime = 0
-        edge.visible = true
+        scene.music.currentTime = 0
+        matrix.edge.visible = true
 
         this.playing = true
         stats.clock.start()
@@ -753,7 +644,7 @@ let game = {
         pauseSpan.className = ""
         stats.clock.start()
         stats.clock.elapsedTime = stats.elapsedTime
-        music.play()
+        scene.music.play()
 
         if (piece) scheduler.setInterval(game.fall, stats.fallPeriod)
         else this.generate()
@@ -768,7 +659,7 @@ let game = {
         piece.position.set(4, SKYLINE)
         scene.add(piece)
         ghost.copy(piece)
-        //directionalLight.target = piece
+        //scene.directionalLight.target = piece
         scene.add(ghost)
     
         if (piece.canMove(TRANSLATION.NONE)) {
@@ -792,11 +683,11 @@ let game = {
             let nbClearedLines = matrix.clearLines()
             if (settings.sfxVolume) {
                 if (nbClearedLines == 4 || (tSpin && nbClearedLines)) {
-                    tetrisSound.currentTime = 0
-                    tetrisSound.play()
+                    scene.tetrisSound.currentTime = 0
+                    scene.tetrisSound.play()
                 } else if (nbClearedLines || tSpin) {
-                    lineClearSound.currentTime = 0
-                    lineClearSound.play()
+                    scene.lineClearSound.currentTime = 0
+                    scene.lineClearSound.play()
                 }
             }
             stats.lockDown(nbClearedLines, tSpin)
@@ -816,7 +707,7 @@ let game = {
         scheduler.clearTimeout(repeat)
         scheduler.clearInterval(autorepeat)
     
-        music.pause()
+        scene.music.pause()
         document.onkeydown = null
         
         pauseSpan.onfocus = game.resume
@@ -830,7 +721,7 @@ let game = {
         renderer.domElement.onblur = null
         renderer.domElement.onfocus = null
         game.playing = false
-        music.pause()
+        scene.music.pause()
         stats.clock.stop()
         localStorage["teTraHighScore"] = stats.highScore
         messagesSpan.addNewChild("div", { className: "show-level-animation", innerHTML: `<h1>GAME<br/>OVER</h1>` })
@@ -855,10 +746,10 @@ let playerActions = {
 
     hardDrop: function () {
         scheduler.clearTimeout(game.lockDown)
-        hardDropSound.play()
+        scene.hardDropSound.play()
         if (settings.sfxVolume) {
-            hardDropSound.currentTime = 0
-            hardDropSound.play()
+            scene.hardDropSound.currentTime = 0
+            scene.hardDropSound.play()
         }
         while (piece.move(TRANSLATION.DOWN)) stats.score += 2
         game.lockDown()
@@ -887,38 +778,38 @@ let playerActions = {
 
 // Sounds
 const listener = new THREE.AudioListener()
-camera.add( listener )
+scene.camera.add( listener )
 const audioLoader = new THREE.AudioLoader(loadingManager)
-const music = new THREE.Audio(listener)
+scene.music = new THREE.Audio(listener)
 audioLoader.load('audio/Tetris_CheDDer_OC_ReMix.mp3', function( buffer ) {
-	music.setBuffer(buffer)
-	music.setLoop(true)
-    music.setVolume(settings.musicVolume/100)
-	if (game.playing) music.play()
+	scene.music.setBuffer(buffer)
+	scene.music.setLoop(true)
+    scene.music.setVolume(settings.musicVolume/100)
+	if (game.playing) scene.music.play()
 })
-const lineClearSound = new THREE.Audio(listener)
+scene.lineClearSound = new THREE.Audio(listener)
 audioLoader.load('audio/line-clear.ogg', function( buffer ) {
-    lineClearSound.setBuffer(buffer)
-    lineClearSound.setVolume(settings.sfxVolume/100)
+    scene.lineClearSound.setBuffer(buffer)
+    scene.lineClearSound.setVolume(settings.sfxVolume/100)
 })
-const tetrisSound = new THREE.Audio(listener)
+scene.tetrisSound = new THREE.Audio(listener)
 audioLoader.load('audio/tetris.ogg', function( buffer ) {
-    tetrisSound.setBuffer(buffer)
-    tetrisSound.setVolume(settings.sfxVolume/100)
+    scene.tetrisSound.setBuffer(buffer)
+    scene.tetrisSound.setVolume(settings.sfxVolume/100)
 })
-const hardDropSound = new THREE.Audio(listener)
+scene.hardDropSound = new THREE.Audio(listener)
 audioLoader.load('audio/hard-drop.wav', function( buffer ) {
-    hardDropSound.setBuffer(buffer)
-    hardDropSound.setVolume(settings.sfxVolume/100)
+    scene.hardDropSound.setBuffer(buffer)
+    scene.hardDropSound.setVolume(settings.sfxVolume/100)
 })
 
 let scheduler = new Scheduler()
 let stats = new Stats()
 let settings  = new Settings(playerActions)
 
-var gui = new TetraGUI(game, settings, stats, debug)
+var gui = new TetraGUI(game, settings, stats, scene)
 
-gui.load(gui.settings)
+gui.load()
 
 // Handle player inputs
 const REPEATABLE_ACTIONS = [
