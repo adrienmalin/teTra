@@ -72,11 +72,11 @@ class Matrix extends THREE.Group {
             !this.cells[p.y][p.x]
     }
 
-    lock(piece) {
-        let minoes = Array.from(piece.children)
+    lock() {
+        this.piece.locked = false
+        let minoes = Array.from(this.piece.children)
         minoes.forEach(mino => {
-            mino.position.add(piece.position)
-            mino.material = piece.material
+            mino.position.add(this.piece.position)
             this.add(mino)
             if (this.cellIsEmpty(mino.position)) {
                 this.cells[mino.position.y][mino.position.x] = mino
@@ -260,14 +260,14 @@ class Tetromino extends THREE.Group {
             this.position.add(translation)
             if (!testFacing) {
                 this.rotatedLast = false
-                ghost.copy(this)
+                this.moveGhost()
             }
             if (this.canMove(TRANSLATION.DOWN)) {
                 this.locked = false
-                scene.add(ghost)
+                scene.add(this.ghost)
             } else {
                 this.locked = true
-                scene.remove(ghost)
+                scene.remove(this.ghost)
                 scheduler.setTimeout(game.lockDown, stats.lockDelay)
             }
             return true
@@ -286,10 +286,21 @@ class Tetromino extends THREE.Group {
                 this.rotatedLast = true
                 if (rotationPoint == 4) this.rotationPoint4Used = true
                 //favicon.href = this.favicon_href
-                ghost.copy(this)
+                this.moveGhost()
                 return true
             }
         })
+    }
+
+    moveGhost() {
+        this.ghost.position.copy(this.position)
+        this.ghost.facing = this.facing
+        this.ghost.minoesPosition = this.minoesPosition
+        this.children.forEach((mino, i) => {
+            this.ghost.children[i].position.copy(mino.position)
+            this.ghost.children[i].material = this.ghostMaterial
+        })
+        while (this.ghost.canMove(TRANSLATION.DOWN)) this.ghost.position.y--
     }
 
     get tSpin() {
@@ -297,15 +308,19 @@ class Tetromino extends THREE.Group {
     }
 }
 // Super Rotation System
-// freedom of movement = srs[piece.facing][rotation]
+// freedom of movement = srs[matrix.piece.facing][rotation]
 Tetromino.prototype.srs = [
     { [ROTATION.CW]: [P(0, 0), P(-1, 0), P(-1, 1), P(0, -2), P(-1, -2)], [ROTATION.CCW]: [P(0, 0), P(1, 0), P(1, 1), P(0, -2), P(1, -2)] },
     { [ROTATION.CW]: [P(0, 0), P(1, 0), P(1, -1), P(0, 2), P(1, 2)], [ROTATION.CCW]: [P(0, 0), P(1, 0), P(1, -1), P(0, 2), P(1, 2)] },
     { [ROTATION.CW]: [P(0, 0), P(1, 0), P(1, 1), P(0, -2), P(1, -2)], [ROTATION.CCW]: [P(0, 0), P(-1, 0), P(-1, 1), P(0, -2), P(-1, -2)] },
     { [ROTATION.CW]: [P(0, 0), P(-1, 0), P(-1, -1), P(0, 2), P(-1, 2)], [ROTATION.CCW]: [P(0, 0), P(-1, 0), P(-1, -1), P(0, 2), P(-1, 2)] },
 ]
-
 Tetromino.prototype.lockedMaterial = new MinoMaterial(0xffffff)
+
+class Ghost extends Tetromino {}
+Ghost.prototype.minoesPosition = [
+    [P(0, 0, 0), P(0, 0, 0), P(0, 0, 0), P(0, 0, 0)],
+]
 
 class I extends Tetromino { }
 I.prototype.minoesPosition = [
@@ -366,7 +381,7 @@ S.prototype.ghostMaterial = new GhostMaterial(COLORS.S)
 class T extends Tetromino {
     get tSpin() {
         if (this.rotatedLast) {
-            let [a, b, c, d] = this.tSlots[piece.facing]
+            let [a, b, c, d] = this.tSlots[matrix.piece.facing]
                 .map(p => !matrix.cellIsEmpty(p.clone().add(this.position)))
             if (a && b && (c || d))
                 return T_SPIN.T_SPIN
@@ -400,22 +415,6 @@ Z.prototype.minoesPosition = [
 ]
 Z.prototype.material = new MinoMaterial(COLORS.Z)
 Z.prototype.ghostMaterial = new GhostMaterial(COLORS.Z)
-
-class Ghost extends Tetromino {
-    copy(piece) {
-        this.position.copy(piece.position)
-        this.facing = piece.facing
-        this.minoesPosition = piece.minoesPosition
-        piece.children.forEach((mino, i) => {
-            this.children[i].position.copy(mino.position)
-            this.children[i].material = piece.ghostMaterial
-        })
-        while (this.canMove(TRANSLATION.DOWN)) this.position.y--
-    }
-}
-Ghost.prototype.minoesPosition = [
-    [P(0, 0, 0), P(0, 0, 0), P(0, 0, 0), P(0, 0, 0)],
-]
 
 
 /* world */
@@ -527,7 +526,7 @@ scene.add(matrix)
 const nextQueue = new NextQueue()
 nextQueue.position.set(13, SKYLINE - 2)
 scene.add(nextQueue)
-let ghost = new Ghost()
+Tetromino.prototype.ghost = new Ghost()
 
 const edgeMaterial = new THREE.MeshBasicMaterial({
     color: 0x88abe0,
@@ -606,8 +605,6 @@ messagesSpan.onanimationend = function (event) {
     event.target.remove()
 }
 
-let piece = null
-
 let game = {
     playing: false,
 
@@ -618,13 +615,13 @@ let game = {
         gui.settings.close()
         
         holdQueue.remove(holdQueue.piece)
-        holdQueue.piece = null
+        holdQueue.piece = undefined
         if (nextQueue.pieces) nextQueue.pieces.forEach(piece => nextQueue.remove(piece))
-        Array.from(matrix.children).forEach(mino => matrix.remove(mino))
+        while(matrix.children.length) matrix.remove(matrix.children[0])
         matrix.init()
-        scene.remove(piece)
-        piece = null
-        scene.remove(ghost)
+        
+        scene.remove(matrix.piece)
+        matrix.piece = null
         world.music.currentTime = 0
         matrix.edge.visible = true
 
@@ -639,7 +636,7 @@ let game = {
         this.resume()
     },
 
-    resume: function(event) {
+    resume: function() {
         document.onkeydown = onkeydown
         document.onkeyup = onkeyup
 
@@ -648,23 +645,18 @@ let game = {
         stats.clock.elapsedTime = stats.elapsedTime
         world.music.play()
 
-        if (piece) scheduler.setInterval(game.fall, stats.fallPeriod)
+        if (matrix.piece) scheduler.setInterval(game.fall, stats.fallPeriod)
         else this.generate()
     },
 
-    generate: function(heldPiece) {
-        if (heldPiece) {
-            piece = heldPiece
-        } else {
-            piece = nextQueue.shift()
-        }
-        piece.position.set(4, SKYLINE)
-        scene.add(piece)
-        ghost.copy(piece)
-        //world.directionalLight.target = piece
-        scene.add(ghost)
+    generate: function(nextPiece=nextQueue.shift()) {
+        matrix.piece = nextPiece
+        matrix.piece.position.set(4, SKYLINE)
+        scene.add(matrix.piece)
+        matrix.piece.moveGhost()
+        scene.add(matrix.piece.ghost)
     
-        if (piece.canMove(TRANSLATION.NONE)) {
+        if (matrix.piece.canMove(TRANSLATION.NONE)) {
             scheduler.setInterval(game.fall, stats.fallPeriod)
         } else {
             game.over() // block out
@@ -672,16 +664,16 @@ let game = {
     },
 
     fall: function() {
-        piece.move(TRANSLATION.DOWN)
+        matrix.piece.move(TRANSLATION.DOWN)
     },
     
     lockDown: function() {
         scheduler.clearTimeout(game.lockDown)
         scheduler.clearInterval(game.fall)
     
-        if (matrix.lock(piece)) {
-            scene.remove(piece)
-            let tSpin = piece.tSpin
+        if (matrix.lock(matrix.piece)) {
+            scene.remove(matrix.piece)
+            let tSpin = matrix.piece.tSpin
             let nbClearedLines = matrix.clearLines()
             if (settings.sfxVolume) {
                 if (nbClearedLines == 4 || (tSpin && nbClearedLines)) {
@@ -717,7 +709,7 @@ let game = {
     },
 
     over: function() {
-        piece.locked = false
+        matrix.piece.locked = false
 
         document.onkeydown = null
         renderer.domElement.onblur = null
@@ -734,16 +726,16 @@ let game = {
 }
 
 let playerActions = {
-    moveLeft: () => piece.move(TRANSLATION.LEFT),
+    moveLeft: () => matrix.piece.move(TRANSLATION.LEFT),
 
-    moveRight: () => piece.move(TRANSLATION.RIGHT),
+    moveRight: () => matrix.piece.move(TRANSLATION.RIGHT),
 
-    rotateCW: () => piece.rotate(ROTATION.CW),
+    rotateCW: () => matrix.piece.rotate(ROTATION.CW),
 
-    rotateCCW: () => piece.rotate(ROTATION.CCW),
+    rotateCCW: () => matrix.piece.rotate(ROTATION.CCW),
 
     softDrop: function () {
-        if (piece.move(TRANSLATION.DOWN)) stats.score++
+        if (matrix.piece.move(TRANSLATION.DOWN)) stats.score++
     },
 
     hardDrop: function () {
@@ -753,19 +745,19 @@ let playerActions = {
             world.hardDropSound.currentTime = 0
             world.hardDropSound.play()
         }
-        while (piece.move(TRANSLATION.DOWN)) stats.score += 2
+        while (matrix.piece.move(TRANSLATION.DOWN)) stats.score += 2
         game.lockDown()
         hardDroppedMatrix.reset()
         hardDroppedMatrix.play()
     },
 
     hold: function () {
-        if (piece.holdEnabled) {
+        if (matrix.piece.holdEnabled) {
             scheduler.clearInterval(game.fall)
             scheduler.clearTimeout(game.lockDown)
 
             let heldpiece = holdQueue.piece
-            holdQueue.piece = piece
+            holdQueue.piece = matrix.piece
             holdQueue.piece.holdEnabled = false
             holdQueue.piece.locked = false
             holdQueue.piece.position.set(0, 0)
