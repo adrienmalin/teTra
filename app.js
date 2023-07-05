@@ -418,7 +418,7 @@ Ghost.prototype.minoesPosition = [
 ]
 
 
-/* Scene */
+/* world */
 
 const loadingManager = new THREE.LoadingManager()
 loadingManager.onStart = function (url, itemsLoaded, itemsTotal) {
@@ -436,6 +436,8 @@ loadingManager.onError = function (url) {
     loadingPercent.innerText = "Erreur"
 }
 
+const world = {}
+
 const scene = new THREE.Scene()
 
 const renderer = new THREE.WebGLRenderer({
@@ -448,10 +450,10 @@ renderer.setClearColor(0x000000, 10)
 renderer.toneMapping = THREE.ACESFilmicToneMapping
 document.body.appendChild(renderer.domElement)
 
-scene.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
-scene.camera.position.set(5, 0, 16)
+world.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
+world.camera.position.set(5, 0, 16)
 
-const controls = new OrbitControls(scene.camera, renderer.domElement)
+const controls = new OrbitControls(world.camera, renderer.domElement)
 controls.autoRotate
 controls.enableDamping   = true
 controls.dampingFactor   = 0.04
@@ -478,7 +480,7 @@ const colorFullMoveForward = 0.02
 
 const commonCylinderGeometry = new THREE.CylinderGeometry(25, 25, 500, 12, 1, true)
 
-scene.darkCylinder = new THREE.Mesh(
+world.darkCylinder = new THREE.Mesh(
     commonCylinderGeometry,
     new THREE.MeshLambertMaterial({
         side: THREE.BackSide,
@@ -491,10 +493,10 @@ scene.darkCylinder = new THREE.Mesh(
         opacity: 0.1
     })
 )
-scene.darkCylinder.position.set(5, 10, -10)
-scene.add(scene.darkCylinder)
+world.darkCylinder.position.set(5, 10, -10)
+scene.add(world.darkCylinder)
 
-scene.colorFullCylinder = new THREE.Mesh(
+world.colorFullCylinder = new THREE.Mesh(
     commonCylinderGeometry,
     new THREE.MeshBasicMaterial({
         side: THREE.BackSide,
@@ -507,15 +509,15 @@ scene.colorFullCylinder = new THREE.Mesh(
         opacity: 0.6
     })
 )
-scene.colorFullCylinder.position.set(5, 10, -10)
-scene.add(scene.colorFullCylinder)
+world.colorFullCylinder.position.set(5, 10, -10)
+scene.add(world.colorFullCylinder)
 
-scene.ambientLight = new THREE.AmbientLight(0xffffff, 0.2)
-scene.add(scene.ambientLight)
+world.ambientLight = new THREE.AmbientLight(0xffffff, 0.2)
+scene.add(world.ambientLight)
 
-scene.directionalLight = new THREE.DirectionalLight(0xffffff, 20)
-scene.directionalLight.position.set(5, -100, -16)
-scene.add(scene.directionalLight)
+world.directionalLight = new THREE.DirectionalLight(0xffffff, 20)
+world.directionalLight.position.set(5, -100, -16)
+scene.add(world.directionalLight)
 
 const holdQueue = new THREE.Group()
 holdQueue.position.set(-4, SKYLINE - 2)
@@ -572,20 +574,20 @@ function animate() {
 
     const delta = clock.getDelta()
 
-    scene.darkCylinder.rotation.y            += GLOBAL_ROTATION * delta
-    scene.darkCylinder.material.map.offset.y += darkMoveForward * delta
-    scene.darkCylinder.material.map.offset.x += darkTextureRotation * delta
+    world.darkCylinder.rotation.y            += GLOBAL_ROTATION * delta
+    world.darkCylinder.material.map.offset.y += darkMoveForward * delta
+    world.darkCylinder.material.map.offset.x += darkTextureRotation * delta
 
-    scene.colorFullCylinder.rotation.y            += GLOBAL_ROTATION * delta
-    scene.colorFullCylinder.material.map.offset.y += colorFullMoveForward * delta
-    scene.colorFullCylinder.material.map.offset.x += colorFullTextureRotation * delta
+    world.colorFullCylinder.rotation.y            += GLOBAL_ROTATION * delta
+    world.colorFullCylinder.material.map.offset.y += colorFullMoveForward * delta
+    world.colorFullCylinder.material.map.offset.x += colorFullTextureRotation * delta
 
     controls.update()
 
     matrix.updateUnlockedMinoes(delta)
     matrix.mixer?.update(delta)
 
-    renderer.render(scene, scene.camera)
+    renderer.render(scene, world.camera)
     envCamera.update(renderer, scene)
 
     gui.update();
@@ -593,8 +595,8 @@ function animate() {
 
 window.addEventListener("resize", () => {
     renderer.setSize(window.innerWidth, window.innerHeight)
-    scene.camera.aspect = window.innerWidth / window.innerHeight
-    scene.camera.updateProjectionMatrix()
+    world.camera.aspect = window.innerWidth / window.innerHeight
+    world.camera.updateProjectionMatrix()
 })
 
 
@@ -623,7 +625,7 @@ let game = {
         scene.remove(piece)
         piece = null
         scene.remove(ghost)
-        scene.music.currentTime = 0
+        world.music.currentTime = 0
         matrix.edge.visible = true
 
         this.playing = true
@@ -644,7 +646,7 @@ let game = {
         pauseSpan.className = ""
         stats.clock.start()
         stats.clock.elapsedTime = stats.elapsedTime
-        scene.music.play()
+        world.music.play()
 
         if (piece) scheduler.setInterval(game.fall, stats.fallPeriod)
         else this.generate()
@@ -659,7 +661,7 @@ let game = {
         piece.position.set(4, SKYLINE)
         scene.add(piece)
         ghost.copy(piece)
-        //scene.directionalLight.target = piece
+        //world.directionalLight.target = piece
         scene.add(ghost)
     
         if (piece.canMove(TRANSLATION.NONE)) {
@@ -683,11 +685,11 @@ let game = {
             let nbClearedLines = matrix.clearLines()
             if (settings.sfxVolume) {
                 if (nbClearedLines == 4 || (tSpin && nbClearedLines)) {
-                    scene.tetrisSound.currentTime = 0
-                    scene.tetrisSound.play()
+                    world.tetrisSound.currentTime = 0
+                    world.tetrisSound.play()
                 } else if (nbClearedLines || tSpin) {
-                    scene.lineClearSound.currentTime = 0
-                    scene.lineClearSound.play()
+                    world.lineClearSound.currentTime = 0
+                    world.lineClearSound.play()
                 }
             }
             stats.lockDown(nbClearedLines, tSpin)
@@ -707,7 +709,7 @@ let game = {
         scheduler.clearTimeout(repeat)
         scheduler.clearInterval(autorepeat)
     
-        scene.music.pause()
+        world.music.pause()
         document.onkeydown = null
         
         pauseSpan.onfocus = game.resume
@@ -721,7 +723,7 @@ let game = {
         renderer.domElement.onblur = null
         renderer.domElement.onfocus = null
         game.playing = false
-        scene.music.pause()
+        world.music.pause()
         stats.clock.stop()
         localStorage["teTraHighScore"] = stats.highScore
         messagesSpan.addNewChild("div", { className: "show-level-animation", innerHTML: `<h1>GAME<br/>OVER</h1>` })
@@ -746,10 +748,10 @@ let playerActions = {
 
     hardDrop: function () {
         scheduler.clearTimeout(game.lockDown)
-        scene.hardDropSound.play()
+        world.hardDropSound.play()
         if (settings.sfxVolume) {
-            scene.hardDropSound.currentTime = 0
-            scene.hardDropSound.play()
+            world.hardDropSound.currentTime = 0
+            world.hardDropSound.play()
         }
         while (piece.move(TRANSLATION.DOWN)) stats.score += 2
         game.lockDown()
@@ -778,36 +780,36 @@ let playerActions = {
 
 // Sounds
 const listener = new THREE.AudioListener()
-scene.camera.add( listener )
+world.camera.add( listener )
 const audioLoader = new THREE.AudioLoader(loadingManager)
-scene.music = new THREE.Audio(listener)
+world.music = new THREE.Audio(listener)
 audioLoader.load('audio/Tetris_CheDDer_OC_ReMix.mp3', function( buffer ) {
-	scene.music.setBuffer(buffer)
-	scene.music.setLoop(true)
-    scene.music.setVolume(settings.musicVolume/100)
-	if (game.playing) scene.music.play()
+	world.music.setBuffer(buffer)
+	world.music.setLoop(true)
+    world.music.setVolume(settings.musicVolume/100)
+	if (game.playing) world.music.play()
 })
-scene.lineClearSound = new THREE.Audio(listener)
+world.lineClearSound = new THREE.Audio(listener)
 audioLoader.load('audio/line-clear.ogg', function( buffer ) {
-    scene.lineClearSound.setBuffer(buffer)
-    scene.lineClearSound.setVolume(settings.sfxVolume/100)
+    world.lineClearSound.setBuffer(buffer)
+    world.lineClearSound.setVolume(settings.sfxVolume/100)
 })
-scene.tetrisSound = new THREE.Audio(listener)
+world.tetrisSound = new THREE.Audio(listener)
 audioLoader.load('audio/tetris.ogg', function( buffer ) {
-    scene.tetrisSound.setBuffer(buffer)
-    scene.tetrisSound.setVolume(settings.sfxVolume/100)
+    world.tetrisSound.setBuffer(buffer)
+    world.tetrisSound.setVolume(settings.sfxVolume/100)
 })
-scene.hardDropSound = new THREE.Audio(listener)
+world.hardDropSound = new THREE.Audio(listener)
 audioLoader.load('audio/hard-drop.wav', function( buffer ) {
-    scene.hardDropSound.setBuffer(buffer)
-    scene.hardDropSound.setVolume(settings.sfxVolume/100)
+    world.hardDropSound.setBuffer(buffer)
+    world.hardDropSound.setVolume(settings.sfxVolume/100)
 })
 
 let scheduler = new Scheduler()
 let stats = new Stats()
 let settings  = new Settings(playerActions)
 
-var gui = new TetraGUI(game, settings, stats, scene)
+var gui = new TetraGUI(game, settings, stats, world)
 
 gui.load()
 
