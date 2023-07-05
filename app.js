@@ -51,7 +51,7 @@ const TRANSLATION = {
 
 const ROTATION = {
     CW: 1,  // ClockWise
-    CCW: -1,  // CounterClockWise
+    CCW: 3,  // CounterClockWise
 }
 
 
@@ -73,10 +73,10 @@ class Matrix extends THREE.Group {
     }
 
     lock() {
-        this.piece.locked = false
         let minoes = Array.from(this.piece.children)
         minoes.forEach(mino => {
             mino.position.add(this.piece.position)
+            mino.material = this.piece.material
             this.add(mino)
             if (this.cellIsEmpty(mino.position)) {
                 this.cells[mino.position.y][mino.position.x] = mino
@@ -206,23 +206,12 @@ class GhostMaterial extends THREE.MeshBasicMaterial {
 }
 
 
-class Tetromino extends THREE.Group {
-    static randomBag = []
-    static get random() {
-        if (!this.randomBag.length) this.randomBag = [I, J, L, O, S, T, Z]
-        return this.randomBag.pick()
-    }
-
+class AbstractTetromino extends THREE.Group {
     constructor() {
         super()
-        this.rotatedLast = false
-        this.rotationPoint4Used = false
-        this.holdEnabled = true
         for (let i = 0; i < 4; i++) {
             this.add(new Mino())
         }
-        this.facing = 0
-        this.locked = false
     }
 
     set facing(facing) {
@@ -236,12 +225,43 @@ class Tetromino extends THREE.Group {
         return this._facing
     }
 
+    canMove(translation, facing = this.facing) {
+        let testPosition = this.position.clone().add(translation)
+        return this.minoesPosition[facing].every(minoPosition => matrix.cellIsEmpty(minoPosition.clone().add(testPosition)))
+    }
+}
+
+class Ghost extends AbstractTetromino {}
+Ghost.prototype.minoesPosition = [
+    [P(0, 0, 0), P(0, 0, 0), P(0, 0, 0), P(0, 0, 0)],
+]
+
+class Tetromino extends AbstractTetromino {
+    static randomBag = []
+    static get random() {
+        if (!this.randomBag.length) this.randomBag = [I, J, L, O, S, T, Z]
+        return this.randomBag.pick()
+    }
+
+    constructor() {
+        super()
+        this.rotatedLast = false
+        this.rotationPoint4Used = false
+        this.holdEnabled = true
+        this.facing = 0
+        this.locked = false
+    }
+
     set locked(locked) {
         this._locked = locked
         if (locked) {
             this.children.forEach(mino => mino.material = this.lockedMaterial)
+            scene.remove(this.ghost)
+            scheduler.resetTimeout(game.lockDown, stats.lockDelay)
         } else {
-            this.children.forEach(mino => mino.material = this.material)
+            //this.children.forEach(mino => mino.material = this.material)
+            scene.add(this.ghost)
+            scheduler.clearTimeout(game.lockDown, stats.lockDelay)
         }
     }
 
@@ -249,57 +269,35 @@ class Tetromino extends THREE.Group {
         return this._locked
     }
 
-    canMove(translation, facing = this.facing) {
-        let testPosition = this.position.clone().add(translation)
-        return this.minoesPosition[facing].every(minoPosition => matrix.cellIsEmpty(minoPosition.clone().add(testPosition)))
-    }
-
-    move(translation, testFacing) {
-        if (this.canMove(translation, testFacing)) {
+    move(translation, rotatedFacing, rotationPoint) {
+        if (this.canMove(translation, rotatedFacing)) {
             scheduler.clearTimeout(game.lockDown)
             this.position.add(translation)
-            if (!testFacing) {
-                this.rotatedLast = false
-                this.moveGhost()
+            this.rotatedLast = rotatedFacing
+            if (rotatedFacing != undefined) {
+                this.facing = rotatedFacing
+                if (rotationPoint == 4) this.rotationPoint4Used = true
             }
-            if (this.canMove(TRANSLATION.DOWN)) {
-                this.locked = false
-                scene.add(this.ghost)
-            } else {
-                this.locked = true
-                scene.remove(this.ghost)
-                scheduler.setTimeout(game.lockDown, stats.lockDelay)
-            }
+            this.locked = !this.canMove(TRANSLATION.DOWN)
+            this.updateGhost()
             return true
         } else if (translation == TRANSLATION.DOWN) {
             this.locked = true
-            if (!scheduler.timeoutTasks.has(game.lockDown))
-                scheduler.setTimeout(game.lockDown, stats.lockDelay)
+            scheduler.setTimeout(game.lockDown, stats.lockDelay)
         }
     }
 
     rotate(rotation) {
-        let testFacing = (this.facing + rotation + 4) % 4
-        return this.srs[this.facing][rotation].some((translation, rotationPoint) => {
-            if (this.move(translation, testFacing)) {
-                this.facing = testFacing
-                this.rotatedLast = true
-                if (rotationPoint == 4) this.rotationPoint4Used = true
-                //favicon.href = this.favicon_href
-                this.moveGhost()
-                return true
-            }
-        })
+        let testFacing = (this.facing + rotation) % 4
+        return this.srs[this.facing][rotation].some(
+            (translation, rotationPoint) => this.move(translation, testFacing, rotationPoint)
+        )
     }
 
-    moveGhost() {
+    updateGhost() {
         this.ghost.position.copy(this.position)
-        this.ghost.facing = this.facing
         this.ghost.minoesPosition = this.minoesPosition
-        this.children.forEach((mino, i) => {
-            this.ghost.children[i].position.copy(mino.position)
-            this.ghost.children[i].material = this.ghostMaterial
-        })
+        this.ghost.facing = this.facing
         while (this.ghost.canMove(TRANSLATION.DOWN)) this.ghost.position.y--
     }
 
@@ -316,11 +314,6 @@ Tetromino.prototype.srs = [
     { [ROTATION.CW]: [P(0, 0), P(-1, 0), P(-1, -1), P(0, 2), P(-1, 2)], [ROTATION.CCW]: [P(0, 0), P(-1, 0), P(-1, -1), P(0, 2), P(-1, 2)] },
 ]
 Tetromino.prototype.lockedMaterial = new MinoMaterial(0xffffff)
-
-class Ghost extends Tetromino {}
-Ghost.prototype.minoesPosition = [
-    [P(0, 0, 0), P(0, 0, 0), P(0, 0, 0), P(0, 0, 0)],
-]
 
 class I extends Tetromino { }
 I.prototype.minoesPosition = [
@@ -653,7 +646,10 @@ let game = {
         matrix.piece = nextPiece
         matrix.piece.position.set(4, SKYLINE)
         scene.add(matrix.piece)
-        matrix.piece.moveGhost()
+        matrix.piece.updateGhost()
+        matrix.piece.ghost.children.forEach((mino) => {
+            mino.material = matrix.piece.ghostMaterial
+        })
         scene.add(matrix.piece.ghost)
     
         if (matrix.piece.canMove(TRANSLATION.NONE)) {
@@ -668,6 +664,11 @@ let game = {
     },
     
     lockDown: function() {
+        if (matrix.piece.canMove(TRANSLATION.DOWN)) {
+            scheduler.resetTimeout(game.lockDown)
+            return
+        }
+
         scheduler.clearTimeout(game.lockDown)
         scheduler.clearInterval(game.fall)
     
