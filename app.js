@@ -59,6 +59,45 @@ const ROTATION = {
 class Matrix extends THREE.Group {
     constructor() {
         super()
+
+        const edgeMaterial = new THREE.MeshBasicMaterial({
+            color: 0x88abe0,
+            envMap: envRenderTarget.texture,
+            transparent: true,
+            opacity: 0.4,
+            reflectivity: 0.9,
+            refractionRatio: 0.5
+        })
+
+        const edgeShape = new THREE.Shape()
+        edgeShape.moveTo(-.3, SKYLINE)
+        edgeShape.lineTo(0, SKYLINE)
+        edgeShape.lineTo(0, 0)
+        edgeShape.lineTo(COLUMNS, 0)
+        edgeShape.lineTo(COLUMNS, SKYLINE)
+        edgeShape.lineTo(COLUMNS + .3, SKYLINE)
+        edgeShape.lineTo(COLUMNS + .3, -.3)
+        edgeShape.lineTo(-.3, -.3)
+        edgeShape.moveTo(-.3, SKYLINE)
+        this.edge = new THREE.Mesh(
+            new THREE.ExtrudeGeometry(edgeShape, {
+                depth: 1,
+                bevelEnabled: false,
+            }),
+            edgeMaterial
+        )
+        this.edge.visible = false
+
+        const positionKF = new THREE.VectorKeyframeTrack('.position', [0, 1, 2], [0, 0, 0, 0, -0.2, 0, 0, 0, 0])
+        const clip = new THREE.AnimationClip('HardDrop', 3, [positionKF])
+        const animationGroup = new THREE.AnimationObjectGroup()
+        animationGroup.add(this)
+        animationGroup.add(this.edge)
+        this.mixer = new THREE.AnimationMixer(animationGroup)
+        const hardDroppedMatrix = this.mixer.clipAction(clip)
+        hardDroppedMatrix.loop = THREE.LoopOnce
+        hardDroppedMatrix.setDuration(0.2)
+
         this.init()
     }
 
@@ -114,6 +153,11 @@ class Matrix extends THREE.Group {
                 this.unlockedMinoes.delete(mino)
             }
         })
+    }
+
+    update(delta) {
+        this.updateUnlockedMinoes(delta)
+        this.mixer?.update(delta)
     }
 }
 
@@ -499,49 +543,11 @@ holdQueue.position.set(-4, SKYLINE - 2)
 scene.add(holdQueue)
 const matrix = new Matrix()
 scene.add(matrix)
+scene.add(matrix.edge)
 const nextQueue = new NextQueue()
 nextQueue.position.set(13, SKYLINE - 2)
 scene.add(nextQueue)
 Tetromino.prototype.ghost = new Ghost()
-
-const edgeMaterial = new THREE.MeshBasicMaterial({
-    color: 0x88abe0,
-    envMap: envRenderTarget.texture,
-    transparent: true,
-    opacity: 0.4,
-    reflectivity: 0.9,
-    refractionRatio: 0.5
-})
-
-const edgeShape = new THREE.Shape()
-edgeShape.moveTo(-.3, SKYLINE)
-edgeShape.lineTo(0, SKYLINE)
-edgeShape.lineTo(0, 0)
-edgeShape.lineTo(COLUMNS, 0)
-edgeShape.lineTo(COLUMNS, SKYLINE)
-edgeShape.lineTo(COLUMNS + .3, SKYLINE)
-edgeShape.lineTo(COLUMNS + .3, -.3)
-edgeShape.lineTo(-.3, -.3)
-edgeShape.moveTo(-.3, SKYLINE)
-matrix.edge = new THREE.Mesh(
-    new THREE.ExtrudeGeometry(edgeShape, {
-        depth: 1,
-        bevelEnabled: false,
-    }),
-    edgeMaterial
-)
-matrix.edge.visible = false
-scene.add(matrix.edge)
-
-const positionKF = new THREE.VectorKeyframeTrack('.position', [0, 1, 2], [0, 0, 0, 0, -0.2, 0, 0, 0, 0])
-const clip = new THREE.AnimationClip('HardDrop', 3, [positionKF])
-const animationGroup = new THREE.AnimationObjectGroup()
-animationGroup.add(matrix)
-animationGroup.add(matrix.edge)
-matrix.mixer = new THREE.AnimationMixer(animationGroup)
-const hardDroppedMatrix = matrix.mixer.clipAction(clip)
-hardDroppedMatrix.loop = THREE.LoopOnce
-hardDroppedMatrix.setDuration(0.2)
 
 let clock = new THREE.Clock()
 
@@ -558,14 +564,11 @@ function animate() {
     world.colorFullCylinder.material.map.offset.x += colorFullTextureRotation * delta
 
     controls.update()
-
-    matrix.updateUnlockedMinoes(delta)
-    matrix.mixer?.update(delta)
+    matrix.update(delta)
+    gui.update()
 
     renderer.render(scene, world.camera)
     envCamera.update(renderer, scene)
-
-    gui.update();
 }
 
 window.addEventListener("resize", () => {
@@ -604,7 +607,10 @@ let game = {
         this.playing = true
         stats.clock.start()
 
-        onblur = this.pause
+        renderer.domElement.tabIndex = 1
+        renderer.domElement.onblur = this.pause
+        gui.domElement.tabIndex = 1
+        gui.domElement.onfocus = game.pause
 
         nextQueue.init()
 
@@ -699,6 +705,7 @@ let game = {
         document.onkeydown = null
         renderer.domElement.onblur = null
         renderer.domElement.onfocus = null
+        gui.domElement.onfocus = null
         game.playing = false
         world.music.pause()
         stats.clock.stop()
