@@ -237,8 +237,6 @@ Ghost.prototype.minoesPosition = [
     [P(0, 0, 0), P(0, 0, 0), P(0, 0, 0), P(0, 0, 0)],
 ]
 
-const lockEvent = new Event("pieceLocked")
-
 class Tetromino extends AbstractTetromino {
     static randomBag = []
     static get random() {
@@ -265,17 +263,13 @@ class Tetromino extends AbstractTetromino {
             }
             if (this.canMove(TRANSLATION.DOWN)) {
                 this.locking = false
-                scheduler.clearTimeout(this.lock)
+                scheduler.clearTimeout(game.lockDown)
             } else {
-                scheduler.resetTimeout(this.lock, stats.lockDelay)
+                scheduler.resetTimeout(game.lockDown, this.lockDelay)
                 this.locking = true
             }
             this.updateGhost()
             return true
-        } else if (translation == TRANSLATION.DOWN) {
-            this.locking = true
-            if (!scheduler.timeoutTasks.has(this.lock))
-                scheduler.setTimeout(this.lock, stats.lockDelay)
         }
     }
 
@@ -294,10 +288,6 @@ class Tetromino extends AbstractTetromino {
             this.children.forEach(mino => mino.material = this.material)
             scene.add(this.ghost)
         }
-    }
-
-    lock() {
-        this.dispatchEvent(lockEvent)
     }
 
     updateGhost() {
@@ -320,6 +310,7 @@ Tetromino.prototype.srs = [
     { [ROTATION.CW]: [P(0, 0), P(-1, 0), P(-1, -1), P(0, 2), P(-1, 2)], [ROTATION.CCW]: [P(0, 0), P(-1, 0), P(-1, -1), P(0, 2), P(-1, 2)] },
 ]
 Tetromino.prototype.lockedMaterial = new MinoMaterial(0xffffff)
+Tetromino.prototype.lockDelay = 500
 
 class I extends Tetromino { }
 I.prototype.minoesPosition = [
@@ -597,12 +588,12 @@ window.addEventListener("resize", () => {
     world.camera.updateProjectionMatrix()
 })
 
-
-/* Game logic */
-
 messagesSpan.onanimationend = function (event) {
     event.target.remove()
 }
+
+
+/* Game logic */
 
 let game = {
     playing: false,
@@ -639,7 +630,10 @@ let game = {
         document.onkeydown = onkeydown
         document.onkeyup = onkeyup
 
-        pauseSpan.className = ""
+        document.body.classList.remove("pause")
+        gui.resumeButton.hide()
+        gui.pauseButton.show()
+
         stats.clock.start()
         stats.clock.elapsedTime = stats.elapsedTime
         world.music.play()
@@ -651,6 +645,7 @@ let game = {
     generate: function(nextPiece=nextQueue.shift()) {
         matrix.piece = nextPiece
         matrix.piece.position.set(4, SKYLINE)
+        matrix.piece.lockDelay = stats.lockDelay
         scene.add(matrix.piece)
         matrix.piece.updateGhost()
         matrix.piece.ghost.children.forEach((mino) => {
@@ -670,7 +665,7 @@ let game = {
     },
     
     lockDown: function() {
-        scheduler.clearTimeout(matrix.piece.lock)
+        scheduler.clearTimeout(game.lockDown)
         scheduler.clearInterval(game.fall)
     
         if (matrix.lock(matrix.piece)) {
@@ -699,7 +694,7 @@ let game = {
         stats.clock.stop()
     
         scheduler.clearInterval(game.fall)
-        scheduler.clearTimeout(matrix.piece.lock)
+        scheduler.clearTimeout(game.lockDown)
         scheduler.clearTimeout(repeat)
         scheduler.clearInterval(autorepeat)
     
@@ -707,7 +702,9 @@ let game = {
         document.onkeydown = null
         
         pauseSpan.onfocus = game.resume
-        pauseSpan.className = "pause"
+        document.body.classList.add("pause")
+        gui.pauseButton.hide()
+        gui.resumeButton.show()
     },
 
     over: function() {
@@ -722,6 +719,7 @@ let game = {
         localStorage["teTraHighScore"] = stats.highScore
         messagesSpan.addNewChild("div", { className: "show-level-animation", innerHTML: `<h1>GAME<br/>OVER</h1>` })
 
+        gui.pauseButton.hide()
         gui.startButton.name("Rejouer")
         gui.startButton.show()
     },
@@ -743,7 +741,7 @@ let playerActions = {
     },
 
     hardDrop: function () {
-        scheduler.clearTimeout(matrix.piece.lock)
+        scheduler.clearTimeout(game.lockDown)
         world.hardDropSound.play()
         if (settings.sfxVolume) {
             world.hardDropSound.currentTime = 0
@@ -758,7 +756,7 @@ let playerActions = {
     hold: function () {
         if (matrix.piece.holdEnabled) {
             scheduler.clearInterval(game.fall)
-            scheduler.clearTimeout(matrix.piece.lock)
+            scheduler.clearTimeout(game.lockDown)
 
             let heldpiece = holdQueue.piece
             holdQueue.piece = matrix.piece
@@ -773,41 +771,6 @@ let playerActions = {
 
     pause: game.pause,
 }
-
-// Sounds
-const listener = new THREE.AudioListener()
-world.camera.add( listener )
-const audioLoader = new THREE.AudioLoader(loadingManager)
-world.music = new THREE.Audio(listener)
-audioLoader.load('audio/Tetris_CheDDer_OC_ReMix.mp3', function( buffer ) {
-	world.music.setBuffer(buffer)
-	world.music.setLoop(true)
-    world.music.setVolume(settings.musicVolume/100)
-	if (game.playing) world.music.play()
-})
-world.lineClearSound = new THREE.Audio(listener)
-audioLoader.load('audio/line-clear.ogg', function( buffer ) {
-    world.lineClearSound.setBuffer(buffer)
-    world.lineClearSound.setVolume(settings.sfxVolume/100)
-})
-world.tetrisSound = new THREE.Audio(listener)
-audioLoader.load('audio/tetris.ogg', function( buffer ) {
-    world.tetrisSound.setBuffer(buffer)
-    world.tetrisSound.setVolume(settings.sfxVolume/100)
-})
-world.hardDropSound = new THREE.Audio(listener)
-audioLoader.load('audio/hard-drop.wav', function( buffer ) {
-    world.hardDropSound.setBuffer(buffer)
-    world.hardDropSound.setVolume(settings.sfxVolume/100)
-})
-
-let scheduler = new Scheduler()
-let stats = new Stats()
-let settings  = new Settings(playerActions)
-
-var gui = new TetraGUI(game, settings, stats, world)
-
-gui.load()
 
 // Handle player inputs
 const REPEATABLE_ACTIONS = [
@@ -867,6 +830,44 @@ function onkeyup(event) {
         }
     }
 }
+
+
+/* Sounds */
+
+const listener = new THREE.AudioListener()
+world.camera.add( listener )
+const audioLoader = new THREE.AudioLoader(loadingManager)
+world.music = new THREE.Audio(listener)
+audioLoader.load('audio/Tetris_CheDDer_OC_ReMix.mp3', function( buffer ) {
+	world.music.setBuffer(buffer)
+	world.music.setLoop(true)
+    world.music.setVolume(settings.musicVolume/100)
+	if (game.playing) world.music.play()
+})
+world.lineClearSound = new THREE.Audio(listener)
+audioLoader.load('audio/line-clear.ogg', function( buffer ) {
+    world.lineClearSound.setBuffer(buffer)
+    world.lineClearSound.setVolume(settings.sfxVolume/100)
+})
+world.tetrisSound = new THREE.Audio(listener)
+audioLoader.load('audio/tetris.ogg', function( buffer ) {
+    world.tetrisSound.setBuffer(buffer)
+    world.tetrisSound.setVolume(settings.sfxVolume/100)
+})
+world.hardDropSound = new THREE.Audio(listener)
+audioLoader.load('audio/hard-drop.wav', function( buffer ) {
+    world.hardDropSound.setBuffer(buffer)
+    world.hardDropSound.setVolume(settings.sfxVolume/100)
+})
+
+
+let scheduler = new Scheduler()
+let stats = new Stats()
+let settings  = new Settings(playerActions)
+
+var gui = new TetraGUI(game, settings, stats, world)
+
+gui.load()
 
 window.onbeforeunload = function (event) {
     gui.save()

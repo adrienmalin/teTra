@@ -7,6 +7,8 @@ class TetraGUI extends GUI {
         super({title: "teTra"})
 
         this.startButton = this.add(game, "start").name("Jouer").hide()
+        this.pauseButton = this.add(game, "pause").name("Pause").hide()
+        this.resumeButton = this.add(game, "resume").name("Reprendre").hide()
 
         this.stats = this.addFolder("Stats").hide()
         this.stats.add(stats, "time").name("Temps").disable().listen()

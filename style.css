@@ -157,17 +157,21 @@ h1 {
     animation-duration: 2s;
 }
 
+.pause canvas {
+    filter: blur(10px);
+}
+
 #pauseSpan {
     display: none;
 }
 
-#pauseSpan.pause {
+.pause #pauseSpan {
     display: flex;
     position:absolute;
     display: flex;
     top: 0;
     left: 0;
-    backdrop-filter: blur(10px);
+    filter: blur(2px);
     width: 100%;
     height: 100%;
     z-index: 10;
