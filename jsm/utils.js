@@ -9,25 +9,26 @@ class Scheduler {
     }
 
     clearInterval(func) {
-        if (this.intervalTasks.has(func))
+        if (this.intervalTasks.has(func)) {
             window.clearInterval(this.intervalTasks.get(func))
-        this.intervalTasks.delete(func)
+            this.intervalTasks.delete(func)
+        }
     }
 
     setTimeout(func, delay, ...args) {
-        if (!this.timeoutTasks.has(func))
-            this.timeoutTasks.set(func, window.setTimeout(func, delay, ...args))
+        this.timeoutTasks.set(func, window.setTimeout(func, delay, ...args))
     }
 
     clearTimeout(func) {
-        if (this.timeoutTasks.has(func))
+        if (this.timeoutTasks.has(func)) {
             window.clearTimeout(this.timeoutTasks.get(func))
-        this.timeoutTasks.delete(func)
+            this.timeoutTasks.delete(func)
+        }
     }
 
     resetTimeout(func, delay, ...args) {
         this.clearTimeout(func)
-        this.timeoutTasks.set(func, window.setTimeout(func, delay, ...args))
+        this.setTimeout(func, delay, ...args)
     }
 }
 

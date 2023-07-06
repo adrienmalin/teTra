@@ -46,6 +46,7 @@ const TRANSLATION = {
     NONE : P( 0,  0),
     LEFT : P(-1,  0),
     RIGHT: P( 1,  0),
+    UP   : P( 0,  1),
     DOWN : P( 0, -1),
 }
 
@@ -73,10 +74,10 @@ class Matrix extends THREE.Group {
     }
 
     lock() {
+        this.piece.locking = false
         let minoes = Array.from(this.piece.children)
         minoes.forEach(mino => {
             mino.position.add(this.piece.position)
-            mino.material = this.piece.material
             this.add(mino)
             if (this.cellIsEmpty(mino.position)) {
                 this.cells[mino.position.y][mino.position.x] = mino
@@ -236,6 +237,8 @@ Ghost.prototype.minoesPosition = [
     [P(0, 0, 0), P(0, 0, 0), P(0, 0, 0), P(0, 0, 0)],
 ]
 
+const lockEvent = new Event("pieceLocked")
+
 class Tetromino extends AbstractTetromino {
     static randomBag = []
     static get random() {
@@ -249,41 +252,30 @@ class Tetromino extends AbstractTetromino {
         this.rotationPoint4Used = false
         this.holdEnabled = true
         this.facing = 0
-        this.locked = false
-    }
-
-    set locked(locked) {
-        this._locked = locked
-        if (locked) {
-            this.children.forEach(mino => mino.material = this.lockedMaterial)
-            scene.remove(this.ghost)
-            scheduler.resetTimeout(game.lockDown, stats.lockDelay)
-        } else {
-            //this.children.forEach(mino => mino.material = this.material)
-            scene.add(this.ghost)
-            scheduler.clearTimeout(game.lockDown, stats.lockDelay)
-        }
-    }
-
-    get locked() {
-        return this._locked
+        this.locking = false
     }
 
     move(translation, rotatedFacing, rotationPoint) {
         if (this.canMove(translation, rotatedFacing)) {
-            scheduler.clearTimeout(game.lockDown)
             this.position.add(translation)
             this.rotatedLast = rotatedFacing
             if (rotatedFacing != undefined) {
                 this.facing = rotatedFacing
                 if (rotationPoint == 4) this.rotationPoint4Used = true
             }
-            this.locked = !this.canMove(TRANSLATION.DOWN)
+            if (this.canMove(TRANSLATION.DOWN)) {
+                this.locking = false
+                scheduler.clearTimeout(this.lock)
+            } else {
+                scheduler.resetTimeout(this.lock, stats.lockDelay)
+                this.locking = true
+            }
             this.updateGhost()
             return true
         } else if (translation == TRANSLATION.DOWN) {
-            this.locked = true
-            scheduler.setTimeout(game.lockDown, stats.lockDelay)
+            this.locking = true
+            if (!scheduler.timeoutTasks.has(this.lock))
+                scheduler.setTimeout(this.lock, stats.lockDelay)
         }
     }
 
@@ -292,6 +284,20 @@ class Tetromino extends AbstractTetromino {
         return this.srs[this.facing][rotation].some(
             (translation, rotationPoint) => this.move(translation, testFacing, rotationPoint)
         )
+    }
+
+    set locking(locking) {
+        if (locking) {
+            this.children.forEach(mino => mino.material = this.lockedMaterial)
+            scene.remove(this.ghost)
+        } else {
+            this.children.forEach(mino => mino.material = this.material)
+            scene.add(this.ghost)
+        }
+    }
+
+    lock() {
+        this.dispatchEvent(lockEvent)
     }
 
     updateGhost() {
@@ -664,12 +670,7 @@ let game = {
     },
     
     lockDown: function() {
-        if (matrix.piece.canMove(TRANSLATION.DOWN)) {
-            scheduler.resetTimeout(game.lockDown)
-            return
-        }
-
-        scheduler.clearTimeout(game.lockDown)
+        scheduler.clearTimeout(matrix.piece.lock)
         scheduler.clearInterval(game.fall)
     
         if (matrix.lock(matrix.piece)) {
@@ -698,7 +699,7 @@ let game = {
         stats.clock.stop()
     
         scheduler.clearInterval(game.fall)
-        scheduler.clearTimeout(game.lockDown)
+        scheduler.clearTimeout(matrix.piece.lock)
         scheduler.clearTimeout(repeat)
         scheduler.clearInterval(autorepeat)
     
@@ -710,7 +711,7 @@ let game = {
     },
 
     over: function() {
-        matrix.piece.locked = false
+        matrix.piece.locking = false
 
         document.onkeydown = null
         renderer.domElement.onblur = null
@@ -726,6 +727,8 @@ let game = {
     },
 }
 
+window.addEventListener("pieceLocked", game.lockDown)
+
 let playerActions = {
     moveLeft: () => matrix.piece.move(TRANSLATION.LEFT),
 
@@ -740,7 +743,7 @@ let playerActions = {
     },
 
     hardDrop: function () {
-        scheduler.clearTimeout(game.lockDown)
+        scheduler.clearTimeout(matrix.piece.lock)
         world.hardDropSound.play()
         if (settings.sfxVolume) {
             world.hardDropSound.currentTime = 0
@@ -755,12 +758,12 @@ let playerActions = {
     hold: function () {
         if (matrix.piece.holdEnabled) {
             scheduler.clearInterval(game.fall)
-            scheduler.clearTimeout(game.lockDown)
+            scheduler.clearTimeout(matrix.piece.lock)
 
             let heldpiece = holdQueue.piece
             holdQueue.piece = matrix.piece
             holdQueue.piece.holdEnabled = false
-            holdQueue.piece.locked = false
+            holdQueue.piece.locking = false
             holdQueue.piece.position.set(0, 0)
             holdQueue.piece.facing = FACING.NORTH
             holdQueue.add(holdQueue.piece)
