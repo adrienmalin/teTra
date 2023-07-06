@@ -1,10 +1,10 @@
 import * as THREE from 'three'
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { T_SPIN } from './jsm/common.js'
-import { Settings } from './jsm/settings.js'
-import { Stats } from './jsm/stats.js'
+import { Settings } from './jsm/Settings.js'
+import { Stats } from './jsm/Stats.js'
 import { Scheduler } from './jsm/utils.js'
-import { TetraGUI } from './jsm/gui.js'
+import { TetraGUI } from './jsm/TetraGUI.js'
+import { TetraControls } from './jsm/TetraControls.js'
 
 let P = (x, y, z = 0) => new THREE.Vector3(x, y, z)
 
@@ -442,21 +442,7 @@ document.body.appendChild(renderer.domElement)
 world.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
 world.camera.position.set(5, 0, 16)
 
-const controls = new OrbitControls(world.camera, renderer.domElement)
-controls.autoRotate
-controls.enableDamping   = true
-controls.dampingFactor   = 0.04
-controls.maxDistance     = 21
-controls.keys            = {}
-controls.minPolarAngle   = 0.9
-controls.maxPolarAngle   = 2.14
-controls.minAzimuthAngle = 0.9 - Math.PI / 2
-controls.maxAzimuthAngle = 2.14 - Math.PI / 2
-controls.target.set(5, 9, 0)
-controls.update()
-
-controls.addEventListener("start", () => renderer.domElement.style.cursor = "grabbing")
-controls.addEventListener("end", () => renderer.domElement.style.cursor = "grab")
+const controls = new TetraControls(world.camera, renderer.domElement)
 
 
 const GLOBAL_ROTATION = 0.028

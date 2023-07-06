@@ -74,7 +74,7 @@ class Stats {
   }
 
   get time() {
-      return this.clock.timeFormat.format(this.clock.elapsedTime * 1000)
+      return this.clock.timeFormat.format(this.clock.getElapsedTime() * 1000)
   }
 
   lockDown(nbClearedLines, tSpin) {
