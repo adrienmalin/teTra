@@ -1,12 +1,12 @@
 import * as THREE from 'three'
-import { T_SPIN } from './jsm/common.js'
+import { scheduler } from './jsm/scheduler.js'
+import { TRANSLATION, ROTATION, environnement, Matrix, HoldQueue, NextQueue } from './jsm/gamelogic.js'
 import { Settings } from './jsm/Settings.js'
 import { Stats } from './jsm/Stats.js'
-import { Scheduler } from './jsm/utils.js'
 import { TetraGUI } from './jsm/TetraGUI.js'
 import { TetraControls } from './jsm/TetraControls.js'
+import { Vortex } from './jsm/Vortex.js'
 
-let P = (x, y, z = 0) => new THREE.Vector3(x, y, z)
 
 Array.prototype.pick = function () { return this.splice(Math.floor(Math.random() * this.length), 1)[0] }
 
@@ -19,439 +19,7 @@ HTMLElement.prototype.addNewChild = function (tag, properties) {
 }
 
 
-/* Constants */
-
-const ROWS = 24
-const SKYLINE = 20
-const COLUMNS = 10
-
-const COLORS = {
-    I: 0xafeff9,
-    J: 0xb8b4ff,
-    L: 0xfdd0b7,
-    O: 0xffedac,
-    S: 0xC8FBA8,
-    T: 0xedb2ff,
-    Z: 0xffb8c5,
-}
-
-const FACING = {
-    NORTH: 0,
-    EAST: 1,
-    SOUTH: 2,
-    WEST: 3,
-}
-
-const TRANSLATION = {
-    NONE : P( 0,  0),
-    LEFT : P(-1,  0),
-    RIGHT: P( 1,  0),
-    UP   : P( 0,  1),
-    DOWN : P( 0, -1),
-}
-
-const ROTATION = {
-    CW: 1,  // ClockWise
-    CCW: 3,  // CounterClockWise
-}
-
-
-class Matrix extends THREE.Group {
-    constructor() {
-        super()
-
-        const edgeMaterial = new THREE.MeshBasicMaterial({
-            color: 0x88abe0,
-            envMap: envRenderTarget.texture,
-            transparent: true,
-            opacity: 0.4,
-            reflectivity: 0.9,
-            refractionRatio: 0.5
-        })
-
-        const edgeShape = new THREE.Shape()
-        edgeShape.moveTo(-.3, SKYLINE)
-        edgeShape.lineTo(0, SKYLINE)
-        edgeShape.lineTo(0, 0)
-        edgeShape.lineTo(COLUMNS, 0)
-        edgeShape.lineTo(COLUMNS, SKYLINE)
-        edgeShape.lineTo(COLUMNS + .3, SKYLINE)
-        edgeShape.lineTo(COLUMNS + .3, -.3)
-        edgeShape.lineTo(-.3, -.3)
-        edgeShape.moveTo(-.3, SKYLINE)
-        this.edge = new THREE.Mesh(
-            new THREE.ExtrudeGeometry(edgeShape, {
-                depth: 1,
-                bevelEnabled: false,
-            }),
-            edgeMaterial
-        )
-        this.edge.visible = false
-
-        const positionKF = new THREE.VectorKeyframeTrack('.position', [0, 1, 2], [0, 0, 0, 0, -0.2, 0, 0, 0, 0])
-        const clip = new THREE.AnimationClip('HardDrop', 3, [positionKF])
-        const animationGroup = new THREE.AnimationObjectGroup()
-        animationGroup.add(this)
-        animationGroup.add(this.edge)
-        this.mixer = new THREE.AnimationMixer(animationGroup)
-        const hardDroppedMatrix = this.mixer.clipAction(clip)
-        hardDroppedMatrix.loop = THREE.LoopOnce
-        hardDroppedMatrix.setDuration(0.2)
-
-        this.init()
-    }
-
-    init() {
-        this.cells = Array(ROWS).fill().map(() => Array(COLUMNS))
-        this.unlockedMinoes = new Set()
-    }
-
-    cellIsEmpty(p) {
-        return 0 <= p.x && p.x < COLUMNS &&
-            0 <= p.y && p.y < ROWS &&
-            !this.cells[p.y][p.x]
-    }
-
-    lock() {
-        this.piece.locking = false
-        let minoes = Array.from(this.piece.children)
-        minoes.forEach(mino => {
-            mino.position.add(this.piece.position)
-            this.add(mino)
-            if (this.cellIsEmpty(mino.position)) {
-                this.cells[mino.position.y][mino.position.x] = mino
-            }
-        })
-        return minoes.some(mino => mino.position.y < SKYLINE)
-    }
-
-    clearLines() {
-        let nbClearedLines = this.cells.reduceRight((nbClearedLines, row, y) => {
-            if (row.filter(mino => mino).length == COLUMNS) {
-                row.forEach(mino => this.unlockedMinoes.add(mino))
-                this.cells.splice(y, 1)
-                this.cells.push(Array(COLUMNS))
-                return ++nbClearedLines
-            }
-            return nbClearedLines
-        }, 0)
-        if (nbClearedLines) {
-            this.cells.forEach((rows, y) => {
-                rows.forEach((mino, x) => {
-                    mino.position.set(x, y)
-                })
-            })
-        }
-        return nbClearedLines
-    }
-
-    updateUnlockedMinoes(delta) {
-        this.unlockedMinoes.forEach(mino => {
-            mino.update(delta)
-            if (Math.sqrt(mino.position.x * mino.position.x + mino.position.z * mino.position.z) > 25) {
-                this.remove(mino)
-                this.unlockedMinoes.delete(mino)
-            }
-        })
-    }
-
-    update(delta) {
-        this.updateUnlockedMinoes(delta)
-        this.mixer?.update(delta)
-    }
-}
-
-
-class NextQueue extends THREE.Group {
-    init() {
-        this.pieces = this.positions.map((position) => {
-            let piece = new Tetromino.random()
-            piece.position.copy(position)
-            this.add(piece)
-            return piece
-        })
-    }
-
-    shift() {
-        let fistPiece = this.pieces.shift()
-        let lastPiece = new Tetromino.random()
-        this.add(lastPiece)
-        this.pieces.push(lastPiece)
-        this.positions.forEach((position, i) => {
-            this.pieces[i].position.copy(position)
-        })
-        return fistPiece
-    }
-
-}
-NextQueue.prototype.positions = [P(0, 0), P(0, -3), P(0, -6), P(0, -9), P(0, -12), P(0, -16)]
-
-const GRAVITY = -20
-
-class Mino extends THREE.Mesh {
-    constructor() {
-        super(Mino.prototype.geometry)
-        this.velocity = P(50 - 100 * Math.random(), 50 - 100 * Math.random(), 50 - 100 * Math.random())
-        this.rotationAngle = P(Math.random(), Math.random(), Math.random()).normalize()
-        this.angularVelocity = 5 - 10 * Math.random()
-        scene.add(this)
-    }
-
-    update(delta) {
-        this.velocity.y += delta * GRAVITY
-        this.position.addScaledVector(this.velocity, delta)
-        this.rotateOnWorldAxis(this.rotationAngle, delta * this.angularVelocity)
-    }
-}
-const minoFaceShape = new THREE.Shape()
-minoFaceShape.moveTo(.1, .1)
-minoFaceShape.lineTo(.1, .9)
-minoFaceShape.lineTo(.9, .9)
-minoFaceShape.lineTo(.9, .1)
-minoFaceShape.lineTo(.1, .1)
-const minoExtrudeSettings = {
-    steps: 1,
-    depth: .8,
-    bevelEnabled: true,
-    bevelThickness: .1,
-    bevelSize: .1,
-    bevelOffset: 0,
-    bevelSegments: 1
-}
-Mino.prototype.geometry = new THREE.ExtrudeGeometry(minoFaceShape, minoExtrudeSettings)
-
-
-const envRenderTarget = new THREE.WebGLCubeRenderTarget(256)
-envRenderTarget.texture.type = THREE.HalfFloatType
-const envCamera = new THREE.CubeCamera(1, 1000, envRenderTarget)
-envCamera.position.set(5, 10)
-
-class MinoMaterial extends THREE.MeshBasicMaterial {
-    constructor(color) {
-        super({
-            side: THREE.DoubleSide,
-            color: color,
-            envMap: envRenderTarget.texture,
-            reflectivity: 0.9,
-        })
-    }
-}
-
-class GhostMaterial extends THREE.MeshBasicMaterial {
-    constructor(color) {
-        super({
-            side: THREE.DoubleSide,
-            color: color,
-            envMap: envRenderTarget.texture,
-            reflectivity: 0.9,
-            transparent: true,
-            opacity: 0.2
-        })
-    }
-}
-
-
-class AbstractTetromino extends THREE.Group {
-    constructor() {
-        super()
-        for (let i = 0; i < 4; i++) {
-            this.add(new Mino())
-        }
-    }
-
-    set facing(facing) {
-        this._facing = facing
-        this.minoesPosition[this.facing].forEach(
-            (position, i) => this.children[i].position.copy(position)
-        )
-    }
-
-    get facing() {
-        return this._facing
-    }
-
-    canMove(translation, facing = this.facing) {
-        let testPosition = this.position.clone().add(translation)
-        return this.minoesPosition[facing].every(minoPosition => matrix.cellIsEmpty(minoPosition.clone().add(testPosition)))
-    }
-}
-
-class Ghost extends AbstractTetromino {}
-Ghost.prototype.minoesPosition = [
-    [P(0, 0, 0), P(0, 0, 0), P(0, 0, 0), P(0, 0, 0)],
-]
-
-class Tetromino extends AbstractTetromino {
-    static randomBag = []
-    static get random() {
-        if (!this.randomBag.length) this.randomBag = [I, J, L, O, S, T, Z]
-        return this.randomBag.pick()
-    }
-
-    constructor() {
-        super()
-        this.rotatedLast = false
-        this.rotationPoint4Used = false
-        this.holdEnabled = true
-        this.facing = 0
-        this.locking = false
-    }
-
-    move(translation, rotatedFacing, rotationPoint) {
-        if (this.canMove(translation, rotatedFacing)) {
-            this.position.add(translation)
-            this.rotatedLast = rotatedFacing
-            if (rotatedFacing != undefined) {
-                this.facing = rotatedFacing
-                if (rotationPoint == 4) this.rotationPoint4Used = true
-            }
-            if (this.canMove(TRANSLATION.DOWN)) {
-                this.locking = false
-                scheduler.clearTimeout(game.lockDown)
-            } else {
-                scheduler.resetTimeout(game.lockDown, this.lockDelay)
-                this.locking = true
-            }
-            this.updateGhost()
-            return true
-        }
-    }
-
-    rotate(rotation) {
-        let testFacing = (this.facing + rotation) % 4
-        return this.srs[this.facing][rotation].some(
-            (translation, rotationPoint) => this.move(translation, testFacing, rotationPoint)
-        )
-    }
-
-    set locking(locking) {
-        if (locking) {
-            this.children.forEach(mino => mino.material = this.lockedMaterial)
-            scene.remove(this.ghost)
-        } else {
-            this.children.forEach(mino => mino.material = this.material)
-            scene.add(this.ghost)
-        }
-    }
-
-    updateGhost() {
-        this.ghost.position.copy(this.position)
-        this.ghost.minoesPosition = this.minoesPosition
-        this.ghost.facing = this.facing
-        while (this.ghost.canMove(TRANSLATION.DOWN)) this.ghost.position.y--
-    }
-
-    get tSpin() {
-        return T_SPIN.NONE
-    }
-}
-// Super Rotation System
-// freedom of movement = srs[matrix.piece.facing][rotation]
-Tetromino.prototype.srs = [
-    { [ROTATION.CW]: [P(0, 0), P(-1, 0), P(-1, 1), P(0, -2), P(-1, -2)], [ROTATION.CCW]: [P(0, 0), P(1, 0), P(1, 1), P(0, -2), P(1, -2)] },
-    { [ROTATION.CW]: [P(0, 0), P(1, 0), P(1, -1), P(0, 2), P(1, 2)], [ROTATION.CCW]: [P(0, 0), P(1, 0), P(1, -1), P(0, 2), P(1, 2)] },
-    { [ROTATION.CW]: [P(0, 0), P(1, 0), P(1, 1), P(0, -2), P(1, -2)], [ROTATION.CCW]: [P(0, 0), P(-1, 0), P(-1, 1), P(0, -2), P(-1, -2)] },
-    { [ROTATION.CW]: [P(0, 0), P(-1, 0), P(-1, -1), P(0, 2), P(-1, 2)], [ROTATION.CCW]: [P(0, 0), P(-1, 0), P(-1, -1), P(0, 2), P(-1, 2)] },
-]
-Tetromino.prototype.lockedMaterial = new MinoMaterial(0xffffff)
-Tetromino.prototype.lockDelay = 500
-
-class I extends Tetromino { }
-I.prototype.minoesPosition = [
-    [P(-1, 0), P(0, 0), P(1, 0), P(2, 0)],
-    [P(1, 1), P(1, 0), P(1, -1), P(1, -2)],
-    [P(-1, -1), P(0, -1), P(1, -1), P(2, -1)],
-    [P(0, 1), P(0, 0), P(0, -1), P(0, -2)],
-]
-I.prototype.srs = [
-    { [ROTATION.CW]: [P(0, 0), P(-2, 0), P(1, 0), P(-2, -1), P(1, 2)], [ROTATION.CCW]: [P(0, 0), P(-1, 0), P(2, 0), P(-1, 2), P(2, -1)] },
-    { [ROTATION.CW]: [P(0, 0), P(-1, 0), P(2, 0), P(-1, 2), P(2, -1)], [ROTATION.CCW]: [P(0, 0), P(2, 0), P(-1, 0), P(2, 1), P(-1, -2)] },
-    { [ROTATION.CW]: [P(0, 0), P(2, 0), P(-1, 0), P(2, 1), P(-1, -2)], [ROTATION.CCW]: [P(0, 0), P(1, 0), P(-2, 0), P(1, -2), P(-2, 1)] },
-    { [ROTATION.CW]: [P(0, 0), P(1, 0), P(-2, 0), P(1, -2), P(-2, 1)], [ROTATION.CCW]: [P(0, 0), P(-2, 0), P(1, 0), P(-2, -1), P(1, 2)] },
-]
-I.prototype.material = new MinoMaterial(COLORS.I)
-I.prototype.ghostMaterial = new GhostMaterial(COLORS.I)
-
-class J extends Tetromino { }
-J.prototype.minoesPosition = [
-    [P(-1, 1), P(-1, 0), P(0, 0), P(1, 0)],
-    [P(0, 1), P(1, 1), P(0, 0), P(0, -1)],
-    [P(1, -1), P(-1, 0), P(0, 0), P(1, 0)],
-    [P(0, 1), P(-1, -1), P(0, 0), P(0, -1)],
-]
-J.prototype.material = new MinoMaterial(COLORS.J)
-J.prototype.ghostMaterial = new GhostMaterial(COLORS.J)
-
-class L extends Tetromino { }
-L.prototype.minoesPosition = [
-    [P(-1, 0), P(0, 0), P(1, 0), P(1, 1)],
-    [P(0, 1), P(0, 0), P(0, -1), P(1, -1)],
-    [P(-1, 0), P(0, 0), P(1, 0), P(-1, -1)],
-    [P(0, 1), P(0, 0), P(0, -1), P(-1, 1)],
-]
-L.prototype.material = new MinoMaterial(COLORS.L)
-L.prototype.ghostMaterial = new GhostMaterial(COLORS.L)
-
-class O extends Tetromino { }
-O.prototype.minoesPosition = [
-    [P(0, 0), P(1, 0), P(0, 1), P(1, 1)]
-]
-O.prototype.srs = [
-    { [ROTATION.CW]: [], [ROTATION.CCW]: [] }
-]
-O.prototype.material = new MinoMaterial(COLORS.O)
-O.prototype.ghostMaterial = new GhostMaterial(COLORS.O)
-
-class S extends Tetromino { }
-S.prototype.minoesPosition = [
-    [P(-1, 0), P(0, 0), P(0, 1), P(1, 1)],
-    [P(0, 1), P(0, 0), P(1, 0), P(1, -1)],
-    [P(-1, -1), P(0, 0), P(1, 0), P(0, -1)],
-    [P(-1, 1), P(0, 0), P(-1, 0), P(0, -1)],
-]
-S.prototype.material = new MinoMaterial(COLORS.S)
-S.prototype.ghostMaterial = new GhostMaterial(COLORS.S)
-
-class T extends Tetromino {
-    get tSpin() {
-        if (this.rotatedLast) {
-            let [a, b, c, d] = this.tSlots[matrix.piece.facing]
-                .map(p => !matrix.cellIsEmpty(p.clone().add(this.position)))
-            if (a && b && (c || d))
-                return T_SPIN.T_SPIN
-            else if (c && d && (a || b))
-                return this.rotationPoint4Used ? T_SPIN.T_SPIN : T_SPIN.MINI
-        }
-        return T_SPIN.NONE
-    }
-}
-T.prototype.minoesPosition = [
-    [P(-1, 0), P(0, 0), P(1, 0), P(0, 1)],
-    [P(0, 1), P(0, 0), P(1, 0), P(0, -1)],
-    [P(-1, 0), P(0, 0), P(1, 0), P(0, -1)],
-    [P(0, 1), P(0, 0), P(0, -1), P(-1, 0)],
-]
-T.prototype.tSlots = [
-    [P(-1, 1), P(1, 1), P(1, -1), P(-1, -1)],
-    [P(1, 1), P(1, -1), P(-1, -1), P(-1, 1)],
-    [P(1, -1), P(-1, -1), P(-1, 1), P(1, 1)],
-    [P(-1, -1), P(-1, 1), P(1, 1), P(1, -1)],
-]
-T.prototype.material = new MinoMaterial(COLORS.T)
-T.prototype.ghostMaterial = new GhostMaterial(COLORS.T)
-
-class Z extends Tetromino { }
-Z.prototype.minoesPosition = [
-    [P(-1, 1), P(0, 1), P(0, 0), P(1, 0)],
-    [P(1, 1), P(1, 0), P(0, 0), P(0, -1)],
-    [P(-1, 0), P(0, 0), P(0, -1), P(1, -1)],
-    [P(0, 1), P(-1, 0), P(0, 0), P(-1, -1)]
-]
-Z.prototype.material = new MinoMaterial(COLORS.Z)
-Z.prototype.ghostMaterial = new GhostMaterial(COLORS.Z)
-
-
-/* world */
+/* Scene */
 
 const loadingManager = new THREE.LoadingManager()
 loadingManager.onStart = function (url, itemsLoaded, itemsTotal) {
@@ -469,9 +37,10 @@ loadingManager.onError = function (url) {
     loadingPercent.innerText = "Erreur"
 }
 
-const world = {}
-
 const scene = new THREE.Scene()
+
+scene.vortex = new Vortex(loadingManager)
+scene.add(scene.vortex)
 
 const renderer = new THREE.WebGLRenderer({
     powerPreference: "high-performance",
@@ -483,99 +52,22 @@ renderer.setClearColor(0x000000, 10)
 renderer.toneMapping = THREE.ACESFilmicToneMapping
 document.body.appendChild(renderer.domElement)
 
-world.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
-world.camera.position.set(5, 0, 16)
+scene.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
+scene.camera.position.set(5, 0, 16)
+        
+scene.ambientLight = new THREE.AmbientLight(0xffffff, 0.2)
+scene.add(scene.ambientLight)
 
-const controls = new TetraControls(world.camera, renderer.domElement)
+scene.directionalLight = new THREE.DirectionalLight(0xffffff, 20)
+scene.directionalLight.position.set(5, -100, -16)
+scene.add(scene.directionalLight)
 
-
-const GLOBAL_ROTATION = 0.028
-
-const darkTextureRotation = 0.006
-const darkMoveForward = 0.007
-
-const colorFullTextureRotation = 0.006
-const colorFullMoveForward = 0.02
-
-const commonCylinderGeometry = new THREE.CylinderGeometry(25, 25, 500, 12, 1, true)
-
-world.darkCylinder = new THREE.Mesh(
-    commonCylinderGeometry,
-    new THREE.MeshLambertMaterial({
-        side: THREE.BackSide,
-        map: new THREE.TextureLoader(loadingManager).load("images/plasma.jpg", (texture) => {
-            texture.wrapS = THREE.RepeatWrapping
-            texture.wrapT = THREE.MirroredRepeatWrapping
-            texture.repeat.set(1, 1)
-        }),
-        blending: THREE.AdditiveBlending,
-        opacity: 0.1
-    })
-)
-world.darkCylinder.position.set(5, 10, -10)
-scene.add(world.darkCylinder)
-
-world.colorFullCylinder = new THREE.Mesh(
-    commonCylinderGeometry,
-    new THREE.MeshBasicMaterial({
-        side: THREE.BackSide,
-        map: new THREE.TextureLoader(loadingManager).load("images/plasma2.jpg", (texture) => {
-            texture.wrapS = THREE.RepeatWrapping
-            texture.wrapT = THREE.MirroredRepeatWrapping
-            texture.repeat.set(2, 1)
-        }),
-        blending: THREE.AdditiveBlending,
-        opacity: 0.6
-    })
-)
-world.colorFullCylinder.position.set(5, 10, -10)
-scene.add(world.colorFullCylinder)
-
-world.ambientLight = new THREE.AmbientLight(0xffffff, 0.2)
-scene.add(world.ambientLight)
-
-world.directionalLight = new THREE.DirectionalLight(0xffffff, 20)
-world.directionalLight.position.set(5, -100, -16)
-scene.add(world.directionalLight)
-
-const holdQueue = new THREE.Group()
-holdQueue.position.set(-4, SKYLINE - 2)
+const holdQueue = new HoldQueue()
 scene.add(holdQueue)
 const matrix = new Matrix()
 scene.add(matrix)
-scene.add(matrix.edge)
 const nextQueue = new NextQueue()
-nextQueue.position.set(13, SKYLINE - 2)
 scene.add(nextQueue)
-Tetromino.prototype.ghost = new Ghost()
-
-let clock = new THREE.Clock()
-
-function animate() {
-
-    const delta = clock.getDelta()
-
-    world.darkCylinder.rotation.y            += GLOBAL_ROTATION * delta
-    world.darkCylinder.material.map.offset.y += darkMoveForward * delta
-    world.darkCylinder.material.map.offset.x += darkTextureRotation * delta
-
-    world.colorFullCylinder.rotation.y            += GLOBAL_ROTATION * delta
-    world.colorFullCylinder.material.map.offset.y += colorFullMoveForward * delta
-    world.colorFullCylinder.material.map.offset.x += colorFullTextureRotation * delta
-
-    controls.update()
-    matrix.update(delta)
-    gui.update()
-
-    renderer.render(scene, world.camera)
-    envCamera.update(renderer, scene)
-}
-
-window.addEventListener("resize", () => {
-    renderer.setSize(window.innerWidth, window.innerHeight)
-    world.camera.aspect = window.innerWidth / window.innerHeight
-    world.camera.updateProjectionMatrix()
-})
 
 messagesSpan.onanimationend = function (event) {
     event.target.remove()
@@ -596,19 +88,17 @@ let game = {
         holdQueue.remove(holdQueue.piece)
         holdQueue.piece = undefined
         if (nextQueue.pieces) nextQueue.pieces.forEach(piece => nextQueue.remove(piece))
-        while(matrix.children.length) matrix.remove(matrix.children[0])
         matrix.init()
         
         scene.remove(matrix.piece)
         matrix.piece = null
-        world.music.currentTime = 0
-        matrix.edge.visible = true
+        scene.music.currentTime = 0
+        matrix.visible = true
 
         this.playing = true
         stats.clock.start()
 
         renderer.domElement.tabIndex = 1
-        renderer.domElement.onblur = this.pause
         gui.domElement.tabIndex = 1
         gui.domElement.onfocus = game.pause
 
@@ -621,6 +111,7 @@ let game = {
     resume: function() {
         document.onkeydown = onkeydown
         document.onkeyup = onkeyup
+        window.onblur = game.pause
 
         document.body.classList.remove("pause")
         gui.resumeButton.hide()
@@ -628,22 +119,16 @@ let game = {
 
         stats.clock.start()
         stats.clock.elapsedTime = stats.elapsedTime
-        world.music.play()
+        scene.music.play()
 
         if (matrix.piece) scheduler.setInterval(game.fall, stats.fallPeriod)
         else this.generate()
     },
 
     generate: function(nextPiece=nextQueue.shift()) {
+        nextPiece.lockDelay = stats.lockDelay
         matrix.piece = nextPiece
-        matrix.piece.position.set(4, SKYLINE)
-        matrix.piece.lockDelay = stats.lockDelay
-        scene.add(matrix.piece)
-        matrix.piece.updateGhost()
-        matrix.piece.ghost.children.forEach((mino) => {
-            mino.material = matrix.piece.ghostMaterial
-        })
-        scene.add(matrix.piece.ghost)
+        matrix.piece.onlockdown = game.lockDown
     
         if (matrix.piece.canMove(TRANSLATION.NONE)) {
             scheduler.setInterval(game.fall, stats.fallPeriod)
@@ -661,16 +146,16 @@ let game = {
         scheduler.clearInterval(game.fall)
     
         if (matrix.lock(matrix.piece)) {
-            scene.remove(matrix.piece)
             let tSpin = matrix.piece.tSpin
             let nbClearedLines = matrix.clearLines()
+            matrix.remove(matrix.piece)
             if (settings.sfxVolume) {
                 if (nbClearedLines == 4 || (tSpin && nbClearedLines)) {
-                    world.tetrisSound.currentTime = 0
-                    world.tetrisSound.play()
+                    scene.tetrisSound.currentTime = 0
+                    scene.tetrisSound.play()
                 } else if (nbClearedLines || tSpin) {
-                    world.lineClearSound.currentTime = 0
-                    world.lineClearSound.play()
+                    scene.lineClearSound.currentTime = 0
+                    scene.lineClearSound.play()
                 }
             }
             stats.lockDown(nbClearedLines, tSpin)
@@ -690,8 +175,9 @@ let game = {
         scheduler.clearTimeout(repeat)
         scheduler.clearInterval(autorepeat)
     
-        world.music.pause()
+        scene.music.pause()
         document.onkeydown = null
+        window.onblur = null
         
         pauseSpan.onfocus = game.resume
         document.body.classList.add("pause")
@@ -703,13 +189,12 @@ let game = {
         matrix.piece.locking = false
 
         document.onkeydown = null
-        renderer.domElement.onblur = null
+        window.onblur = null
         renderer.domElement.onfocus = null
         gui.domElement.onfocus = null
         game.playing = false
-        world.music.pause()
+        scene.music.pause()
         stats.clock.stop()
-        localStorage["teTraHighScore"] = stats.highScore
         messagesSpan.addNewChild("div", { className: "show-level-animation", innerHTML: `<h1>GAME<br/>OVER</h1>` })
 
         gui.pauseButton.hide()
@@ -718,7 +203,10 @@ let game = {
     },
 }
 
-window.addEventListener("pieceLocked", game.lockDown)
+
+/* Handle player inputs */
+
+const controls = new TetraControls(scene.camera, renderer.domElement)
 
 let playerActions = {
     moveLeft: () => matrix.piece.move(TRANSLATION.LEFT),
@@ -735,15 +223,15 @@ let playerActions = {
 
     hardDrop: function () {
         scheduler.clearTimeout(game.lockDown)
-        world.hardDropSound.play()
+        scene.hardDropSound.play()
         if (settings.sfxVolume) {
-            world.hardDropSound.currentTime = 0
-            world.hardDropSound.play()
+            scene.hardDropSound.currentTime = 0
+            scene.hardDropSound.play()
         }
         while (matrix.piece.move(TRANSLATION.DOWN)) stats.score += 2
         game.lockDown()
-        hardDroppedMatrix.reset()
-        hardDroppedMatrix.play()
+        matrix.hardDropAnimation.reset()
+        matrix.hardDropAnimation.play()
     },
 
     hold: function () {
@@ -753,11 +241,6 @@ let playerActions = {
 
             let heldpiece = holdQueue.piece
             holdQueue.piece = matrix.piece
-            holdQueue.piece.holdEnabled = false
-            holdQueue.piece.locking = false
-            holdQueue.piece.position.set(0, 0)
-            holdQueue.piece.facing = FACING.NORTH
-            holdQueue.add(holdQueue.piece)
             game.generate(heldpiece)
         }
     },
@@ -765,7 +248,6 @@ let playerActions = {
     pause: game.pause,
 }
 
-// Handle player inputs
 const REPEATABLE_ACTIONS = [
     playerActions.moveLeft,
     playerActions.moveRight,
@@ -828,46 +310,65 @@ function onkeyup(event) {
 /* Sounds */
 
 const listener = new THREE.AudioListener()
-world.camera.add( listener )
+scene.camera.add( listener )
 const audioLoader = new THREE.AudioLoader(loadingManager)
-world.music = new THREE.Audio(listener)
+
+scene.music = new THREE.Audio(listener)
 audioLoader.load('audio/Tetris_CheDDer_OC_ReMix.mp3', function( buffer ) {
-	world.music.setBuffer(buffer)
-	world.music.setLoop(true)
-    world.music.setVolume(settings.musicVolume/100)
-	if (game.playing) world.music.play()
+	scene.music.setBuffer(buffer)
+	scene.music.setLoop(true)
+    scene.music.setVolume(settings.musicVolume/100)
+	if (game.playing) scene.music.play()
 })
-world.lineClearSound = new THREE.Audio(listener)
+scene.lineClearSound = new THREE.Audio(listener)
 audioLoader.load('audio/line-clear.ogg', function( buffer ) {
-    world.lineClearSound.setBuffer(buffer)
-    world.lineClearSound.setVolume(settings.sfxVolume/100)
+    scene.lineClearSound.setBuffer(buffer)
+    scene.lineClearSound.setVolume(settings.sfxVolume/100)
 })
-world.tetrisSound = new THREE.Audio(listener)
+scene.tetrisSound = new THREE.Audio(listener)
 audioLoader.load('audio/tetris.ogg', function( buffer ) {
-    world.tetrisSound.setBuffer(buffer)
-    world.tetrisSound.setVolume(settings.sfxVolume/100)
+    scene.tetrisSound.setBuffer(buffer)
+    scene.tetrisSound.setVolume(settings.sfxVolume/100)
 })
-world.hardDropSound = new THREE.Audio(listener)
+scene.hardDropSound = new THREE.Audio(listener)
 audioLoader.load('audio/hard-drop.wav', function( buffer ) {
-    world.hardDropSound.setBuffer(buffer)
-    world.hardDropSound.setVolume(settings.sfxVolume/100)
+    scene.hardDropSound.setBuffer(buffer)
+    scene.hardDropSound.setVolume(settings.sfxVolume/100)
 })
 
 
-let scheduler = new Scheduler()
-let stats = new Stats()
-let settings  = new Settings(playerActions)
+let stats     = new Stats()
+let settings  = new Settings()
 
-var gui = new TetraGUI(game, settings, stats, world)
+var gui = new TetraGUI(game, settings, stats, scene)
 
-gui.load()
+const clock = new THREE.Clock()
+
+function animate() {
+
+    const delta = clock.getDelta()
+
+    scene.vortex.update(delta)
+    matrix.update(delta)
+    controls.update()
+    gui.update()
+
+    renderer.render(scene, scene.camera)
+    environnement.camera.update(renderer, scene)
+}
+
+window.addEventListener("resize", () => {
+    renderer.setSize(window.innerWidth, window.innerHeight)
+    scene.camera.aspect = window.innerWidth / window.innerHeight
+    scene.camera.updateProjectionMatrix()
+})
 
 window.onbeforeunload = function (event) {
     gui.save()
-    if (game.playing) return false
+    localStorage["teTraHighScore"] = stats.highScore
+    return !game.playing
 }
 
-
 if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('jsm/service-worker.js');
+    navigator.serviceWorker.register('./jsm/service-worker.js');
 }

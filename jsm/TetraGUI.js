@@ -1,9 +1,10 @@
 import { GUI } from 'three/addons/libs/lil-gui.module.min.js'
-import * as FPS from 'three/addons/libs/stats.module.js';
+import * as FPS from 'three/addons/libs/stats.module.js'
+import { I, J, L, O, S, T, Z } from './gamelogic.js'
 
 
 class TetraGUI extends GUI {
-    constructor(game, settings, stats, world) {
+    constructor(game, settings, stats, scene) {
         super({title: "teTra"})
 
         this.startButton = this.add(game, "start").name("Jouer").hide()
@@ -51,44 +52,46 @@ class TetraGUI extends GUI {
         this.settings.volume = this.settings.addFolder("Volume").open()
         this.settings.volume.add(settings,"musicVolume").name("Musique").min(0).max(100).step(1).onChange((volume) => {
             if (volume) {
-                world.music.setVolume(volume/100)
-                if (game.playing) world.music.play()
+                scene.music.setVolume(volume/100)
+                if (game.playing) scene.music.play()
             } else {
-                world.music.pause()
+                scene.music.pause()
             }
         })
         this.settings.volume.add(settings,"sfxVolume").name("Effets").min(0).max(100).step(1).onChange((volume) => {
-            world.lineClearSound.setVolume(volume/100)
-            world.tetrisSound.setVolume(volume/100)
-            world.hardDropSound.setVolume(volume/100)
+            scene.lineClearSound.setVolume(volume/100)
+            scene.tetrisSound.setVolume(volume/100)
+            scene.hardDropSound.setVolume(volume/100)
         })
 
         if (window.location.search.includes("debug")) {
             this.debug = this.addFolder("debug")
             let cameraPositionFolder = this.debug.addFolder("camera.position")
-            cameraPositionFolder.add(world.camera.position, "x")
-            cameraPositionFolder.add(world.camera.position, "y")
-            cameraPositionFolder.add(world.camera.position, "z")
+            cameraPositionFolder.add(scene.camera.position, "x")
+            cameraPositionFolder.add(scene.camera.position, "y")
+            cameraPositionFolder.add(scene.camera.position, "z")
         
             let lightFolder = this.debug.addFolder("lights intensity")
-            lightFolder.add(world.ambientLight, "intensity").name("ambient").min(0).max(20)
-            lightFolder.add(world.directionalLight, "intensity").name("directional").min(0).max(20)
+            lightFolder.add(scene.ambientLight, "intensity").name("ambient").min(0).max(20)
+            lightFolder.add(scene.directionalLight, "intensity").name("directional").min(0).max(20)
         
             let materialsFolder = this.debug.addFolder("materials opacity")
-            materialsFolder.add(world.darkCylinder.material, "opacity").name("dark").min(0).max(1)
-            materialsFolder.add(world.colorFullCylinder.material, "opacity").name("colorFull").min(0).max(1)
-            /*materialsFolder.add(I.prototype.material, "reflectivity").min(0).max(2).onChange(() => {
+            materialsFolder.add(scene.vortex.darkCylinder.material, "opacity").name("dark").min(0).max(1)
+            materialsFolder.add(scene.vortex.colorFullCylinder.material, "opacity").name("colorFull").min(0).max(1)
+            materialsFolder.add(I.prototype.material, "reflectivity").min(0).max(2).onChange(() => {
                 J.prototype.material.reflectivity = I.prototype.material.reflectivity
                 L.prototype.material.reflectivity = I.prototype.material.reflectivity
                 O.prototype.material.reflectivity = I.prototype.material.reflectivity
                 S.prototype.material.reflectivity = I.prototype.material.reflectivity
                 T.prototype.material.reflectivity = I.prototype.material.reflectivity
                 Z.prototype.material.reflectivity = I.prototype.material.reflectivity
-            })*/
+            })
 
             this.fps = new FPS.default()
             document.body.appendChild(this.fps.dom)
         }
+
+        this.load()
     }
 
     load() {
