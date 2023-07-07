@@ -2,6 +2,8 @@ import * as THREE from 'three'
 import { scheduler } from './scheduler.js'
 
 
+Array.prototype.pick = function () { return this.splice(Math.floor(Math.random() * this.length), 1)[0] }
+
 let P = (x, y, z = 0) => new THREE.Vector3(x, y, z)
 
 const GRAVITY = -20

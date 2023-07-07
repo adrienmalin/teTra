@@ -8,8 +8,6 @@ import { TetraControls } from './jsm/TetraControls.js'
 import { Vortex } from './jsm/Vortex.js'
 
 
-Array.prototype.pick = function () { return this.splice(Math.floor(Math.random() * this.length), 1)[0] }
-
 HTMLElement.prototype.addNewChild = function (tag, properties) {
     let child = document.createElement(tag)
     for (let key in properties) {
@@ -58,8 +56,8 @@ scene.camera.position.set(5, 0, 16)
 scene.ambientLight = new THREE.AmbientLight(0xffffff, 0.2)
 scene.add(scene.ambientLight)
 
-scene.directionalLight = new THREE.DirectionalLight(0xffffff, 20)
-scene.directionalLight.position.set(5, -100, -16)
+scene.directionalLight = new THREE.DirectionalLight(0xffffff, 15)
+scene.directionalLight.position.set(5, 0, -10)
 scene.add(scene.directionalLight)
 
 const holdQueue = new HoldQueue()

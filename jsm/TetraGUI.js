@@ -66,19 +66,24 @@ class TetraGUI extends GUI {
 
         if (window.location.search.includes("debug")) {
             this.debug = this.addFolder("debug")
-            let cameraPositionFolder = this.debug.addFolder("camera.position")
-            cameraPositionFolder.add(scene.camera.position, "x")
-            cameraPositionFolder.add(scene.camera.position, "y")
-            cameraPositionFolder.add(scene.camera.position, "z")
+            let cameraPosition = this.debug.addFolder("camera.position")
+            cameraPosition.add(scene.camera.position, "x")
+            cameraPosition.add(scene.camera.position, "y")
+            cameraPosition.add(scene.camera.position, "z")
+            
+            let directionalLightPosition = this.debug.addFolder("directionalLight.position")
+            directionalLightPosition.add(scene.directionalLight.position, "x")
+            directionalLightPosition.add(scene.directionalLight.position, "y")
+            directionalLightPosition.add(scene.directionalLight.position, "z")
         
-            let lightFolder = this.debug.addFolder("lights intensity")
-            lightFolder.add(scene.ambientLight, "intensity").name("ambient").min(0).max(20)
-            lightFolder.add(scene.directionalLight, "intensity").name("directional").min(0).max(20)
+            let light = this.debug.addFolder("lights intensity")
+            light.add(scene.ambientLight, "intensity").name("ambient").min(0).max(20)
+            light.add(scene.directionalLight, "intensity").name("directional").min(0).max(20)
         
-            let materialsFolder = this.debug.addFolder("materials opacity")
-            materialsFolder.add(scene.vortex.darkCylinder.material, "opacity").name("dark").min(0).max(1)
-            materialsFolder.add(scene.vortex.colorFullCylinder.material, "opacity").name("colorFull").min(0).max(1)
-            materialsFolder.add(I.prototype.material, "reflectivity").min(0).max(2).onChange(() => {
+            let materials = this.debug.addFolder("materials opacity")
+            materials.add(scene.vortex.darkCylinder.material, "opacity").name("dark").min(0).max(1)
+            materials.add(scene.vortex.colorFullCylinder.material, "opacity").name("colorFull").min(0).max(1)
+            materials.add(I.prototype.material, "reflectivity").min(0).max(2).onChange(() => {
                 J.prototype.material.reflectivity = I.prototype.material.reflectivity
                 L.prototype.material.reflectivity = I.prototype.material.reflectivity
                 O.prototype.material.reflectivity = I.prototype.material.reflectivity
