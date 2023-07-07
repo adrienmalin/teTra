@@ -14,7 +14,7 @@ class Vortex extends THREE.Group {
     constructor(loadingManager) {
         super()
 
-        const commonCylinderGeometry = new THREE.CylinderGeometry(25, 25, 500, 12, 1, true)
+        const commonCylinderGeometry = new THREE.CylinderGeometry(35, 35, 500, 12, 1, true)
         
         this.darkCylinder = new THREE.Mesh(
             commonCylinderGeometry,

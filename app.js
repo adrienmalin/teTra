@@ -53,11 +53,11 @@ document.body.appendChild(renderer.domElement)
 scene.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
 scene.camera.position.set(5, 0, 16)
         
-scene.ambientLight = new THREE.AmbientLight(0xffffff, 0.2)
+scene.ambientLight = new THREE.AmbientLight(0xffffff, 0.1)
 scene.add(scene.ambientLight)
 
 scene.directionalLight = new THREE.DirectionalLight(0xffffff, 15)
-scene.directionalLight.position.set(5, 0, -10)
+scene.directionalLight.position.set(5, 100, -10)
 scene.add(scene.directionalLight)
 
 const holdQueue = new HoldQueue()
