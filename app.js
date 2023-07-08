@@ -5,7 +5,7 @@ import { Settings } from './jsm/Settings.js'
 import { Stats } from './jsm/Stats.js'
 import { TetraGUI } from './jsm/TetraGUI.js'
 import { TetraControls } from './jsm/TetraControls.js'
-import { Vortex } from './jsm/Vortex.js'
+import { TetraScene } from './jsm/TetraScene.js'
 
 
 HTMLElement.prototype.addNewChild = function (tag, properties) {
@@ -14,61 +14,6 @@ HTMLElement.prototype.addNewChild = function (tag, properties) {
         child[key] = properties[key]
     }
     this.appendChild(child)
-}
-
-
-/* Scene */
-
-const loadingManager = new THREE.LoadingManager()
-loadingManager.onStart = function (url, itemsLoaded, itemsTotal) {
-    loadingPercent.innerText = "0%"
-}
-loadingManager.onProgress = function (url, itemsLoaded, itemsTotal) {
-    loadingPercent.innerText = Math.floor(100 * itemsLoaded / itemsTotal) + '%'
-}
-loadingManager.onLoad = function () {
-    loaddingCircle.remove()
-    renderer.setAnimationLoop(animate)
-    gui.startButton.show()
-}
-loadingManager.onError = function (url) {
-    loadingPercent.innerText = "Erreur"
-}
-
-const scene = new THREE.Scene()
-
-scene.vortex = new Vortex(loadingManager)
-scene.add(scene.vortex)
-
-const renderer = new THREE.WebGLRenderer({
-    powerPreference: "high-performance",
-    antialias: true,
-    stencil: false
-})
-renderer.setSize(window.innerWidth, window.innerHeight)
-renderer.setClearColor(0x000000, 10)
-renderer.toneMapping = THREE.ACESFilmicToneMapping
-document.body.appendChild(renderer.domElement)
-
-scene.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
-scene.camera.position.set(5, 0, 16)
-        
-scene.ambientLight = new THREE.AmbientLight(0xffffff, 0.1)
-scene.add(scene.ambientLight)
-
-scene.directionalLight = new THREE.DirectionalLight(0xffffff, 15)
-scene.directionalLight.position.set(5, 100, -10)
-scene.add(scene.directionalLight)
-
-const holdQueue = new HoldQueue()
-scene.add(holdQueue)
-const matrix = new Matrix()
-scene.add(matrix)
-const nextQueue = new NextQueue()
-scene.add(nextQueue)
-
-messagesSpan.onanimationend = function (event) {
-    event.target.remove()
 }
 
 
@@ -205,8 +150,6 @@ let game = {
 
 /* Handle player inputs */
 
-const controls = new TetraControls(scene.camera, renderer.domElement)
-
 let playerActions = {
     moveLeft: () => matrix.piece.move(TRANSLATION.LEFT),
 
@@ -306,48 +249,63 @@ function onkeyup(event) {
 }
 
 
-/* Sounds */
+/* Scene */
 
-const listener = new THREE.AudioListener()
-scene.camera.add( listener )
-const audioLoader = new THREE.AudioLoader(loadingManager)
+const loadingManager = new THREE.LoadingManager()
+loadingManager.onStart = function (url, itemsLoaded, itemsTotal) {
+    loadingPercent.innerText = "0%"
+}
+loadingManager.onProgress = function (url, itemsLoaded, itemsTotal) {
+    loadingPercent.innerText = Math.floor(100 * itemsLoaded / itemsTotal) + '%'
+}
+loadingManager.onLoad = function () {
+    loaddingCircle.remove()
+    renderer.setAnimationLoop(animate)
+    gui.startButton.show()
+}
+loadingManager.onError = function (url) {
+    loadingPercent.innerText = "Erreur"
+}
 
-scene.music = new THREE.Audio(listener)
-audioLoader.load('audio/Tetris_CheDDer_OC_ReMix.mp3', function( buffer ) {
-	scene.music.setBuffer(buffer)
-	scene.music.setLoop(true)
-    scene.music.setVolume(settings.musicVolume/100)
-	if (game.playing) scene.music.play()
+
+const renderer = new THREE.WebGLRenderer({
+    powerPreference: "high-performance",
+    antialias: true,
+    stencil: false
 })
-scene.lineClearSound = new THREE.Audio(listener)
-audioLoader.load('audio/line-clear.ogg', function( buffer ) {
-    scene.lineClearSound.setBuffer(buffer)
-    scene.lineClearSound.setVolume(settings.sfxVolume/100)
-})
-scene.tetrisSound = new THREE.Audio(listener)
-audioLoader.load('audio/tetris.ogg', function( buffer ) {
-    scene.tetrisSound.setBuffer(buffer)
-    scene.tetrisSound.setVolume(settings.sfxVolume/100)
-})
-scene.hardDropSound = new THREE.Audio(listener)
-audioLoader.load('audio/hard-drop.wav', function( buffer ) {
-    scene.hardDropSound.setBuffer(buffer)
-    scene.hardDropSound.setVolume(settings.sfxVolume/100)
-})
+renderer.setSize(window.innerWidth, window.innerHeight)
+renderer.setClearColor(0x000000, 10)
+renderer.toneMapping = THREE.ACESFilmicToneMapping
+document.body.appendChild(renderer.domElement)
 
 
-let stats     = new Stats()
-let settings  = new Settings()
+const stats     = new Stats()
+const settings  = new Settings()
 
-var gui = new TetraGUI(game, settings, stats, scene)
+const scene = new TetraScene(loadingManager, settings)
+
+const gui = new TetraGUI(game, settings, stats, scene)
 
 const clock = new THREE.Clock()
+
+const holdQueue = new HoldQueue()
+scene.add(holdQueue)
+const matrix = new Matrix()
+scene.add(matrix)
+const nextQueue = new NextQueue()
+scene.add(nextQueue)
+
+const controls = new TetraControls(scene.camera, renderer.domElement)
+
+messagesSpan.onanimationend = function (event) {
+    event.target.remove()
+}
+
 
 function animate() {
 
     const delta = clock.getDelta()
-
-    scene.vortex.update(delta)
+    scene.update(delta)
     matrix.update(delta)
     controls.update()
     gui.update()
