@@ -6,6 +6,7 @@ import { I, J, L, O, S, T, Z } from './gamelogic.js'
 class TetraGUI extends GUI {
     constructor(game, settings, stats, scene) {
         super({title: "teTra"})
+        this.domElement.tabIndex = 1
 
         this.startButton = this.add(game, "start").name("Jouer").hide()
         this.pauseButton = this.add(game, "pause").name("Pause").hide()

@@ -425,7 +425,7 @@ class Matrix extends THREE.Group {
     updateUnlockedMinoes(delta) {
         this.unlockedMinoes.forEach(mino => {
             mino.update(delta)
-            if (Math.sqrt(mino.position.x * mino.position.x + mino.position.z * mino.position.z) > 40) {
+            if (Math.sqrt(mino.position.x * mino.position.x + mino.position.z * mino.position.z) > 40 || mino.position.y < -50) {
                 this.remove(mino)
                 this.unlockedMinoes.delete(mino)
             }

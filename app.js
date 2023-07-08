@@ -110,6 +110,7 @@ let game = {
         document.onkeydown = onkeydown
         document.onkeyup = onkeyup
         window.onblur = game.pause
+        gui.domElement.onfocus = game.pause
 
         document.body.classList.remove("pause")
         gui.resumeButton.hide()

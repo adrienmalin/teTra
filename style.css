@@ -176,8 +176,9 @@ h1 {
     height: 100%;
     z-index: 10;
     color: rgba(255, 255, 255, 20%);
-    text-align: center;
     justify-content: center;
     align-items: center;
-    font-size: 10vh;
+    font-size: 20vh;
+    font-weight: 800;
+    letter-spacing: .1em;
 }
