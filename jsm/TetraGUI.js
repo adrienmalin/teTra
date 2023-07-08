@@ -1,3 +1,4 @@
+import * as THREE from 'three'
 import { GUI } from 'three/addons/libs/lil-gui.module.min.js'
 import * as FPS from 'three/addons/libs/stats.module.js'
 import { I, J, L, O, S, T, Z } from './gamelogic.js'
@@ -27,6 +28,52 @@ class TetraGUI extends GUI {
         this.settings = this.addFolder("Options").open()
 
         this.settings.add(settings, "startLevel").name("Niveau initial").min(1).max(15).step(1)
+        this.settings.add(scene.vortex, "background", ["Plasma", "Espace"]).name("Fond").onChange(background => {
+            const loadingManager = new THREE.LoadingManager()
+            let darkTexture, colorfullTexture
+            switch (background) {
+                case "Plasma":
+                    darkTexture = new THREE.TextureLoader(loadingManager).load("./images/plasma.jpg", texture => {
+                        texture.wrapS = THREE.RepeatWrapping
+                        texture.wrapT = THREE.MirroredRepeatWrapping
+                        texture.repeat.set(1, 1)
+                    })
+                    colorfullTexture = new THREE.TextureLoader(loadingManager).load("./images/plasma2.jpg", texture => {
+                        texture.wrapS = THREE.RepeatWrapping
+                        texture.wrapT = THREE.MirroredRepeatWrapping
+                        texture.repeat.set(2, 1)
+                    })
+                    loadingManager.onLoad = function() {
+                        scene.vortex.darkCylinder.material.map = darkTexture
+                        scene.vortex.darkCylinder.material.opacity = 0.1
+                        scene.vortex.colorFullCylinder.material.map = colorfullTexture
+                        scene.vortex.colorFullCylinder.material.opacity = 0.6
+                    }
+                    scene.ambientLight.intensity     = 2
+                    scene.directionalLight.intensity = 3
+                break
+                case "Espace":
+                    darkTexture = new THREE.TextureLoader(loadingManager).load("./images/dark.jpg", texture => {
+                        texture.wrapS = THREE.RepeatWrapping
+                        texture.wrapT = THREE.MirroredRepeatWrapping
+                        texture.repeat.set(1, 1)
+                    })
+                    colorfullTexture = new THREE.TextureLoader(loadingManager).load("./images/colorfull.jpg", texture => {
+                        texture.wrapS = THREE.RepeatWrapping
+                        texture.wrapT = THREE.MirroredRepeatWrapping
+                        texture.repeat.set(1, 1)
+                    })
+                    loadingManager.onLoad = function() {
+                        scene.vortex.darkCylinder.material.map = darkTexture
+                        scene.vortex.darkCylinder.material.opacity = 0.2
+                        scene.vortex.colorFullCylinder.material.map = colorfullTexture
+                        scene.vortex.colorFullCylinder.material.opacity = 0.2
+                        scene.ambientLight.intensity = 2
+                        scene.directionalLight.intensity = 3
+                    }
+                break
+            }
+        })
 
         this.settings.key = this.settings.addFolder("Commandes").open()
         let moveLeftKeyController = this.settings.key.add(settings.key, "moveLeft").name('Gauche')
@@ -51,7 +98,7 @@ class TetraGUI extends GUI {
         this.settings.delay.add(settings,"dasDelay").name("DAS (ms)").min(100).max(500).step(5);
 
         this.settings.volume = this.settings.addFolder("Volume").open()
-        this.settings.volume.add(settings,"musicVolume").name("Musique").min(0).max(100).step(1).onChange((volume) => {
+        this.settings.volume.add(settings,"musicVolume").name("Musique").min(0).max(100).step(1).onChange(volume => {
             if (volume) {
                 scene.music.setVolume(volume/100)
                 if (game.playing) scene.music.play()
@@ -59,7 +106,7 @@ class TetraGUI extends GUI {
                 scene.music.pause()
             }
         })
-        this.settings.volume.add(settings,"sfxVolume").name("Effets").min(0).max(100).step(1).onChange((volume) => {
+        this.settings.volume.add(settings,"sfxVolume").name("Effets").min(0).max(100).step(1).onChange(volume => {
             scene.lineClearSound.setVolume(volume/100)
             scene.tetrisSound.setVolume(volume/100)
             scene.hardDropSound.setVolume(volume/100)
