@@ -1,20 +1,20 @@
 import * as THREE from 'three'
 
 
-const GLOBAL_ROTATION = 0.028
-
-const darkTextureRotation = 0.006
-const darkMoveForward = 0.007
-
-const colorFullTextureRotation = 0.006
-const colorFullMoveForward = 0.02
-
-
 class Vortex extends THREE.Group {
     constructor(loadingManager) {
         super()
 
         const commonCylinderGeometry = new THREE.CylinderGeometry(35, 35, 500, 12, 1, true)
+
+
+        this.globalRotation = 0.028
+        
+        this.darkTextureRotation = 0.006
+        this.darkMoveForward = 0.007
+        
+        this.colorFullTextureRotation = 0.006
+        this.colorFullMoveForward = 0.02
 
         this.background = "Plasma"
         
@@ -52,13 +52,13 @@ class Vortex extends THREE.Group {
     }
 
     update(delta) {
-        this.darkCylinder.rotation.y            += GLOBAL_ROTATION * delta
-        this.darkCylinder.material.map.offset.y += darkMoveForward * delta
-        this.darkCylinder.material.map.offset.x += darkTextureRotation * delta
+        this.darkCylinder.rotation.y            += this.globalRotation * delta
+        this.darkCylinder.material.map.offset.y += this.darkMoveForward * delta
+        this.darkCylinder.material.map.offset.x += this.darkTextureRotation * delta
 
-        this.colorFullCylinder.rotation.y            += GLOBAL_ROTATION * delta
-        this.colorFullCylinder.material.map.offset.y += colorFullMoveForward * delta
-        this.colorFullCylinder.material.map.offset.x += colorFullTextureRotation * delta
+        this.colorFullCylinder.rotation.y            += this.globalRotation * delta
+        this.colorFullCylinder.material.map.offset.y += this.colorFullMoveForward * delta
+        this.colorFullCylinder.material.map.offset.x += this.colorFullTextureRotation * delta
     }
 }
 

@@ -118,6 +118,10 @@
 	}
 }
 
+body {
+	background-color: #222;
+}
+
 #loaddingCircle {
 	margin: 0;
 	padding: 0;

@@ -48,26 +48,40 @@ class TetraGUI extends GUI {
                         scene.vortex.darkCylinder.material.opacity = 0.1
                         scene.vortex.colorFullCylinder.material.map = colorfullTexture
                         scene.vortex.colorFullCylinder.material.opacity = 0.6
+                        
+                        scene.vortex.globalRotation = 0.028
+                        scene.vortex.darkTextureRotation = 0.006
+                        scene.vortex.darkMoveForward = 0.007
+                        scene.vortex.colorFullTextureRotation = 0.006
+                        scene.vortex.colorFullMoveForward = 0.02
+
+                        scene.ambientLight.intensity     = 0.1
+                        scene.directionalLight.intensity = 15
                     }
-                    scene.ambientLight.intensity     = 2
-                    scene.directionalLight.intensity = 3
                 break
                 case "Espace":
                     darkTexture = new THREE.TextureLoader(loadingManager).load("./images/dark.jpg", texture => {
                         texture.wrapS = THREE.RepeatWrapping
                         texture.wrapT = THREE.MirroredRepeatWrapping
-                        texture.repeat.set(1, 1)
+                        texture.repeat.set(1, 2)
                     })
                     colorfullTexture = new THREE.TextureLoader(loadingManager).load("./images/colorfull.jpg", texture => {
                         texture.wrapS = THREE.RepeatWrapping
                         texture.wrapT = THREE.MirroredRepeatWrapping
-                        texture.repeat.set(1, 1)
+                        texture.repeat.set(1, 2)
                     })
                     loadingManager.onLoad = function() {
                         scene.vortex.darkCylinder.material.map = darkTexture
                         scene.vortex.darkCylinder.material.opacity = 0.2
                         scene.vortex.colorFullCylinder.material.map = colorfullTexture
                         scene.vortex.colorFullCylinder.material.opacity = 0.2
+                        
+                        scene.vortex.globalRotation = 0.028
+                        scene.vortex.darkTextureRotation = 0.006
+                        scene.vortex.darkMoveForward = 0.007
+                        scene.vortex.colorFullTextureRotation = 0.006
+                        scene.vortex.colorFullMoveForward = 0.02
+
                         scene.ambientLight.intensity = 2
                         scene.directionalLight.intensity = 3
                     }
