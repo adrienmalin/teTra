@@ -9,7 +9,7 @@ let jsKeyRenamer = new Proxy({
   ["Entrée"]      : "Enter",
 }, {
   get(obj, keyName) {
-      return keyName in obj? obj[keyName] : keyName
+      return keyName in obj? obj[keyName] : keyName.toLowerCase()
   }
 })
 let friendyKeyRenamer = new Proxy({
@@ -23,7 +23,7 @@ let friendyKeyRenamer = new Proxy({
   ["Enter"]       : "Entrée",
 }, {
   get(obj, keyName) {
-      return keyName in obj? obj[keyName] : keyName
+      return keyName in obj? obj[keyName] : keyName.toUpperCase()
   }
 })
 
