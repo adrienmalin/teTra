@@ -63,12 +63,12 @@ class TetraGUI extends GUI {
                     darkTexture = new THREE.TextureLoader(loadingManager).load("./images/dark.jpg", texture => {
                         texture.wrapS = THREE.RepeatWrapping
                         texture.wrapT = THREE.MirroredRepeatWrapping
-                        texture.repeat.set(1, 2)
+                        texture.repeat.set(2, 4)
                     })
                     colorfullTexture = new THREE.TextureLoader(loadingManager).load("./images/colorfull.jpg", texture => {
                         texture.wrapS = THREE.RepeatWrapping
                         texture.wrapT = THREE.MirroredRepeatWrapping
-                        texture.repeat.set(1, 2)
+                        texture.repeat.set(2, 4)
                     })
                     loadingManager.onLoad = function() {
                         scene.vortex.darkCylinder.material.map = darkTexture
