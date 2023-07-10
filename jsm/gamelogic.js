@@ -87,10 +87,12 @@ Mino.prototype.geometry = new THREE.ExtrudeGeometry(minoFaceShape, minoExtrudeSe
 class MinoMaterial extends THREE.MeshBasicMaterial {
     constructor(color) {
         super({
-            side: THREE.DoubleSide,
             color: color,
             envMap: environnement,
             reflectivity: 0.9,
+            transparent: true,
+            opacity: 0.8,
+            side: THREE.DoubleSide,
         })
     }
 }
@@ -98,12 +100,12 @@ class MinoMaterial extends THREE.MeshBasicMaterial {
 class GhostMaterial extends THREE.MeshBasicMaterial {
     constructor(color) {
         super({
-            side: THREE.DoubleSide,
             color: color,
             envMap: environnement,
             reflectivity: 0.9,
             transparent: true,
-            opacity: 0.2
+            opacity: 0.15,
+            side: THREE.DoubleSide,
         })
     }
 }
