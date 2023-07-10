@@ -167,14 +167,19 @@ class Tetromino extends AbstractTetromino {
             }
             if (this.canMove(TRANSLATION.DOWN)) {
                 this.locking = false
-                scheduler.clearTimeout(this.onlockdown)
+                scheduler.clearTimeout(this.onLockDown)
             } else {
-                scheduler.resetTimeout(this.onlockdown, this.lockDelay)
+                scheduler.resetTimeout(this.onLockDown, this.lockDelay)
                 this.locking = true
             }
             if (this.ghost.visible) this.updateGhost()
             return true
+        } else {
+            this.locked = true
+            if (!scheduler.timeoutTasks.has(this.onLockDown))
+                scheduler.setTimeout(this.onLockDown, this.lockDelay)
         }
+
     }
 
     rotate(rotation) {

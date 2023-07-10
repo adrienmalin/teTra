@@ -72,7 +72,7 @@ let game = {
     generate: function(nextPiece=nextQueue.shift()) {
         nextPiece.lockDelay = stats.lockDelay
         matrix.piece = nextPiece
-        matrix.piece.onlockdown = game.lockDown
+        matrix.piece.onLockDown = game.lockDown
     
         if (matrix.piece.canMove(TRANSLATION.NONE)) {
             scheduler.setInterval(game.fall, stats.fallPeriod)
