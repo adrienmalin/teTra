@@ -89,7 +89,7 @@ class MinoMaterial extends THREE.MeshBasicMaterial {
         super({
             color: color,
             envMap: environnement,
-            reflectivity: 0.95,
+            reflectivity: 0.9,
             transparent: true,
             opacity: 0.95,
             side: THREE.DoubleSide,
@@ -499,4 +499,4 @@ class NextQueue extends THREE.Group {
 NextQueue.prototype.positions = [P(0, 0), P(0, -3), P(0, -6), P(0, -9), P(0, -12), P(0, -15), P(0, -18)]
 
 
-export { T_SPIN, FACING, TRANSLATION, ROTATION, environnement, Tetromino, I, J, L, O, S, T, Z, Matrix, HoldQueue, NextQueue }
+export { T_SPIN, FACING, TRANSLATION, ROTATION, COLORS, environnement, Tetromino, I, J, L, O, S, T, Z, Matrix, HoldQueue, NextQueue }

@@ -43,7 +43,6 @@ let game = {
 
         renderer.domElement.tabIndex = 1
         gui.domElement.tabIndex = 1
-        gui.domElement.onfocus = game.pause
 
         nextQueue.init()
 
@@ -55,7 +54,7 @@ let game = {
         document.onkeydown = onkeydown
         document.onkeyup = onkeyup
         window.onblur = game.pause
-        gui.domElement.onfocus = game.pause
+        if (!gui.debug) gui.domElement.onfocus = game.pause
 
         document.body.classList.remove("pause")
         gui.resumeButton.hide()
