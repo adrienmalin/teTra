@@ -33,30 +33,27 @@ class TetraGUI extends GUI {
             let darkTexture, colorfullTexture
             switch (background) {
                 case "Plasma":
-                    darkTexture = new THREE.TextureLoader(loadingManager).load("./images/plasma.jpg", texture => {
-                        texture.wrapS = THREE.RepeatWrapping
-                        texture.wrapT = THREE.MirroredRepeatWrapping
-                        texture.repeat.set(1, 1)
-                    })
-                    colorfullTexture = new THREE.TextureLoader(loadingManager).load("./images/plasma2.jpg", texture => {
+                    darkTexture = new THREE.TextureLoader(loadingManager).load("./images/plasma2.jpg", texture => {
                         texture.wrapS = THREE.RepeatWrapping
                         texture.wrapT = THREE.MirroredRepeatWrapping
                         texture.repeat.set(2, 1)
                     })
+                    colorfullTexture = new THREE.TextureLoader(loadingManager).load("./images/plasma.jpg", texture => {
+                        texture.wrapS = THREE.RepeatWrapping
+                        texture.wrapT = THREE.MirroredRepeatWrapping
+                        texture.repeat.set(1, 1)
+                    })
                     loadingManager.onLoad = function() {
                         scene.vortex.darkCylinder.material.map = darkTexture
-                        scene.vortex.darkCylinder.material.opacity = 0.1
+                        scene.vortex.darkCylinder.material.opacity = 0.75
                         scene.vortex.colorFullCylinder.material.map = colorfullTexture
-                        scene.vortex.colorFullCylinder.material.opacity = 0.6
+                        scene.vortex.colorFullCylinder.material.opacity = 0.075
                         
                         scene.vortex.globalRotation = 0.028
-                        scene.vortex.darkTextureRotation = 0.006
-                        scene.vortex.darkMoveForward = 0.007
+                        scene.vortex.darkTextureRotation = 0.005
+                        scene.vortex.darkMoveForward = 0.012
                         scene.vortex.colorFullTextureRotation = 0.006
-                        scene.vortex.colorFullMoveForward = 0.02
-
-                        scene.ambientLight.intensity     = 0.1
-                        scene.directionalLight.intensity = 15
+                        scene.vortex.colorFullMoveForward = 0.016
                     }
                 break
                 case "Espace":
@@ -113,9 +110,9 @@ class TetraGUI extends GUI {
 
         this.settings.volume = this.settings.addFolder("Volume").open()
         this.settings.volume.add(settings,"musicVolume").name("Musique").min(0).max(100).step(1).onChange(volume => {
-            if (volume) {
-                scene.music.setVolume(volume/100)
-                if (game.playing) scene.music.play()
+            scene.music.setVolume(volume/100)
+            if (game.playing) {
+                if (volume) scene.music.play()
             } else {
                 scene.music.pause()
             }
