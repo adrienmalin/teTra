@@ -68,7 +68,7 @@ class TetraGUI extends GUI {
                     colorfullTexture = new THREE.TextureLoader(loadingManager).load("./images/colorfull.jpg", texture => {
                         texture.wrapS = THREE.RepeatWrapping
                         texture.wrapT = THREE.MirroredRepeatWrapping
-                        texture.repeat.set(2, 4)
+                        texture.repeat.set(1, 2)
                     })
                     loadingManager.onLoad = function() {
                         scene.vortex.darkCylinder.material.map = darkTexture
@@ -239,7 +239,7 @@ class TetraGUI extends GUI {
                         })
                     break
                     case "MeshPhysicalMaterial":
-                        minoMaterialFactory = color => new THREE.MeshStandardMaterial({
+                        minoMaterialFactory = color => new THREE.MeshPhysicalMaterial({
                             color              : "white",
                             envMap             : environnement,
                             transparent        : true,

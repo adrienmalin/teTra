@@ -16,7 +16,7 @@ class TetraScene extends THREE.Scene {
         this.add(this.ambientLight)
         
         this.directionalLight = new THREE.DirectionalLight(0xffffff, 20)
-        this.directionalLight.position.set(5, -9, -20)
+        this.directionalLight.position.set(5, -100, -20)
         this.add(this.directionalLight)
 
 

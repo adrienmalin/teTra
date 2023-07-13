@@ -91,7 +91,7 @@ class MinoMaterial extends THREE.MeshBasicMaterial {
             envMap: environnement,
             reflectivity: 0.9,
             transparent: true,
-            opacity: 0.95,
+            opacity: 0.8,
             side: THREE.DoubleSide,
         })
     }
