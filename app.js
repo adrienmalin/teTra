@@ -34,6 +34,7 @@ let game = {
         matrix.init()
         
         scene.remove(matrix.piece)
+        if (matrix.piece) matrix.remove(matrix.piece)
         matrix.piece = null
         scene.music.currentTime = 0
         matrix.visible = true
