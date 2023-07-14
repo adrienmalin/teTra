@@ -71,22 +71,37 @@ const minoExtrudeSettings = {
 }
 let minoGeometry = new THREE.ExtrudeGeometry(minoFaceShape, minoExtrudeSettings)
 
+/*let minoMaterial = new THREE.MeshBasicMaterial({
+    envMap: environnement,
+    side: THREE.DoubleSide,
+    transparent: true,
+    opacity: 0.8,
+    reflectivity: 0.9,
+})*/
 let minoMaterial = new THREE.MeshStandardMaterial({
     envMap: environnement,
     side: THREE.DoubleSide,
     transparent: true,
-    opacity: 0.7,
-    //reflectivity: 0.8,
-    roughness: 0.09,
-    metalness: 0.98,
-    //attenuationDistance: 0.5,
-    //ior: 2,
-    //sheen: 0,
-    //sheenRoughness: 1,
-    //specularIntensity: 1,
-    //thickness: 5,
-    //transmission: 1,
+    opacity: 0.6,
+    roughness: 0.1,
+    metalness: 0.9,
 })
+/*
+let minoMaterial = new THREE.MeshPhysicalMaterial({
+    envMap: environnement,
+    side: THREE.DoubleSide,
+    transparent: true,
+    opacity: 0.6,
+    roughness: 0.1,
+    metalness: 0.90,
+    attenuationDistance: 0.5,
+    ior: 2,
+    sheen: 0,
+    sheenRoughness: 1,
+    specularIntensity: 1,
+    thickness: 5,
+    transmission: 1,
+})*/
 
 
 class Mino extends THREE.Object3D {

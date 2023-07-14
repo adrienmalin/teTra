@@ -55,7 +55,7 @@ export class TetraGUI extends GUI {
                         scene.vortex.colorFullTextureRotation = 0.006
                         scene.vortex.colorFullMoveForward = 0.016
 
-                        scene.ambientLight.intensity = .5
+                        scene.ambientLight.intensity = 0.5
                         scene.directionalLight.intensity = 6
                     }
                 break
