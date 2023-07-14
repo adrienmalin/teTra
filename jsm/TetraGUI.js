@@ -33,27 +33,27 @@ export class TetraGUI extends GUI {
             let darkTexture, colorfullTexture
             switch (background) {
                 case "Plasma":
-                    darkTexture = new THREE.TextureLoader(loadingManager).load("./images/plasma2.jpg", texture => {
-                        texture.wrapS = THREE.RepeatWrapping
-                        texture.wrapT = THREE.MirroredRepeatWrapping
-                        texture.repeat.set(2, 1)
-                    })
-                    colorfullTexture = new THREE.TextureLoader(loadingManager).load("./images/plasma.jpg", texture => {
+                    darkTexture = new THREE.TextureLoader(loadingManager).load("./images/plasma.jpg", texture => {
                         texture.wrapS = THREE.RepeatWrapping
                         texture.wrapT = THREE.MirroredRepeatWrapping
                         texture.repeat.set(1, 1)
                     })
+                    colorfullTexture = new THREE.TextureLoader(loadingManager).load("./images/plasma2.jpg", texture => {
+                        texture.wrapS = THREE.RepeatWrapping
+                        texture.wrapT = THREE.MirroredRepeatWrapping
+                        texture.repeat.set(2, 1)
+                    })
                     loadingManager.onLoad = function() {
                         scene.vortex.darkCylinder.material.map = darkTexture
-                        scene.vortex.darkCylinder.material.opacity = 0.75
+                        scene.vortex.darkCylinder.material.opacity = 0.1
                         scene.vortex.colorFullCylinder.material.map = colorfullTexture
-                        scene.vortex.colorFullCylinder.material.opacity = 0.075
+                        scene.vortex.colorFullCylinder.material.opacity = 0.7
                         
                         scene.vortex.globalRotation = 0.028
                         scene.vortex.darkTextureRotation = 0.005
-                        scene.vortex.darkMoveForward = 0.012
+                        scene.vortex.darkMoveForward = 0.009
                         scene.vortex.colorFullTextureRotation = 0.006
-                        scene.vortex.colorFullMoveForward = 0.016
+                        scene.vortex.colorFullMoveForward = 0.013
 
                         scene.ambientLight.intensity = 0.5
                         scene.directionalLight.intensity = 6
@@ -133,6 +133,10 @@ export class TetraGUI extends GUI {
             cameraPosition.add(scene.camera.position, "x")
             cameraPosition.add(scene.camera.position, "y")
             cameraPosition.add(scene.camera.position, "z")
+        
+            let light = this.debug.addFolder("lights intensity").close()
+            light.add(scene.ambientLight, "intensity").name("ambient").min(0).max(20)
+            light.add(scene.directionalLight, "intensity").name("directional").min(0).max(20)
             
             let directionalLightPosition = this.debug.addFolder("directionalLight.position").close()
             directionalLightPosition.add(scene.directionalLight.position, "x")
@@ -144,19 +148,15 @@ export class TetraGUI extends GUI {
             directionalLightTargetPosition.add(scene.directionalLight.target.position, "y")
             directionalLightTargetPosition.add(scene.directionalLight.target.position, "z")
         
-            let light = this.debug.addFolder("lights intensity").close()
-            light.add(scene.ambientLight, "intensity").name("ambient").min(0).max(20)
-            light.add(scene.directionalLight, "intensity").name("directional").min(0).max(20)
-        
             let vortex = this.debug.addFolder("vortex opacity").close()
             vortex.add(scene.vortex.darkCylinder.material, "opacity").name("dark").min(0).max(1)
             vortex.add(scene.vortex.colorFullCylinder.material, "opacity").name("colorFull").min(0).max(1)
 
             let material = this.debug.addFolder("minoes material").close()
             material.add(minoMaterial, "opacity").min(0).max(1)
-            //material.add(minoMaterial, "reflectivity").min(0).max(1)
-            material.add(minoMaterial, "roughness").min(0).max(1)
-            material.add(minoMaterial, "metalness").min(0).max(1)
+            material.add(minoMaterial, "reflectivity").min(0).max(1)
+            //material.add(minoMaterial, "roughness").min(0).max(1)
+            //material.add(minoMaterial, "metalness").min(0).max(1)
             //material.add(minoMaterial, "attenuationDistance").min(0).max(1).hide()
             //material.add(minoMaterial, "ior").min(1).max(2).hide()
             //material.add(minoMaterial, "sheen").min(0).max(1).hide()

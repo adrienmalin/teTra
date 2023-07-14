@@ -8,10 +8,10 @@ export class Vortex extends THREE.Group {
         this.globalRotation = 0.028
         
         this.darkTextureRotation = 0.006
-        this.darkMoveForward = 0.011
+        this.darkMoveForward = 0.009
         
         this.colorFullTextureRotation = 0.006
-        this.colorFullMoveForward = 0.09
+        this.colorFullMoveForward = 0.013
 
         const commonCylinderGeometry = new THREE.CylinderGeometry(35, 35, 500, 12, 1, true)
 
@@ -21,13 +21,13 @@ export class Vortex extends THREE.Group {
             commonCylinderGeometry,
             new THREE.MeshLambertMaterial({
                 side: THREE.BackSide,
-                map: new THREE.TextureLoader(loadingManager).load("./images/plasma.jpg", (texture) => {
+                map: new THREE.TextureLoader(loadingManager).load("./images/plasma2.jpg", (texture) => {
                     texture.wrapS = THREE.RepeatWrapping
                     texture.wrapT = THREE.MirroredRepeatWrapping
-                    texture.repeat.set(2, 1)
+                    texture.repeat.set(1, 1)
                 }),
                 blending: THREE.AdditiveBlending,
-                opacity: 0.75
+                opacity: 0.1
             })
         )
         this.add(this.darkCylinder)
@@ -36,13 +36,13 @@ export class Vortex extends THREE.Group {
             commonCylinderGeometry,
             new THREE.MeshBasicMaterial({
                 side: THREE.BackSide,
-                map: new THREE.TextureLoader(loadingManager).load("./images/plasma2.jpg", (texture) => {
+                map: new THREE.TextureLoader(loadingManager).load("./images/plasma.jpg", (texture) => {
                     texture.wrapS = THREE.RepeatWrapping
                     texture.wrapT = THREE.MirroredRepeatWrapping
-                    texture.repeat.set(1, 1)
+                    texture.repeat.set(2, 1)
                 }),
                 blending: THREE.AdditiveBlending,
-                opacity: 0.075
+                opacity: 0.7
             })
         )
         this.add(this.colorFullCylinder)
