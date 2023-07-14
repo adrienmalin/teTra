@@ -154,9 +154,9 @@ export class TetraGUI extends GUI {
 
             let material = this.debug.addFolder("minoes material").close()
             material.add(minoMaterial, "opacity").min(0).max(1)
-            material.add(minoMaterial, "reflectivity").min(0).max(1)
-            //material.add(minoMaterial, "roughness").min(0).max(1)
-            //material.add(minoMaterial, "metalness").min(0).max(1)
+            //material.add(minoMaterial, "reflectivity").min(0).max(1)
+            material.add(minoMaterial, "roughness").min(0).max(1)
+            material.add(minoMaterial, "metalness").min(0).max(1)
             //material.add(minoMaterial, "attenuationDistance").min(0).max(1).hide()
             //material.add(minoMaterial, "ior").min(1).max(2).hide()
             //material.add(minoMaterial, "sheen").min(0).max(1).hide()
