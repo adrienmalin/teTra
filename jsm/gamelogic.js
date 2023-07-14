@@ -16,6 +16,8 @@ const COLORS = {
     S: 0xC8FBA8,
     T: 0xedb2ff,
     Z: 0xffb8c5,
+    LOCKING: "white",
+    GHOST: "white",
 }
 
 const TRANSLATION = {
@@ -52,20 +54,6 @@ environnement.camera = new THREE.CubeCamera(1, 1000, envRenderTarget)
 environnement.camera.position.set(5, 10)
 
 
-class Mino extends THREE.Mesh {
-    constructor() {
-        super(Mino.prototype.geometry)
-        this.velocity = P(50 - 100 * Math.random(), 50 - 100 * Math.random(), 50 - 100 * Math.random())
-        this.rotationAngle = P(Math.random(), Math.random(), Math.random()).normalize()
-        this.angularVelocity = 5 - 10 * Math.random()
-    }
-
-    update(delta) {
-        this.velocity.y += delta * GRAVITY
-        this.position.addScaledVector(this.velocity, delta)
-        this.rotateOnWorldAxis(this.rotationAngle, delta * this.angularVelocity)
-    }
-}
 const minoFaceShape = new THREE.Shape()
 minoFaceShape.moveTo(.1, .1)
 minoFaceShape.lineTo(.1, .9)
@@ -81,67 +69,46 @@ const minoExtrudeSettings = {
     bevelOffset: 0,
     bevelSegments: 1
 }
-Mino.prototype.geometry = new THREE.ExtrudeGeometry(minoFaceShape, minoExtrudeSettings)
+let minoGeometry = new THREE.ExtrudeGeometry(minoFaceShape, minoExtrudeSettings)
+
+let minoMaterial = new THREE.MeshStandardMaterial({
+    envMap: environnement,
+    side: THREE.DoubleSide,
+    transparent: true,
+    opacity: 0.8,
+    //reflectivity: 0.8,
+    roughness: 0.1,
+    metalness: 0.9,
+    //attenuationDistance: 0.5,
+    //ior: 2,
+    //sheen: 0,
+    //sheenRoughness: 1,
+    //specularIntensity: 1,
+    //thickness: 5,
+    //transmission: 1,
+})
 
 
-class MinoMaterial extends THREE.MeshBasicMaterial {
-    constructor(color) {
-        super({
-            color: color,
-            envMap: environnement,
-            reflectivity: 0.9,
-            transparent: true,
-            opacity: 0.8,
-            side: THREE.DoubleSide,
-        })
-    }
-}
-
-class GhostMaterial extends THREE.MeshBasicMaterial {
-    constructor(color) {
-        super({
-            color: color,
-            envMap: environnement,
-            reflectivity: 0.9,
-            transparent: true,
-            opacity: 0.15,
-            side: THREE.DoubleSide,
-        })
-    }
-}
-
-
-class AbstractTetromino extends THREE.Group {
-    constructor() {
+class Mino extends THREE.Object3D {
+    constructor(color, x, y, z=0) {
         super()
-        for (let i = 0; i < 4; i++) {
-            this.add(new Mino())
-        }
+        this.color = color
+        this.position.set(x, y, z)
+        this.velocity = P(50 - 100 * Math.random(), 50 - 100 * Math.random(), 50 - 100 * Math.random())
+        this.rotationAngle = P(Math.random(), Math.random(), Math.random()).normalize()
+        this.angularVelocity = 5 - 10 * Math.random()
     }
 
-    set facing(facing) {
-        this._facing = facing
-        this.minoesPosition[this.facing].forEach(
-            (position, i) => this.children[i].position.copy(position)
-        )
-    }
-
-    get facing() {
-        return this._facing
-    }
-
-    canMove(translation, facing=this.facing) {
-        let testPosition = this.position.clone().add(translation)
-        return this.minoesPosition[facing].every(minoPosition => this.parent.cellIsEmpty(minoPosition.clone().add(testPosition)))
+    update(delta) {
+        this.velocity.y += delta * GRAVITY
+        this.position.addScaledVector(this.velocity, delta)
+        this.rotateOnWorldAxis(this.rotationAngle, delta * this.angularVelocity)
+        this.updateMatrix()
     }
 }
 
-class Ghost extends AbstractTetromino {}
-Ghost.prototype.minoesPosition = [
-    [P(0, 0, 0), P(0, 0, 0), P(0, 0, 0), P(0, 0, 0)],
-]
 
-class Tetromino extends AbstractTetromino {
+class Tetromino extends THREE.InstancedMesh {
     static randomBag = []
     static get random() {
         if (!this.randomBag.length) this.randomBag = [I, J, L, O, S, T, Z]
@@ -149,12 +116,47 @@ class Tetromino extends AbstractTetromino {
     }
 
     constructor() {
-        super()
+        super(minoGeometry, undefined, 4)
+        this.material           = this.minoMaterial
+        this.facing             = FACING.NORTH
         this.rotatedLast        = false
         this.rotationPoint4Used = false
         this.holdEnabled        = true
-        this.facing             = 0
         this.locking            = false
+    }
+
+    set facing(facing) {
+        this._facing = facing
+        let matrix4 = new THREE.Matrix4()
+        this.minoesPosition[this.facing].forEach((position, i) => {
+            matrix4.setPosition(position)
+            this.setMatrixAt(i, matrix4)
+        })
+        this.instanceMatrix.needsUpdate = true
+    }
+
+    get facing() {
+        return this._facing
+    }
+
+    set locking(locking) {
+        if (locking) {
+            this.color = this.lockingColor
+        } else {
+            this.color = this.freeColor
+        }
+    }
+
+    set color(color) {
+        for (let i = 0; i < this.count; i++) {
+            this.setColorAt(i, color)
+        }
+        this.instanceColor.needsUpdate = true
+    }
+
+    canMove(translation, facing=this.facing) {
+        let testPosition = this.position.clone().add(translation)
+        return this.minoesPosition[facing].every(minoPosition => this.parent.cellIsEmpty(minoPosition.clone().add(testPosition)))
     }
 
     move(translation, rotatedFacing, rotationPoint) {
@@ -167,14 +169,16 @@ class Tetromino extends AbstractTetromino {
             }
             if (this.canMove(TRANSLATION.DOWN)) {
                 this.locking = false
+                this.parent.ghost.visible = true
+                this.parent.ghost.copy(this)
                 scheduler.clearTimeout(this.onLockDown)
             } else {
                 scheduler.resetTimeout(this.onLockDown, this.lockDelay)
                 this.locking = true
+                this.parent.ghost.visible = false
             }
-            if (this.ghost.visible) this.updateGhost()
             return true
-        } else {
+        } else if (translation == TRANSLATION.DOWN) {
             this.locked = true
             if (!scheduler.timeoutTasks.has(this.onLockDown))
                 scheduler.setTimeout(this.onLockDown, this.lockDelay)
@@ -189,27 +193,19 @@ class Tetromino extends AbstractTetromino {
         )
     }
 
-    set locking(locking) {
-        if (locking) {
-            this.children.forEach(mino => mino.material = this.lockedMaterial)
-            this.ghost.visible = false
-        } else {
-            this.children.forEach(mino => mino.material = this.material)
-            this.ghost.visible = true
-        }
-    }
-
-    updateGhost() {
-        this.ghost.position.copy(this.position)
-        this.ghost.minoesPosition = this.minoesPosition
-        this.ghost.facing = this.facing
-        while (this.ghost.canMove(TRANSLATION.DOWN)) this.ghost.position.y--
-    }
-
     get tSpin() {
         return T_SPIN.NONE
     }
+
+    copy(piece) {
+        this.position.copy(piece.position)
+        this.minoesPosition = piece.minoesPosition
+        this.facing = piece.facing
+        while (this.canMove(TRANSLATION.DOWN)) this.position.y--
+    }
 }
+Tetromino.prototype.minoMaterial = minoMaterial
+Tetromino.prototype.lockingColor = new THREE.Color(COLORS.LOCKING)
 // Super Rotation System
 // freedom of movement = srs[this.parent.piece.facing][rotation]
 Tetromino.prototype.srs = [
@@ -218,9 +214,21 @@ Tetromino.prototype.srs = [
     { [ROTATION.CW]: [P(0, 0), P(1, 0), P(1, 1), P(0, -2), P(1, -2)], [ROTATION.CCW]: [P(0, 0), P(-1, 0), P(-1, 1), P(0, -2), P(-1, -2)] },
     { [ROTATION.CW]: [P(0, 0), P(-1, 0), P(-1, -1), P(0, 2), P(-1, 2)], [ROTATION.CCW]: [P(0, 0), P(-1, 0), P(-1, -1), P(0, 2), P(-1, 2)] },
 ]
-Tetromino.prototype.lockedMaterial = new MinoMaterial(0xffffff)
 Tetromino.prototype.lockDelay = 500
-Tetromino.prototype.ghost = new Ghost()
+
+
+class Ghost extends Tetromino {}
+Ghost.prototype.minoMaterial = new THREE.MeshBasicMaterial({
+    envMap: environnement,
+    reflectivity: 0.9,
+    transparent: true,
+    opacity: 0.15,
+    side: THREE.DoubleSide,
+})
+Ghost.prototype.freeColor = new THREE.Color(COLORS.GHOST)
+Ghost.prototype.minoesPosition = [
+    [P(0, 0, 0), P(0, 0, 0), P(0, 0, 0), P(0, 0, 0)],
+]
 
 
 class I extends Tetromino { }
@@ -236,8 +244,7 @@ I.prototype.srs = [
     { [ROTATION.CW]: [P(0, 0), P(2, 0), P(-1, 0), P(2, 1), P(-1, -2)], [ROTATION.CCW]: [P(0, 0), P(1, 0), P(-2, 0), P(1, -2), P(-2, 1)] },
     { [ROTATION.CW]: [P(0, 0), P(1, 0), P(-2, 0), P(1, -2), P(-2, 1)], [ROTATION.CCW]: [P(0, 0), P(-2, 0), P(1, 0), P(-2, -1), P(1, 2)] },
 ]
-I.prototype.material = new MinoMaterial(COLORS.I)
-I.prototype.ghostMaterial = new GhostMaterial(COLORS.I)
+I.prototype.freeColor = new THREE.Color(COLORS.I)
 
 class J extends Tetromino { }
 J.prototype.minoesPosition = [
@@ -246,8 +253,7 @@ J.prototype.minoesPosition = [
     [P(1, -1), P(-1, 0), P(0, 0), P(1, 0)],
     [P(0, 1), P(-1, -1), P(0, 0), P(0, -1)],
 ]
-J.prototype.material = new MinoMaterial(COLORS.J)
-J.prototype.ghostMaterial = new GhostMaterial(COLORS.J)
+J.prototype.freeColor = new THREE.Color(COLORS.J)
 
 class L extends Tetromino { }
 L.prototype.minoesPosition = [
@@ -256,8 +262,7 @@ L.prototype.minoesPosition = [
     [P(-1, 0), P(0, 0), P(1, 0), P(-1, -1)],
     [P(0, 1), P(0, 0), P(0, -1), P(-1, 1)],
 ]
-L.prototype.material = new MinoMaterial(COLORS.L)
-L.prototype.ghostMaterial = new GhostMaterial(COLORS.L)
+L.prototype.freeColor = new THREE.Color(COLORS.L)
 
 class O extends Tetromino { }
 O.prototype.minoesPosition = [
@@ -266,8 +271,7 @@ O.prototype.minoesPosition = [
 O.prototype.srs = [
     { [ROTATION.CW]: [], [ROTATION.CCW]: [] }
 ]
-O.prototype.material = new MinoMaterial(COLORS.O)
-O.prototype.ghostMaterial = new GhostMaterial(COLORS.O)
+O.prototype.freeColor = new THREE.Color(COLORS.O)
 
 class S extends Tetromino { }
 S.prototype.minoesPosition = [
@@ -276,8 +280,7 @@ S.prototype.minoesPosition = [
     [P(-1, -1), P(0, 0), P(1, 0), P(0, -1)],
     [P(-1, 1), P(0, 0), P(-1, 0), P(0, -1)],
 ]
-S.prototype.material = new MinoMaterial(COLORS.S)
-S.prototype.ghostMaterial = new GhostMaterial(COLORS.S)
+S.prototype.freeColor = new THREE.Color(COLORS.S)
 
 class T extends Tetromino {
     get tSpin() {
@@ -304,8 +307,7 @@ T.prototype.tSlots = [
     [P(1, -1), P(-1, -1), P(-1, 1), P(1, 1)],
     [P(-1, -1), P(-1, 1), P(1, 1), P(1, -1)],
 ]
-T.prototype.material = new MinoMaterial(COLORS.T)
-T.prototype.ghostMaterial = new GhostMaterial(COLORS.T)
+T.prototype.freeColor = new THREE.Color(COLORS.T)
 
 class Z extends Tetromino { }
 Z.prototype.minoesPosition = [
@@ -314,8 +316,7 @@ Z.prototype.minoesPosition = [
     [P(-1, 0), P(0, 0), P(0, -1), P(1, -1)],
     [P(0, 1), P(-1, 0), P(0, 0), P(-1, -1)]
 ]
-Z.prototype.material = new MinoMaterial(COLORS.Z)
-Z.prototype.ghostMaterial = new GhostMaterial(COLORS.Z)
+Z.prototype.freeColor = new THREE.Color(COLORS.Z)
 
 
 const ROWS = 24
@@ -323,7 +324,7 @@ const SKYLINE = 20
 const COLUMNS = 10
 
 
-class Matrix extends THREE.Group {
+class Playfield extends THREE.Group {
     constructor() {
         super()
         this.visible = false
@@ -364,13 +365,24 @@ class Matrix extends THREE.Group {
         this.hardDropAnimation.loop = THREE.LoopOnce
         this.hardDropAnimation.setDuration(0.2)
 
+        this.ghost = new Ghost()
+        this.add(this.ghost)
+        this.ghost.visible = false
+
+        this.lockedMeshes = new THREE.InstancedMesh(minoGeometry, minoMaterial, 200)
+        this.add(this.lockedMeshes)
+
+        this.freedMinoes = []
+        this.freedMeshes = new THREE.InstancedMesh(minoGeometry, minoMaterial, 200)
+        this.freedMeshes.count = 0
+        this.add(this.freedMeshes)
+
         this.init()
     }
 
     init() {
-        while(this.children.length > 1 ) this.remove(this.children[1])
         this.cells = Array(ROWS).fill().map(() => Array(COLUMNS))
-        this.unlockedMinoes = new Set()
+        this.lockedMeshes.count = 0
     }
 
     cellIsEmpty(p) {
@@ -383,11 +395,9 @@ class Matrix extends THREE.Group {
         if (piece) {
             this.add(piece)
             piece.position.set(4, SKYLINE)
-            this.add(piece.ghost)
-            piece.ghost.children.forEach((mino) => {
-                mino.material = piece.ghostMaterial
-            })
-            piece.updateGhost()
+            this.ghost.color = piece.freeColor
+            this.ghost.copy(piece)
+            this.ghost.visible = true
         }
         this._piece = piece
     }
@@ -397,50 +407,66 @@ class Matrix extends THREE.Group {
     }
 
     lock() {
-        this.piece.locking = false
-        let minoes = Array.from(this.piece.children)
-        minoes.forEach(mino => {
-            mino.position.add(this.piece.position)
-            this.add(mino)
-            if (this.cellIsEmpty(mino.position)) {
-                this.cells[mino.position.y][mino.position.x] = mino
+        this.piece.minoesPosition[this.piece.facing].forEach(position => {
+            position = position.clone()
+            position.add(this.piece.position)
+            if (this.cellIsEmpty(position)) {
+                this.cells[position.y][position.x] = this.piece.freeColor
             }
         })
-        return minoes.some(mino => mino.position.y < SKYLINE)
+        this.updateLockedMinoes()
+        return this.piece.minoesPosition[this.piece.facing].every(position => position.y + this.piece.position.y < SKYLINE)
     }
 
     clearLines() {
         let nbClearedLines = this.cells.reduceRight((nbClearedLines, row, y) => {
-            if (row.filter(mino => mino).length == COLUMNS) {
-                row.forEach(mino => this.unlockedMinoes.add(mino))
+            if (row.filter(color => color).length == COLUMNS) {
+                row.forEach((color, x) => {
+                    this.freedMinoes.push(new Mino(color, x, y))
+                })
                 this.cells.splice(y, 1)
                 this.cells.push(Array(COLUMNS))
                 return ++nbClearedLines
             }
             return nbClearedLines
         }, 0)
-        if (nbClearedLines) {
-            this.cells.forEach((rows, y) => {
-                rows.forEach((mino, x) => {
-                    mino.position.set(x, y)
-                })
-            })
-        }
+        this.updateLockedMinoes()
         return nbClearedLines
     }
 
-    updateUnlockedMinoes(delta) {
-        this.unlockedMinoes.forEach(mino => {
-            mino.update(delta)
-            if (Math.sqrt(mino.position.x * mino.position.x + mino.position.z * mino.position.z) > 40 || mino.position.y < -50) {
-                this.remove(mino)
-                this.unlockedMinoes.delete(mino)
-            }
-        })
+    updateLockedMinoes() {
+        let i = 0
+        let matrix4 = new THREE.Matrix4()
+        this.cells.forEach((row, y) => row.forEach((color, x) => {
+            matrix4.setPosition(x, y, 0)
+            this.lockedMeshes.setMatrixAt(i, matrix4)
+            this.lockedMeshes.setColorAt(i, color)
+            i++
+        }))
+        this.lockedMeshes.count = i
+        this.lockedMeshes.instanceMatrix.needsUpdate = true
+        this.lockedMeshes.instanceColor.needsUpdate = true
+    }
+
+    updateFreedMinoes(delta) {
+        this.freedMinoes.forEach(mino => mino.update(delta))
+        this.freedMinoes = this.freedMinoes.filter(mino => 
+            Math.sqrt(mino.position.x * mino.position.x + mino.position.z * mino.position.z) <= 40 && mino.position.y > -50
+        ) || []
+        
+        this.freedMeshes.count = this.freedMinoes.length
+        if (this.freedMeshes.count) {
+            this.freedMinoes.forEach((mino, i) => {
+                this.freedMeshes.setMatrixAt(i, mino.matrix)
+                this.freedMeshes.setColorAt(i, mino.color)
+            })
+            this.freedMeshes.instanceMatrix.needsUpdate = true
+            this.freedMeshes.instanceColor.needsUpdate = true
+        }
     }
 
     update(delta) {
-        this.updateUnlockedMinoes(delta)
+        this.updateFreedMinoes(delta)
         this.mixer?.update(delta)
     }
 }
@@ -499,4 +525,4 @@ class NextQueue extends THREE.Group {
 NextQueue.prototype.positions = [P(0, 0), P(0, -3), P(0, -6), P(0, -9), P(0, -12), P(0, -15), P(0, -18)]
 
 
-export { T_SPIN, FACING, TRANSLATION, ROTATION, COLORS, environnement, Tetromino, I, J, L, O, S, T, Z, Matrix, HoldQueue, NextQueue }
+export { T_SPIN, FACING, TRANSLATION, ROTATION, COLORS, environnement, minoMaterial, Tetromino, I, J, L, O, S, T, Z, Playfield, HoldQueue, NextQueue }

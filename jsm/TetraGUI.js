@@ -1,10 +1,10 @@
 import * as THREE from 'three'
 import { GUI } from 'three/addons/libs/lil-gui.module.min.js'
 import * as FPS from 'three/addons/libs/stats.module.js'
-import { COLORS, environnement, I, J, L, O, S, T, Z } from './gamelogic.js'
+import { COLORS, environnement, minoMaterial, I, J, L, O, S, T, Z, Tetromino } from './gamelogic.js'
 
 
-class TetraGUI extends GUI {
+export class TetraGUI extends GUI {
     constructor(game, settings, stats, scene) {
         super({title: "teTra"})
         this.domElement.tabIndex = 1
@@ -135,6 +135,11 @@ class TetraGUI extends GUI {
             directionalLightPosition.add(scene.directionalLight.position, "x")
             directionalLightPosition.add(scene.directionalLight.position, "y")
             directionalLightPosition.add(scene.directionalLight.position, "z")
+            
+            let directionalLightTargetPosition = this.debug.addFolder("directionalLight.target").close()
+            directionalLightTargetPosition.add(scene.directionalLight.target.position, "x")
+            directionalLightTargetPosition.add(scene.directionalLight.target.position, "y")
+            directionalLightTargetPosition.add(scene.directionalLight.target.position, "z")
         
             let light = this.debug.addFolder("lights intensity").close()
             light.add(scene.ambientLight, "intensity").name("ambient").min(0).max(20)
@@ -144,125 +149,18 @@ class TetraGUI extends GUI {
             vortex.add(scene.vortex.darkCylinder.material, "opacity").name("dark").min(0).max(1)
             vortex.add(scene.vortex.colorFullCylinder.material, "opacity").name("colorFull").min(0).max(1)
 
-            let materialParams = {
-                type: "MeshBasicMaterial",
-                opacity: 0.95,
-                reflectivity: 0.8,
-                roughness: 0.1,
-                metalness: 0.5,
-                attenuationDistance: 0.5,
-                ior: 2,
-                sheen: 0,
-                sheenRoughness: 1,
-                specularIntensity: 1,
-                thickness: 5,
-                transmission: 1,
-            }
             let material = this.debug.addFolder("minoes material").close()
-            let type = material.add(materialParams, "type", ["MeshBasicMaterial", "MeshStandardMaterial", "MeshPhysicalMaterial"])
-            let opacity = material.add(materialParams, "opacity").min(0).max(1)
-            let reflectivity = material.add(materialParams, "reflectivity").min(0).max(1)
-            let roughness = material.add(materialParams, "roughness").min(0).max(1).hide()
-            let metalness = material.add(materialParams, "metalness").min(0).max(1).hide()
-            let attenuationDistance = material.add(materialParams, "attenuationDistance").min(0).max(1).hide()
-            let ior = material.add(materialParams, "ior").min(1).max(2).hide()
-            let sheen = material.add(materialParams, "sheen").min(0).max(1).hide()
-            let sheenRoughness = material.add(materialParams, "sheenRoughness").min(0).max(1).hide()
-            let specularIntensity = material.add(materialParams, "specularIntensity").min(0).max(1).hide()
-            let thickness = material.add(materialParams, "thickness").min(0).max(5).hide()
-            let transmission = material.add(materialParams, "transmission").min(0).max(1).hide()
-            type.onChange(type => {
-                switch(type) {
-                    case "MeshBasicMaterial":
-                        reflectivity.show()
-                        roughness.hide()
-                        metalness.hide()
-                        attenuationDistance.hide()
-                        ior.hide()
-                        sheen.hide()
-                        sheenRoughness.hide()
-                        specularIntensity.hide()
-                        thickness.hide()
-                        transmission.hide()
-                    break
-                    case "MeshStandardMaterial":
-                        reflectivity.hide()
-                        roughness.show()
-                        metalness.show()
-                        attenuationDistance.hide()
-                        ior.hide()
-                        sheen.hide()
-                        sheenRoughness.hide()
-                        specularIntensity.hide()
-                        thickness.hide()
-                        transmission.hide()
-                    break
-                    case "MeshPhysicalMaterial":
-                        reflectivity.hide()
-                        roughness.show()
-                        metalness.show()
-                        attenuationDistance.show()
-                        ior.show()
-                        sheen.show()
-                        sheenRoughness.show()
-                        specularIntensity.show()
-                        thickness.show()
-                        transmission.show()
-                    break
-                }
-            })
-            material.onChange(() => {
-                let minoMaterialFactory
-                switch(materialParams.type) {
-                    case "MeshBasicMaterial":
-                        minoMaterialFactory = color => new THREE.MeshBasicMaterial({
-                            color       : color,
-                            envMap      : environnement,
-                            reflectivity: materialParams.reflectivity,
-                            transparent : true,
-                            opacity     : materialParams.opacity,
-                            side        : THREE.DoubleSide,
-                        })
-                    break
-                    case "MeshStandardMaterial":
-                        minoMaterialFactory = color => new THREE.MeshStandardMaterial({
-                            color      : color,
-                            envMap     : environnement,
-                            transparent: true,
-                            opacity    : materialParams.opacity,
-                            side       : THREE.DoubleSide,
-                            roughness  : materialParams.roughness,
-                            metalness  : materialParams.metalness,
-                        })
-                    break
-                    case "MeshPhysicalMaterial":
-                        minoMaterialFactory = color => new THREE.MeshPhysicalMaterial({
-                            color              : "white",
-                            envMap             : environnement,
-                            transparent        : true,
-                            opacity            : materialParams.opacity,
-                            side               : THREE.DoubleSide,
-                            roughness          : materialParams.roughness,
-                            metalness          : materialParams.metalness,
-                            attenuationColor   : color,
-                            attenuationDistance: materialParams.attenuationDistance,
-                            ior                : materialParams.ior,
-                            sheen              : materialParams.sheen,
-                            sheenRoughness     : materialParams.sheenRoughness,
-                            specularIntensity  : materialParams.specularIntensity,
-                            thickness          : materialParams.thickness,
-                            transmission       : materialParams.transmission,
-                        })
-                    break
-                }
-                I.prototype.material = minoMaterialFactory(COLORS.I)
-                J.prototype.material = minoMaterialFactory(COLORS.J)
-                L.prototype.material = minoMaterialFactory(COLORS.L)
-                O.prototype.material = minoMaterialFactory(COLORS.O)
-                S.prototype.material = minoMaterialFactory(COLORS.S)
-                T.prototype.material = minoMaterialFactory(COLORS.T)
-                Z.prototype.material = minoMaterialFactory(COLORS.Z)
-            })
+            material.add(minoMaterial, "opacity").min(0).max(1)
+            //material.add(minoMaterial, "reflectivity").min(0).max(1)
+            material.add(minoMaterial, "roughness").min(0).max(1)
+            material.add(minoMaterial, "metalness").min(0).max(1)
+            //material.add(minoMaterial, "attenuationDistance").min(0).max(1).hide()
+            //material.add(minoMaterial, "ior").min(1).max(2).hide()
+            //material.add(minoMaterial, "sheen").min(0).max(1).hide()
+            //material.add(minoMaterial, "sheenRoughness").min(0).max(1).hide()
+            //material.add(minoMaterial, "specularIntensity").min(0).max(1).hide()
+            //material.add(minoMaterial, "thickness").min(0).max(5).hide()
+            //material.add(minoMaterial, "transmission").min(0).max(1).hide()
 
             this.fps = new FPS.default()
             document.body.appendChild(this.fps.dom)
@@ -295,6 +193,3 @@ class TetraGUI extends GUI {
         this.fps?.update()
     }
 }
-
-
-export { TetraGUI }

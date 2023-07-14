@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 import { scheduler } from './jsm/scheduler.js'
-import { TRANSLATION, ROTATION, environnement, Matrix, HoldQueue, NextQueue } from './jsm/gamelogic.js'
+import { TRANSLATION, ROTATION, environnement, Playfield, HoldQueue, NextQueue } from './jsm/gamelogic.js'
 import { Settings } from './jsm/Settings.js'
 import { Stats } from './jsm/Stats.js'
 import { TetraGUI } from './jsm/TetraGUI.js'
@@ -31,13 +31,13 @@ let game = {
         holdQueue.remove(holdQueue.piece)
         holdQueue.piece = undefined
         if (nextQueue.pieces) nextQueue.pieces.forEach(piece => nextQueue.remove(piece))
-        matrix.init()
+        playfield.init()
         
-        scene.remove(matrix.piece)
-        if (matrix.piece) matrix.remove(matrix.piece)
-        matrix.piece = null
+        scene.remove(playfield.piece)
+        if (playfield.piece) playfield.remove(playfield.piece)
+        playfield.piece = null
         scene.music.currentTime = 0
-        matrix.visible = true
+        playfield.visible = true
 
         this.playing = true
         stats.clock.start()
@@ -65,16 +65,16 @@ let game = {
         stats.clock.elapsedTime = stats.elapsedTime
         scene.music.play()
 
-        if (matrix.piece) scheduler.setInterval(game.fall, stats.fallPeriod)
+        if (playfield.piece) scheduler.setInterval(game.fall, stats.fallPeriod)
         else this.generate()
     },
 
     generate: function(nextPiece=nextQueue.shift()) {
         nextPiece.lockDelay = stats.lockDelay
-        matrix.piece = nextPiece
-        matrix.piece.onLockDown = game.lockDown
+        playfield.piece = nextPiece
+        playfield.piece.onLockDown = game.lockDown
     
-        if (matrix.piece.canMove(TRANSLATION.NONE)) {
+        if (playfield.piece.canMove(TRANSLATION.NONE)) {
             scheduler.setInterval(game.fall, stats.fallPeriod)
         } else {
             game.over() // block out
@@ -82,17 +82,17 @@ let game = {
     },
 
     fall: function() {
-        matrix.piece.move(TRANSLATION.DOWN)
+        playfield.piece.move(TRANSLATION.DOWN)
     },
     
     lockDown: function() {
         scheduler.clearTimeout(game.lockDown)
         scheduler.clearInterval(game.fall)
     
-        if (matrix.lock(matrix.piece)) {
-            let tSpin = matrix.piece.tSpin
-            let nbClearedLines = matrix.clearLines()
-            matrix.remove(matrix.piece)
+        if (playfield.lock(playfield.piece)) {
+            let tSpin = playfield.piece.tSpin
+            let nbClearedLines = playfield.clearLines()
+            playfield.remove(playfield.piece)
             if (settings.sfxVolume) {
                 if (nbClearedLines == 4 || (tSpin && nbClearedLines)) {
                     scene.tetrisSound.currentTime = 0
@@ -130,7 +130,7 @@ let game = {
     },
 
     over: function() {
-        matrix.piece.locking = false
+        playfield.piece.locking = false
 
         document.onkeydown = null
         window.onblur = null
@@ -151,16 +151,16 @@ let game = {
 /* Handle player inputs */
 
 let playerActions = {
-    moveLeft: () => matrix.piece.move(TRANSLATION.LEFT),
+    moveLeft: () => playfield.piece.move(TRANSLATION.LEFT),
 
-    moveRight: () => matrix.piece.move(TRANSLATION.RIGHT),
+    moveRight: () => playfield.piece.move(TRANSLATION.RIGHT),
 
-    rotateCW: () => matrix.piece.rotate(ROTATION.CW),
+    rotateCW: () => playfield.piece.rotate(ROTATION.CW),
 
-    rotateCCW: () => matrix.piece.rotate(ROTATION.CCW),
+    rotateCCW: () => playfield.piece.rotate(ROTATION.CCW),
 
     softDrop: function () {
-        if (matrix.piece.move(TRANSLATION.DOWN)) stats.score++
+        if (playfield.piece.move(TRANSLATION.DOWN)) stats.score++
     },
 
     hardDrop: function () {
@@ -170,19 +170,19 @@ let playerActions = {
             scene.hardDropSound.currentTime = 0
             scene.hardDropSound.play()
         }
-        while (matrix.piece.move(TRANSLATION.DOWN)) stats.score += 2
+        while (playfield.piece.move(TRANSLATION.DOWN)) stats.score += 2
         game.lockDown()
-        matrix.hardDropAnimation.reset()
-        matrix.hardDropAnimation.play()
+        playfield.hardDropAnimation.reset()
+        playfield.hardDropAnimation.play()
     },
 
     hold: function () {
-        if (matrix.piece.holdEnabled) {
+        if (playfield.piece.holdEnabled) {
             scheduler.clearInterval(game.fall)
             scheduler.clearTimeout(game.lockDown)
 
             let heldpiece = holdQueue.piece
-            holdQueue.piece = matrix.piece
+            holdQueue.piece = playfield.piece
             game.generate(heldpiece)
         }
     },
@@ -290,8 +290,8 @@ const clock = new THREE.Clock()
 
 const holdQueue = new HoldQueue()
 scene.add(holdQueue)
-const matrix = new Matrix()
-scene.add(matrix)
+const playfield = new Playfield()
+scene.add(playfield)
 const nextQueue = new NextQueue()
 scene.add(nextQueue)
 
@@ -306,7 +306,7 @@ function animate() {
 
     const delta = clock.getDelta()
     scene.update(delta)
-    matrix.update(delta)
+    playfield.update(delta)
     controls.update()
     gui.update()
 
