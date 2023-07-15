@@ -6,7 +6,7 @@ Array.prototype.pick = function () { return this.splice(Math.floor(Math.random()
 
 let P = (x, y, z = 0) => new THREE.Vector3(x, y, z)
 
-const GRAVITY = -20
+const GRAVITY = -30
 
 const COLORS = {
     I: 0xafeff9,
@@ -17,7 +17,8 @@ const COLORS = {
     T: 0xedb2ff,
     Z: 0xffb8c5,
     LOCKING: "white",
-    GHOST: "white",
+    GHOST: 0xc0c0c0,
+    EDGE: 0x88abe0
 }
 
 const TRANSLATION = {
@@ -45,6 +46,11 @@ const FACING = {
     SOUTH: 2,
     WEST: 3,
 }
+
+
+const ROWS = 24
+const SKYLINE = 20
+const COLUMNS = 10
 
 
 const envRenderTarget = new THREE.WebGLCubeRenderTarget(256)
@@ -120,7 +126,7 @@ class Mino extends THREE.Object3D {
         this.rotateOnWorldAxis(this.rotationAngle, delta * this.angularVelocity)
         this.updateMatrix()
     }
-}
+    }
 
 
 class Tetromino extends THREE.InstancedMesh {
@@ -211,13 +217,6 @@ class Tetromino extends THREE.InstancedMesh {
     get tSpin() {
         return T_SPIN.NONE
     }
-
-    copy(piece) {
-        this.position.copy(piece.position)
-        this.minoesPosition = piece.minoesPosition
-        this.facing = piece.facing
-        while (this.canMove(TRANSLATION.DOWN)) this.position.y--
-    }
 }
 Tetromino.prototype.minoMaterial = minoMaterial
 Tetromino.prototype.lockingColor = new THREE.Color(COLORS.LOCKING)
@@ -232,14 +231,23 @@ Tetromino.prototype.srs = [
 Tetromino.prototype.lockDelay = 500
 
 
-class Ghost extends Tetromino {}
-Ghost.prototype.minoMaterial = new THREE.MeshBasicMaterial({
+class Ghost extends Tetromino {
+
+    copy(piece) {
+        this.position.copy(piece.position)
+        this.minoesPosition = piece.minoesPosition
+        this.facing = piece.facing
+        while (this.canMove(TRANSLATION.DOWN)) this.position.y--
+    }
+    
+}
+/*Ghost.prototype.minoMaterial = new THREE.MeshBasicMaterial({
     envMap: environnement,
     reflectivity: 0.9,
     transparent: true,
     opacity: 0.15,
     side: THREE.DoubleSide,
-})
+})*/
 Ghost.prototype.freeColor = new THREE.Color(COLORS.GHOST)
 Ghost.prototype.minoesPosition = [
     [P(0, 0, 0), P(0, 0, 0), P(0, 0, 0), P(0, 0, 0)],
@@ -334,23 +342,18 @@ Z.prototype.minoesPosition = [
 Z.prototype.freeColor = new THREE.Color(COLORS.Z)
 
 
-const ROWS = 24
-const SKYLINE = 20
-const COLUMNS = 10
-
-
 class Playfield extends THREE.Group {
     constructor() {
         super()
         this.visible = false
 
-        const edgeMaterial = new THREE.MeshBasicMaterial({
-            color: 0x88abe0,
+        const edgeMaterial = new THREE.MeshStandardMaterial({
+            color: COLORS.EDGE,
             envMap: environnement,
             transparent: true,
-            opacity: 0.4,
-            reflectivity: 0.9,
-            refractionRatio: 0.5
+            opacity: 0.2,
+            roughness: 0.1,
+            metallness: 0.9,
         })
         const edgeShape = new THREE.Shape()
             .moveTo(-.3, SKYLINE)
@@ -410,7 +413,7 @@ class Playfield extends THREE.Group {
         if (piece) {
             this.add(piece)
             piece.position.set(4, SKYLINE)
-            this.ghost.color = piece.freeColor
+            //this.ghost.color = piece.freeColor
             this.ghost.copy(piece)
             this.ghost.visible = true
         }

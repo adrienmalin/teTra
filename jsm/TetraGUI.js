@@ -55,8 +55,8 @@ export class TetraGUI extends GUI {
                         scene.vortex.colorFullTextureRotation = 0.006
                         scene.vortex.colorFullMoveForward = 0.013
 
-                        scene.ambientLight.intensity = 0.5
-                        scene.directionalLight.intensity = 6
+                        scene.ambientLight.intensity = 1
+                        scene.directionalLight.intensity = 5
                     }
                 break
                 case "Espace":
@@ -142,28 +142,23 @@ export class TetraGUI extends GUI {
             directionalLightPosition.add(scene.directionalLight.position, "x")
             directionalLightPosition.add(scene.directionalLight.position, "y")
             directionalLightPosition.add(scene.directionalLight.position, "z")
-            
-            let directionalLightTargetPosition = this.debug.addFolder("directionalLight.target").close()
-            directionalLightTargetPosition.add(scene.directionalLight.target.position, "x")
-            directionalLightTargetPosition.add(scene.directionalLight.target.position, "y")
-            directionalLightTargetPosition.add(scene.directionalLight.target.position, "z")
         
             let vortex = this.debug.addFolder("vortex opacity").close()
             vortex.add(scene.vortex.darkCylinder.material, "opacity").name("dark").min(0).max(1)
             vortex.add(scene.vortex.colorFullCylinder.material, "opacity").name("colorFull").min(0).max(1)
 
             let material = this.debug.addFolder("minoes material").close()
-            material.add(minoMaterial, "opacity").min(0).max(1)
-            //material.add(minoMaterial, "reflectivity").min(0).max(1)
-            material.add(minoMaterial, "roughness").min(0).max(1)
-            material.add(minoMaterial, "metalness").min(0).max(1)
-            //material.add(minoMaterial, "attenuationDistance").min(0).max(1).hide()
-            //material.add(minoMaterial, "ior").min(1).max(2).hide()
-            //material.add(minoMaterial, "sheen").min(0).max(1).hide()
-            //material.add(minoMaterial, "sheenRoughness").min(0).max(1).hide()
-            //material.add(minoMaterial, "specularIntensity").min(0).max(1).hide()
-            //material.add(minoMaterial, "thickness").min(0).max(5).hide()
-            //material.add(minoMaterial, "transmission").min(0).max(1).hide()
+            if ("opacity"             in minoMaterial) material.add(minoMaterial, "opacity").min(0).max(1)
+            if ("reflectivity"        in minoMaterial) material.add(minoMaterial, "reflectivity").min(0).max(1)
+            if ("roughness"           in minoMaterial) material.add(minoMaterial, "roughness").min(0).max(1)
+            if ("metalness"           in minoMaterial) material.add(minoMaterial, "metalness").min(0).max(1)
+            if ("attenuationDistance" in minoMaterial) material.add(minoMaterial, "attenuationDistance").min(0).max(1)
+            if ("ior"                 in minoMaterial) material.add(minoMaterial, "ior").min(1).max(2)
+            if ("sheen"               in minoMaterial) material.add(minoMaterial, "sheen").min(0).max(1)
+            if ("sheenRoughness"      in minoMaterial) material.add(minoMaterial, "sheenRoughness").min(0).max(1)
+            if ("specularIntensity"   in minoMaterial) material.add(minoMaterial, "specularIntensity").min(0).max(1)
+            if ("thickness"           in minoMaterial) material.add(minoMaterial, "thickness").min(0).max(5)
+            if ("transmission"        in minoMaterial) material.add(minoMaterial, "transmission").min(0).max(1)
 
             this.fps = new FPS.default()
             document.body.appendChild(this.fps.dom)
