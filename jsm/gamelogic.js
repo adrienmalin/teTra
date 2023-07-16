@@ -126,7 +126,7 @@ class Mino extends THREE.Object3D {
         this.rotateOnWorldAxis(this.rotationAngle, delta * this.angularVelocity)
         this.updateMatrix()
     }
-    }
+}
 
 
 class Tetromino extends THREE.InstancedMesh {
