@@ -90,7 +90,7 @@ let minoMaterial = new THREE.MeshStandardMaterial({
     transparent: true,
     opacity: 0.6,
     roughness: 0.1,
-    metalness: 0.9,
+    metalness: 0.95,
 })
 /*
 let minoMaterial = new THREE.MeshPhysicalMaterial({
