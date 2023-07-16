@@ -120,7 +120,7 @@ class Mino extends THREE.Object3D {
         this.angularVelocity = 5 - 10 * Math.random()
     }
 
-    update(delta) {
+    explode(delta) {
         this.velocity.y += delta * GRAVITY
         this.position.addScaledVector(this.velocity, delta)
         this.rotateOnWorldAxis(this.rotationAngle, delta * this.angularVelocity)
@@ -468,9 +468,9 @@ class Playfield extends THREE.Group {
     }
 
     updateFreedMinoes(delta) {
-        this.freedMinoes.forEach(mino => mino.update(delta))
+        this.freedMinoes.forEach(mino => mino.explode(delta))
         this.freedMinoes = this.freedMinoes.filter(mino => 
-            Math.sqrt(mino.position.x * mino.position.x + mino.position.z * mino.position.z) <= 40 && mino.position.y > -50
+            Math.sqrt(mino.position.x * mino.position.x + mino.position.z * mino.position.z) <= 40 && mino.position.y < -50
         ) || []
         
         this.freedMeshes.count = this.freedMinoes.length
