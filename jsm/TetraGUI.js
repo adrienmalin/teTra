@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 import { GUI } from 'three/addons/libs/lil-gui.module.min.js'
 import * as FPS from 'three/addons/libs/stats.module.js'
-import { COLORS, environnement, minoMaterial, I, J, L, O, S, T, Z, Tetromino } from './gamelogic.js'
+import { Mino } from './gamelogic.js'
 
 
 export class TetraGUI extends GUI {
@@ -148,17 +148,17 @@ export class TetraGUI extends GUI {
             vortex.add(scene.vortex.colorFullCylinder.material, "opacity").name("colorFull").min(0).max(1)
 
             let material = this.debug.addFolder("minoes material").close()
-            if ("opacity"             in minoMaterial) material.add(minoMaterial, "opacity").min(0).max(1)
-            if ("reflectivity"        in minoMaterial) material.add(minoMaterial, "reflectivity").min(0).max(1)
-            if ("roughness"           in minoMaterial) material.add(minoMaterial, "roughness").min(0).max(1)
-            if ("metalness"           in minoMaterial) material.add(minoMaterial, "metalness").min(0).max(1)
-            if ("attenuationDistance" in minoMaterial) material.add(minoMaterial, "attenuationDistance").min(0).max(1)
-            if ("ior"                 in minoMaterial) material.add(minoMaterial, "ior").min(1).max(2)
-            if ("sheen"               in minoMaterial) material.add(minoMaterial, "sheen").min(0).max(1)
-            if ("sheenRoughness"      in minoMaterial) material.add(minoMaterial, "sheenRoughness").min(0).max(1)
-            if ("specularIntensity"   in minoMaterial) material.add(minoMaterial, "specularIntensity").min(0).max(1)
-            if ("thickness"           in minoMaterial) material.add(minoMaterial, "thickness").min(0).max(5)
-            if ("transmission"        in minoMaterial) material.add(minoMaterial, "transmission").min(0).max(1)
+            if ("opacity"             in Mino.mesh.material) material.add(Mino.mesh.material, "opacity").min(0).max(1)
+            if ("reflectivity"        in Mino.mesh.material) material.add(Mino.mesh.material, "reflectivity").min(0).max(1)
+            if ("roughness"           in Mino.mesh.material) material.add(Mino.mesh.material, "roughness").min(0).max(1)
+            if ("metalness"           in Mino.mesh.material) material.add(Mino.mesh.material, "metalness").min(0).max(1)
+            if ("attenuationDistance" in Mino.mesh.material) material.add(Mino.mesh.material, "attenuationDistance").min(0).max(1)
+            if ("ior"                 in Mino.mesh.material) material.add(Mino.mesh.material, "ior").min(1).max(2)
+            if ("sheen"               in Mino.mesh.material) material.add(Mino.mesh.material, "sheen").min(0).max(1)
+            if ("sheenRoughness"      in Mino.mesh.material) material.add(Mino.mesh.material, "sheenRoughness").min(0).max(1)
+            if ("specularIntensity"   in Mino.mesh.material) material.add(Mino.mesh.material, "specularIntensity").min(0).max(1)
+            if ("thickness"           in Mino.mesh.material) material.add(Mino.mesh.material, "thickness").min(0).max(5)
+            if ("transmission"        in Mino.mesh.material) material.add(Mino.mesh.material, "transmission").min(0).max(1)
 
             this.fps = new FPS.default()
             document.body.appendChild(this.fps.dom)

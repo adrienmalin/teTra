@@ -60,85 +60,118 @@ environnement.camera = new THREE.CubeCamera(1, 1000, envRenderTarget)
 environnement.camera.position.set(5, 10)
 
 
-const minoFaceShape = new THREE.Shape()
-minoFaceShape.moveTo(.1, .1)
-minoFaceShape.lineTo(.1, .9)
-minoFaceShape.lineTo(.9, .9)
-minoFaceShape.lineTo(.9, .1)
-minoFaceShape.lineTo(.1, .1)
-const minoExtrudeSettings = {
-    steps: 1,
-    depth: .8,
-    bevelEnabled: true,
-    bevelThickness: .1,
-    bevelSize: .1,
-    bevelOffset: 0,
-    bevelSegments: 1
-}
-let minoGeometry = new THREE.ExtrudeGeometry(minoFaceShape, minoExtrudeSettings)
-
-/*let minoMaterial = new THREE.MeshBasicMaterial({
-    envMap: environnement,
-    side: THREE.DoubleSide,
-    transparent: true,
-    opacity: 0.8,
-    reflectivity: 0.9,
-})*/
-let minoMaterial = new THREE.MeshStandardMaterial({
-    envMap: environnement,
-    side: THREE.DoubleSide,
-    transparent: true,
-    opacity: 0.6,
-    roughness: 0.1,
-    metalness: 0.95,
-})
-/*
-let minoMaterial = new THREE.MeshPhysicalMaterial({
-    envMap: environnement,
-    side: THREE.DoubleSide,
-    transparent: true,
-    opacity: 0.6,
-    roughness: 0.1,
-    metalness: 0.90,
-    attenuationDistance: 0.5,
-    ior: 2,
-    sheen: 0,
-    sheenRoughness: 1,
-    specularIntensity: 1,
-    thickness: 5,
-    transmission: 1,
-})*/
-
-
 class Mino extends THREE.Object3D {
-    constructor(color, x, y, z=0) {
+    static instances = new Set()
+    static mesh
+    static {
+        let minoFaceShape = new THREE.Shape()
+        minoFaceShape.moveTo(.1, .1)
+        minoFaceShape.lineTo(.1, .9)
+        minoFaceShape.lineTo(.9, .9)
+        minoFaceShape.lineTo(.9, .1)
+        minoFaceShape.lineTo(.1, .1)
+        let minoExtrudeSettings = {
+            steps: 1,
+            depth: .8,
+            bevelEnabled: true,
+            bevelThickness: .1,
+            bevelSize: .1,
+            bevelOffset: 0,
+            bevelSegments: 1
+        }
+        let minoGeometry = new THREE.ExtrudeGeometry(minoFaceShape, minoExtrudeSettings)
+
+        /*let minoMaterial = new THREE.MeshBasicMaterial({
+            envMap: environnement,
+            side: THREE.DoubleSide,
+            transparent: true,
+            opacity: 0.8,
+            reflectivity: 0.9,
+        })*/
+        let minoMaterial = new THREE.MeshStandardMaterial({
+            envMap: environnement,
+            side: THREE.DoubleSide,
+            transparent: true,
+            opacity: 0.6,
+            roughness: 0.1,
+            metalness: 0.95,
+        })
+        /*
+        let minoMaterial = new THREE.MeshPhysicalMaterial({
+            envMap: environnement,
+            side: THREE.DoubleSide,
+            transparent: true,
+            opacity: 0.6,
+            roughness: 0.1,
+            metalness: 0.90,
+            attenuationDistance: 0.5,
+            ior: 2,
+            sheen: 0,
+            sheenRoughness: 1,
+            specularIntensity: 1,
+            thickness: 5,
+            transmission: 1,
+        })*/
+
+        this.mesh = new THREE.InstancedMesh(minoGeometry, minoMaterial, 2*ROWS*COLUMNS)
+    }
+
+    static update(delta) {
+        let i = 0
+        this.instances.forEach(mino => {
+            if (mino.parent.visible) {
+                mino.updateMatrixWorld()
+                this.mesh.setColorAt(i, mino.color)
+                this.mesh.setMatrixAt(i, mino.matrixWorld)
+                i++
+            }
+        })
+        this.mesh.count = i
+        if (this.mesh.count) {
+            this.mesh.instanceColor.needsUpdate = true
+            this.mesh.instanceMatrix.needsUpdate = true
+        }
+    }
+
+    constructor(color) {
         super()
         this.color = color
-        this.position.set(x, y, z)
         this.velocity = P(50 - 100 * Math.random(), 50 - 100 * Math.random(), 50 - 100 * Math.random())
         this.rotationAngle = P(Math.random(), Math.random(), Math.random()).normalize()
         this.angularVelocity = 5 - 10 * Math.random()
+        Mino.instances.add(this)
     }
 
-    update(delta) {
+    explode(delta) {
         this.velocity.y += delta * GRAVITY
         this.position.addScaledVector(this.velocity, delta)
         this.rotateOnWorldAxis(this.rotationAngle, delta * this.angularVelocity)
-        this.updateMatrix()
+        if (Math.sqrt(mino.position.x * mino.position.x + mino.position.z * mino.position.z) > 40 || mino.position.y < -50) {
+            this.dispose()
+            return false
+        } else {
+            this.updateMatrix()
+            return true
+        }
+    }
+
+    dispose() {
+        Mino.instances.delete(this)
     }
 }
 
 
-class Tetromino extends THREE.InstancedMesh {
+class Tetromino extends THREE.Group {
     static randomBag = []
     static get random() {
         if (!this.randomBag.length) this.randomBag = [I, J, L, O, S, T, Z]
         return this.randomBag.pick()
     }
 
-    constructor() {
-        super(minoGeometry, undefined, 4)
-        this.material           = this.minoMaterial
+    constructor(position) {
+        super()
+        if (position) this.position.copy(position)
+        this.minoesPosition[FACING.NORTH].forEach(position => this.add(new Mino(this.freeColor)))
         this.facing             = FACING.NORTH
         this.rotatedLast        = false
         this.rotationPoint4Used = false
@@ -148,12 +181,7 @@ class Tetromino extends THREE.InstancedMesh {
 
     set facing(facing) {
         this._facing = facing
-        let matrix4 = new THREE.Matrix4()
-        this.minoesPosition[this.facing].forEach((position, i) => {
-            matrix4.setPosition(position)
-            this.setMatrixAt(i, matrix4)
-        })
-        this.instanceMatrix.needsUpdate = true
+        this.children.forEach((mino, i) => mino.position.copy(this.minoesPosition[facing][i]))
     }
 
     get facing() {
@@ -169,10 +197,7 @@ class Tetromino extends THREE.InstancedMesh {
     }
 
     set color(color) {
-        for (let i = 0; i < this.count; i++) {
-            this.setColorAt(i, color)
-        }
-        this.instanceColor.needsUpdate = true
+        this.children.forEach((mino) => mino.color = color)
     }
 
     canMove(translation, facing=this.facing) {
@@ -190,7 +215,6 @@ class Tetromino extends THREE.InstancedMesh {
             }
             if (this.canMove(TRANSLATION.DOWN)) {
                 this.locking = false
-                this.parent.ghost.visible = true
                 this.parent.ghost.copy(this)
                 scheduler.clearTimeout(this.onLockDown)
             } else {
@@ -238,6 +262,7 @@ class Ghost extends Tetromino {
         this.minoesPosition = piece.minoesPosition
         this.facing = piece.facing
         while (this.canMove(TRANSLATION.DOWN)) this.position.y--
+        this.visible = true
     }
     
 }
@@ -388,13 +413,7 @@ class Playfield extends THREE.Group {
         this.add(this.ghost)
         this.ghost.visible = false
 
-        this.lockedMeshes = new THREE.InstancedMesh(minoGeometry, minoMaterial, 200)
-        this.add(this.lockedMeshes)
-
-        this.freedMinoes = []
-        this.freedMeshes = new THREE.InstancedMesh(minoGeometry, minoMaterial, 200)
-        this.freedMeshes.count = 0
-        this.add(this.freedMeshes)
+        this.freedMinoes = new Set()
 
         this.init()
     }
@@ -414,9 +433,7 @@ class Playfield extends THREE.Group {
         if (piece) {
             this.add(piece)
             piece.position.set(4, SKYLINE)
-            //this.ghost.color = piece.freeColor
             this.ghost.copy(piece)
-            this.ghost.visible = true
         }
         this._piece = piece
     }
@@ -426,62 +443,37 @@ class Playfield extends THREE.Group {
     }
 
     lock() {
-        this.piece.minoesPosition[this.piece.facing].forEach(position => {
-            position = position.clone()
-            position.add(this.piece.position)
-            if (this.cellIsEmpty(position)) {
-                this.cells[position.y][position.x] = this.piece.freeColor
+        this.piece.locking = false
+        return Array.from(this.piece.children).every(mino => {
+            this.add(mino)
+            mino.position.add(this.piece.position)
+            if (this.cellIsEmpty(mino.position)) {
+                this.cells[mino.position.y][mino.position.x] = mino
+                return mino.position.y < SKYLINE
+            } else {
+                return false
             }
         })
-        this.updateLockedMinoes()
-        return this.piece.minoesPosition[this.piece.facing].every(position => position.y + this.piece.position.y < SKYLINE)
     }
 
     clearLines() {
         let nbClearedLines = this.cells.reduceRight((nbClearedLines, row, y) => {
             if (row.filter(color => color).length == COLUMNS) {
-                row.forEach((color, x) => {
-                    this.freedMinoes.push(new Mino(color, x, y))
-                })
+                row.forEach(mino => this.freedMinoes.add(mino))
                 this.cells.splice(y, 1)
                 this.cells.push(Array(COLUMNS))
                 return ++nbClearedLines
             }
             return nbClearedLines
         }, 0)
-        this.updateLockedMinoes()
+        if (nbClearedLines) this.cells.forEach((row, y) => row.forEach((mino, x) => mino.position.set(x, y, 0)))
         return nbClearedLines
     }
 
-    updateLockedMinoes() {
-        let i = 0
-        let matrix4 = new THREE.Matrix4()
-        this.cells.forEach((row, y) => row.forEach((color, x) => {
-            matrix4.setPosition(x, y, 0)
-            this.lockedMeshes.setMatrixAt(i, matrix4)
-            this.lockedMeshes.setColorAt(i, color)
-            i++
-        }))
-        this.lockedMeshes.count = i
-        this.lockedMeshes.instanceMatrix.needsUpdate = true
-        this.lockedMeshes.instanceColor.needsUpdate = true
-    }
-
     updateFreedMinoes(delta) {
-        this.freedMinoes.forEach(mino => mino.update(delta))
-        this.freedMinoes = this.freedMinoes.filter(mino => 
-            Math.sqrt(mino.position.x * mino.position.x + mino.position.z * mino.position.z) <= 40 && mino.position.y > -50
-        ) || []
-        
-        this.freedMeshes.count = this.freedMinoes.length
-        if (this.freedMeshes.count) {
-            this.freedMinoes.forEach((mino, i) => {
-                this.freedMeshes.setMatrixAt(i, mino.matrix)
-                this.freedMeshes.setColorAt(i, mino.color)
-            })
-            this.freedMeshes.instanceMatrix.needsUpdate = true
-            this.freedMeshes.instanceColor.needsUpdate = true
-        }
+        this.freedMinoes.forEach(mino => {
+            if (mino.explode(delta)) this.freedMinoes.delete(this)
+        })
     }
 
     update(delta) {
@@ -522,8 +514,7 @@ class NextQueue extends THREE.Group {
 
     init() {
         this.pieces = this.positions.map((position) => {
-            let piece = new Tetromino.random()
-            piece.position.copy(position)
+            let piece = new Tetromino.random(position)
             this.add(piece)
             return piece
         })
@@ -544,4 +535,4 @@ class NextQueue extends THREE.Group {
 NextQueue.prototype.positions = [P(0, 0), P(0, -3), P(0, -6), P(0, -9), P(0, -12), P(0, -15), P(0, -18)]
 
 
-export { T_SPIN, FACING, TRANSLATION, ROTATION, COLORS, environnement, minoMaterial, Tetromino, I, J, L, O, S, T, Z, Playfield, HoldQueue, NextQueue }
+export { T_SPIN, FACING, TRANSLATION, ROTATION, COLORS, environnement, Mino, Tetromino, Playfield, HoldQueue, NextQueue }

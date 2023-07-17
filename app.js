@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 import { scheduler } from './jsm/scheduler.js'
-import { TRANSLATION, ROTATION, environnement, Playfield, HoldQueue, NextQueue } from './jsm/gamelogic.js'
+import { TRANSLATION, ROTATION, environnement, Mino, Playfield, HoldQueue, NextQueue } from './jsm/gamelogic.js'
 import { Settings } from './jsm/Settings.js'
 import { Stats } from './jsm/Stats.js'
 import { TetraGUI } from './jsm/TetraGUI.js'
@@ -288,6 +288,8 @@ const gui = new TetraGUI(game, settings, stats, scene)
 
 const clock = new THREE.Clock()
 
+scene.add(Mino.mesh)
+
 const holdQueue = new HoldQueue()
 scene.add(holdQueue)
 const playfield = new Playfield()
@@ -307,6 +309,7 @@ function animate() {
     const delta = clock.getDelta()
     scene.update(delta)
     playfield.update(delta)
+    Mino.update()
     controls.update()
     gui.update()
 
