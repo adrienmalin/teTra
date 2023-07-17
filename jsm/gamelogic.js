@@ -96,8 +96,7 @@ class Mino extends THREE.Object3D {
             roughness: 0.1,
             metalness: 0.95,
         })
-        /*
-        let minoMaterial = new THREE.MeshPhysicalMaterial({
+        /*let minoMaterial = new THREE.MeshPhysicalMaterial({
             envMap: environnement,
             side: THREE.DoubleSide,
             transparent: true,
@@ -116,10 +115,10 @@ class Mino extends THREE.Object3D {
         this.mesh = new THREE.InstancedMesh(minoGeometry, minoMaterial, 2*ROWS*COLUMNS)
     }
 
-    static update(delta) {
+    static update() {
         let i = 0
         this.instances.forEach(mino => {
-            if (mino.parent.visible) {
+            if (mino.parent?.visible) {
                 mino.updateMatrixWorld()
                 this.mesh.setColorAt(i, mino.color)
                 this.mesh.setMatrixAt(i, mino.matrixWorld)
@@ -146,7 +145,7 @@ class Mino extends THREE.Object3D {
         this.velocity.y += delta * GRAVITY
         this.position.addScaledVector(this.velocity, delta)
         this.rotateOnWorldAxis(this.rotationAngle, delta * this.angularVelocity)
-        if (Math.sqrt(mino.position.x * mino.position.x + mino.position.z * mino.position.z) > 40 || mino.position.y < -50) {
+        if (Math.sqrt(this.position.x * this.position.x + this.position.z * this.position.z) > 40 || this.position.y < -50) {
             this.dispose()
             return false
         } else {
@@ -255,15 +254,13 @@ Tetromino.prototype.lockDelay = 500
 
 
 class Ghost extends Tetromino {
-
     copy(piece) {
         this.position.copy(piece.position)
         this.minoesPosition = piece.minoesPosition
         this.facing = piece.facing
-        while (this.canMove(TRANSLATION.DOWN)) this.position.y--
         this.visible = true
+        while (this.canMove(TRANSLATION.DOWN)) this.position.y--
     }
-    
 }
 Ghost.prototype.freeColor = new THREE.Color(COLORS.GHOST)
 Ghost.prototype.minoesPosition = [
@@ -400,10 +397,6 @@ class Playfield extends THREE.Group {
         this.hardDropAnimation.loop = THREE.LoopOnce
         this.hardDropAnimation.setDuration(0.2)
 
-        this.ghost = new Ghost()
-        this.add(this.ghost)
-        this.ghost.visible = false
-
         this.freedMinoes = new Set()
 
         this.init()
@@ -411,7 +404,10 @@ class Playfield extends THREE.Group {
 
     init() {
         this.cells = Array(ROWS).fill().map(() => Array(COLUMNS))
-        this.lockedMeshes.count = 0
+
+        this.ghost = new Ghost()
+        this.ghost.visible = false
+        this.add(this.ghost)
     }
 
     cellIsEmpty(p) {
@@ -514,11 +510,11 @@ class NextQueue extends THREE.Group {
     shift() {
         let fistPiece = this.pieces.shift()
         let lastPiece = new Tetromino.random()
-        this.add(lastPiece)
         this.pieces.push(lastPiece)
         this.positions.forEach((position, i) => {
             this.pieces[i].position.copy(position)
         })
+        this.add(lastPiece)
         return fistPiece
     }
 

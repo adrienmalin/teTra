@@ -27,6 +27,8 @@ let game = {
         stats.init()
         gui.stats.show()
         gui.settings.close()
+
+        Mino.instances.clear()
         
         holdQueue.remove(holdQueue.piece)
         holdQueue.piece = undefined

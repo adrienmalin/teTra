@@ -152,7 +152,7 @@ export class TetraGUI extends GUI {
             if ("reflectivity"        in Mino.mesh.material) material.add(Mino.mesh.material, "reflectivity").min(0).max(1)
             if ("roughness"           in Mino.mesh.material) material.add(Mino.mesh.material, "roughness").min(0).max(1)
             if ("metalness"           in Mino.mesh.material) material.add(Mino.mesh.material, "metalness").min(0).max(1)
-            if ("attenuationDistance" in Mino.mesh.material) material.add(Mino.mesh.material, "attenuationDistance").min(0).max(1)
+            if ("attenuationDistance" in Mino.mesh.material) material.add(Mino.mesh.material, "attenuationDistance").min(0)
             if ("ior"                 in Mino.mesh.material) material.add(Mino.mesh.material, "ior").min(1).max(2)
             if ("sheen"               in Mino.mesh.material) material.add(Mino.mesh.material, "sheen").min(0).max(1)
             if ("sheenRoughness"      in Mino.mesh.material) material.add(Mino.mesh.material, "sheenRoughness").min(0).max(1)
