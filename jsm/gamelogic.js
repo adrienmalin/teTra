@@ -129,7 +129,7 @@ class Mino extends THREE.Object3D {
             side: THREE.DoubleSide,
             transparent: true,
             opacity: 0.6,
-            roughness: 0.1,
+            roughness: 0.4,
             metalness: 0.95,
         })
         /*let minoMaterial = new THREE.MeshPhysicalMaterial({
@@ -137,8 +137,8 @@ class Mino extends THREE.Object3D {
             side: THREE.DoubleSide,
             transparent: true,
             opacity: 0.6,
-            roughness: 0.1,
-            metalness: 0.90,
+            roughness: 0.5,
+            metalness: 0.9,
             attenuationDistance: 0.5,
             ior: 2,
             sheen: 0,
@@ -381,7 +381,7 @@ class Playfield extends THREE.Group {
             transparent: true,
             opacity: 0.2,
             roughness: 0.1,
-            metallness: 0.9,
+            metalness: 0.9,
         })
         const edgeShape = new THREE.Shape()
             .moveTo(-.3, SKYLINE)
