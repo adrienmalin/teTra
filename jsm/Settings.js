@@ -1,29 +1,29 @@
 let jsKeyRenamer = new Proxy({
-    ["←"]: "ArrowLeft",
-    ["→"]: "ArrowRight",
-    ["↑"]: "ArrowUp",
-    ["↓"]: "ArrowDown",
-    ["Espace"]: " ",
-    ["Échap."]: "Escape",
-    ["Ret. arrière"]: "Backspace",
-    ["Entrée"]: "Enter",
+    ["←"]: "arrowleft",
+    ["→"]: "arrowright",
+    ["↑"]: "arrowup",
+    ["↓"]: "arrowdown",
+    ["Espace"]:  " ",
+    ["Échap."]: "escape",
+    ["Ret. arrière"]: "backspace",
+    ["Entrée"]: "enter",
 }, {
     get(obj, keyName) {
-        return keyName in obj ? obj[keyName] : keyName
+        return keyName in obj ? obj[keyName] : keyName.toLowerCase()
     }
 })
 let friendyKeyRenamer = new Proxy({
-    ["ArrowLeft"]: "←",
-    ["ArrowRight"]: "→",
-    ["ArrowUp"]: "↑",
-    ["ArrowDown"]: "↓",
+    ["arrowleft"]: "←",
+    ["arrowright"]: "→",
+    ["arrowup"]: "↑",
+    ["arrowdown"]: "↓",
     [" "]: "Espace",
-    ["Escape"]: "Échap.",
-    ["Backspace"]: "Ret. arrière",
-    ["Enter"]: "Entrée",
+    ["escape"]: "Échap.",
+    ["backspace"]: "Ret. arrière",
+    ["enter"]: "Entrée",
 }, {
     get(obj, keyName) {
-        return keyName in obj ? obj[keyName] : keyName
+        return keyName.toLowerCase() in obj ? obj[keyName] : keyName.toUpperCase()
     }
 })
 
@@ -38,6 +38,7 @@ class Settings {
 
         this.key = new Proxy(keyMaps, {
             set(km, action, key) {
+                key = key.toLowerCase()
                 km.action[key] = action
                 return km.key[action] = jsKeyRenamer[key]
             },
@@ -50,14 +51,15 @@ class Settings {
         })
         this.action = new Proxy(keyMaps, {
             set(km, key, action) {
+                key = key.toLowerCase()
                 km.key[action] = key
                 return km.action[key] = action
             },
             has(km, key) {
-                return key in km.action
+                return key.toLowerCase() in km.action
             },
             get(km, key) {
-                return km.action[key]
+                return km.action[key.toLowerCase()]
             }
         })
 
