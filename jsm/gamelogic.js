@@ -60,6 +60,42 @@ environnement.camera = new THREE.CubeCamera(1, 1000, envRenderTarget)
 environnement.camera.position.set(5, 10)
 
 
+class InstancedMino extends THREE.InstancedMesh {
+    constructor(geometry, material, count) {
+        super(geometry, material, count)
+        this.instances = new Set()
+        this.count = 0
+    }
+
+    add(instance) {
+        this.instances.add(instance)
+    }
+
+    delete(instance) {
+        this.instances.delete(instance)
+    }
+
+    clear() {
+        this.instances.clear()
+    }
+
+    update() {
+        this.count = 0
+        this.instances.forEach(mino => {
+            if (mino.parent?.visible) {
+                this.setColorAt(this.count, mino.color)
+                this.setMatrixAt(this.count, mino.matrixWorld)
+                this.count++
+            }
+        })
+        if (this.count) {
+            this.instanceColor.needsUpdate = true
+            this.instanceMatrix.needsUpdate = true
+        }
+    }
+}
+
+
 class Mino extends THREE.Object3D {
     static instances = new Set()
     static mesh
@@ -112,24 +148,7 @@ class Mino extends THREE.Object3D {
             transmission: 1,
         })*/
 
-        this.mesh = new THREE.InstancedMesh(minoGeometry, minoMaterial, 2*ROWS*COLUMNS)
-    }
-
-    static update() {
-        let i = 0
-        this.instances.forEach(mino => {
-            if (mino.parent?.visible) {
-                mino.updateMatrixWorld()
-                this.mesh.setColorAt(i, mino.color)
-                this.mesh.setMatrixAt(i, mino.matrixWorld)
-                i++
-            }
-        })
-        this.mesh.count = i
-        if (this.mesh.count) {
-            this.mesh.instanceColor.needsUpdate = true
-            this.mesh.instanceMatrix.needsUpdate = true
-        }
+        this.mesh = new InstancedMino(minoGeometry, minoMaterial, 2*ROWS*COLUMNS)
     }
 
     constructor(color) {
@@ -138,7 +157,7 @@ class Mino extends THREE.Object3D {
         this.velocity = P(50 - 100 * Math.random(), 50 - 100 * Math.random(), 50 - 100 * Math.random())
         this.rotationAngle = P(Math.random(), Math.random(), Math.random()).normalize()
         this.angularVelocity = 5 - 10 * Math.random()
-        Mino.instances.add(this)
+        this.constructor.mesh.add(this)
     }
 
     explode(delta) {
@@ -146,16 +165,11 @@ class Mino extends THREE.Object3D {
         this.position.addScaledVector(this.velocity, delta)
         this.rotateOnWorldAxis(this.rotationAngle, delta * this.angularVelocity)
         if (Math.sqrt(this.position.x * this.position.x + this.position.z * this.position.z) > 40 || this.position.y < -50) {
-            this.dispose()
+            this.constructor.mesh.delete(this)
             return false
         } else {
-            this.updateMatrix()
             return true
         }
-    }
-
-    dispose() {
-        Mino.instances.delete(this)
     }
 }
 
@@ -170,7 +184,7 @@ class Tetromino extends THREE.Group {
     constructor(position) {
         super()
         if (position) this.position.copy(position)
-        this.minoesPosition[FACING.NORTH].forEach(position => this.add(new Mino(this.freeColor)))
+        this.minoesPosition[FACING.NORTH].forEach(() => this.add(new Mino(this.freeColor)))
         this.facing             = FACING.NORTH
         this.rotatedLast        = false
         this.rotationPoint4Used = false
@@ -500,21 +514,17 @@ class NextQueue extends THREE.Group {
     }
 
     init() {
-        this.pieces = this.positions.map((position) => {
-            let piece = new Tetromino.random(position)
-            this.add(piece)
-            return piece
+        this.positions.forEach((position) => {
+            this.add(new Tetromino.random(position))
         })
     }
 
     shift() {
-        let fistPiece = this.pieces.shift()
-        let lastPiece = new Tetromino.random()
-        this.pieces.push(lastPiece)
+        let fistPiece = this.children.shift()
+        this.add(new Tetromino.random())
         this.positions.forEach((position, i) => {
-            this.pieces[i].position.copy(position)
+            this.children[i].position.copy(position)
         })
-        this.add(lastPiece)
         return fistPiece
     }
 

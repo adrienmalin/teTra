@@ -28,7 +28,7 @@ let game = {
         gui.stats.show()
         gui.settings.close()
 
-        Mino.instances.clear()
+        Mino.mesh.clear()
         
         holdQueue.remove(holdQueue.piece)
         holdQueue.piece = undefined
@@ -309,9 +309,10 @@ messagesSpan.onanimationend = function (event) {
 function animate() {
 
     const delta = clock.getDelta()
+    scene.updateMatrixWorld()
     scene.update(delta)
     playfield.update(delta)
-    Mino.update()
+    Mino.mesh.update()
     controls.update()
     gui.update()
 
