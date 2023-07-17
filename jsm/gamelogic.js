@@ -242,7 +242,6 @@ class Tetromino extends THREE.Group {
         return T_SPIN.NONE
     }
 }
-Tetromino.prototype.minoMaterial = minoMaterial
 Tetromino.prototype.lockingColor = new THREE.Color(COLORS.LOCKING)
 // Super Rotation System
 // freedom of movement = srs[this.parent.piece.facing][rotation]
@@ -266,14 +265,6 @@ class Ghost extends Tetromino {
     }
     
 }
-Ghost.prototype.minoMaterial = new THREE.MeshStandardMaterial({
-    envMap: environnement,
-    metalness: 0.9,
-    roughness: 0.2,
-    transparent: true,
-    opacity: 0.15,
-    side: THREE.DoubleSide,
-})
 Ghost.prototype.freeColor = new THREE.Color(COLORS.GHOST)
 Ghost.prototype.minoesPosition = [
     [P(0, 0, 0), P(0, 0, 0), P(0, 0, 0), P(0, 0, 0)],
