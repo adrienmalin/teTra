@@ -116,14 +116,6 @@ class Mino extends THREE.Object3D {
             bevelSegments: 1
         }
         let minoGeometry = new THREE.ExtrudeGeometry(minoFaceShape, minoExtrudeSettings)
-
-        /*let minoMaterial = new THREE.MeshBasicMaterial({
-            envMap: environnement,
-            side: THREE.DoubleSide,
-            transparent: true,
-            opacity: 0.8,
-            reflectivity: 0.9,
-        })*/
         let minoMaterial = new THREE.MeshStandardMaterial({
             envMap: environnement,
             side: THREE.DoubleSide,
@@ -132,22 +124,6 @@ class Mino extends THREE.Object3D {
             roughness: 0.4,
             metalness: 0.95,
         })
-        /*let minoMaterial = new THREE.MeshPhysicalMaterial({
-            envMap: environnement,
-            side: THREE.DoubleSide,
-            transparent: true,
-            opacity: 0.6,
-            roughness: 0.5,
-            metalness: 0.9,
-            attenuationDistance: 0.5,
-            ior: 2,
-            sheen: 0,
-            sheenRoughness: 1,
-            specularIntensity: 1,
-            thickness: 5,
-            transmission: 1,
-        })*/
-
         this.mesh = new InstancedMino(minoGeometry, minoMaterial, 2*ROWS*COLUMNS)
     }
 

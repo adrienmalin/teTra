@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 import { GUI } from 'three/addons/libs/lil-gui.module.min.js'
 import * as FPS from 'three/addons/libs/stats.module.js'
-import { Mino } from './gamelogic.js'
+import { Mino, environnement } from './gamelogic.js'
 
 
 export class TetraGUI extends GUI {
@@ -45,9 +45,9 @@ export class TetraGUI extends GUI {
                     })
                     loadingManager.onLoad = function() {
                         scene.vortex.darkCylinder.material.map = darkTexture
-                        scene.vortex.darkCylinder.material.opacity = 0.035
+                        scene.vortex.darkCylinder.material.opacity = 0.006
                         scene.vortex.colorFullCylinder.material.map = colorfullTexture
-                        scene.vortex.colorFullCylinder.material.opacity = 0.6
+                        scene.vortex.colorFullCylinder.material.opacity = 0.7
                         
                         scene.vortex.globalRotation = 0.028
                         scene.vortex.darkTextureRotation = 0.005
@@ -128,37 +128,84 @@ export class TetraGUI extends GUI {
 
         this.debug = window.location.search.includes("debug")
         if (this.debug) {
-            this.debug = this.addFolder("debug")
-            let cameraPosition = this.debug.addFolder("camera.position").close()
+            let debug = this.addFolder("debug")
+            let cameraPosition = debug.addFolder("camera.position").close()
             cameraPosition.add(scene.camera.position, "x")
             cameraPosition.add(scene.camera.position, "y")
             cameraPosition.add(scene.camera.position, "z")
         
-            let light = this.debug.addFolder("lights intensity").close()
+            let light = debug.addFolder("lights intensity").close()
             light.add(scene.ambientLight, "intensity").name("ambient").min(0).max(20)
             light.add(scene.directionalLight, "intensity").name("directional").min(0).max(20)
             
-            let directionalLightPosition = this.debug.addFolder("directionalLight.position").close()
+            let directionalLightPosition = debug.addFolder("directionalLight.position").close()
             directionalLightPosition.add(scene.directionalLight.position, "x")
             directionalLightPosition.add(scene.directionalLight.position, "y")
             directionalLightPosition.add(scene.directionalLight.position, "z")
         
-            let vortex = this.debug.addFolder("vortex opacity").close()
+            let vortex = debug.addFolder("vortex opacity").close()
             vortex.add(scene.vortex.darkCylinder.material, "opacity").name("dark").min(0).max(1)
             vortex.add(scene.vortex.colorFullCylinder.material, "opacity").name("colorFull").min(0).max(1)
 
-            let material = this.debug.addFolder("minoes material").close()
-            if ("opacity"             in Mino.mesh.material) material.add(Mino.mesh.material, "opacity").min(0).max(1)
-            if ("reflectivity"        in Mino.mesh.material) material.add(Mino.mesh.material, "reflectivity").min(0).max(1)
-            if ("roughness"           in Mino.mesh.material) material.add(Mino.mesh.material, "roughness").min(0).max(1)
-            if ("metalness"           in Mino.mesh.material) material.add(Mino.mesh.material, "metalness").min(0).max(1)
-            if ("attenuationDistance" in Mino.mesh.material) material.add(Mino.mesh.material, "attenuationDistance").min(0)
-            if ("ior"                 in Mino.mesh.material) material.add(Mino.mesh.material, "ior").min(1).max(2)
-            if ("sheen"               in Mino.mesh.material) material.add(Mino.mesh.material, "sheen").min(0).max(1)
-            if ("sheenRoughness"      in Mino.mesh.material) material.add(Mino.mesh.material, "sheenRoughness").min(0).max(1)
-            if ("specularIntensity"   in Mino.mesh.material) material.add(Mino.mesh.material, "specularIntensity").min(0).max(1)
-            if ("thickness"           in Mino.mesh.material) material.add(Mino.mesh.material, "thickness").min(0).max(5)
-            if ("transmission"        in Mino.mesh.material) material.add(Mino.mesh.material, "transmission").min(0).max(1)
+            this.materialType = "MeshStandardMaterial"
+            let material
+
+            function changeMaterial(type) {
+                material?.destroy()
+                switch(type) {
+                    case "MeshBasicMaterial":
+                        Mino.mesh.material = new THREE.MeshBasicMaterial({
+                            envMap: environnement,
+                            side: THREE.DoubleSide,
+                            transparent: true,
+                            opacity: 0.5,
+                            reflectivity: 0.9,
+                        })
+                    break
+                    case "MeshStandardMaterial":
+                        Mino.mesh.material = new THREE.MeshStandardMaterial({
+                            envMap: environnement,
+                            side: THREE.DoubleSide,
+                            transparent: true,
+                            opacity: 0.6,
+                            roughness: 0.4,
+                            metalness: 0.95,
+                        })
+                    break
+                    case "MeshPhysicalMaterial":
+                        Mino.mesh.material = new THREE.MeshPhysicalMaterial({
+                            envMap: environnement,
+                            side: THREE.DoubleSide,
+                            transparent: true,
+                            opacity: 0.6,
+                            roughness: 0.5,
+                            metalness: 0.9,
+                            attenuationDistance: 0.5,
+                            ior: 2,
+                            sheen: 0,
+                            sheenRoughness: 1,
+                            specularIntensity: 1,
+                            thickness: 5,
+                            transmission: 1,
+                        })
+                    break
+                }
+                material = debug.addFolder("material type")
+                if ("opacity"             in Mino.mesh.material) material.add(Mino.mesh.material, "opacity").min(0).max(1)
+                if ("reflectivity"        in Mino.mesh.material) material.add(Mino.mesh.material, "reflectivity").min(0).max(1)
+                if ("roughness"           in Mino.mesh.material) material.add(Mino.mesh.material, "roughness").min(0).max(1)
+                if ("metalness"           in Mino.mesh.material) material.add(Mino.mesh.material, "metalness").min(0).max(1)
+                if ("attenuationDistance" in Mino.mesh.material) material.add(Mino.mesh.material, "attenuationDistance").min(0)
+                if ("ior"                 in Mino.mesh.material) material.add(Mino.mesh.material, "ior").min(1).max(2)
+                if ("sheen"               in Mino.mesh.material) material.add(Mino.mesh.material, "sheen").min(0).max(1)
+                if ("sheenRoughness"      in Mino.mesh.material) material.add(Mino.mesh.material, "sheenRoughness").min(0).max(1)
+                if ("specularIntensity"   in Mino.mesh.material) material.add(Mino.mesh.material, "specularIntensity").min(0).max(1)
+                if ("thickness"           in Mino.mesh.material) material.add(Mino.mesh.material, "thickness").min(0).max(5)
+                if ("transmission"        in Mino.mesh.material) material.add(Mino.mesh.material, "transmission").min(0).max(1)
+            }
+            debug.add(this, "materialType", ["MeshBasicMaterial", "MeshStandardMaterial", "MeshPhysicalMaterial"]).name("material type").onChange(changeMaterial)
+            changeMaterial(this.materialType)
+            material.close()
 
             this.fps = new FPS.default()
             document.body.appendChild(this.fps.dom)
