@@ -1,29 +1,29 @@
 let jsKeyRenamer = new Proxy({
-    ["←"]: "arrowleft",
-    ["→"]: "arrowright",
-    ["↑"]: "arrowup",
-    ["↓"]: "arrowdown",
+    ["←"]: "ArrowLeft",
+    ["→"]: "ArrowRight",
+    ["↑"]: "ArrowUp",
+    ["↓"]: "ArrowDown",
     ["Espace"]:  " ",
-    ["Échap."]: "escape",
-    ["Ret. arrière"]: "backspace",
-    ["Entrée"]: "enter",
+    ["Échap."]: "Escape",
+    ["Ret. arrière"]: "Backspace",
+    ["Entrée"]: "Enter",
 }, {
     get(obj, keyName) {
-        return keyName in obj ? obj[keyName] : keyName.toLowerCase()
+        return keyName in obj ? obj[keyName] : keyName
     }
 })
 let friendyKeyRenamer = new Proxy({
-    ["arrowleft"]: "←",
-    ["arrowright"]: "→",
-    ["arrowup"]: "↑",
-    ["arrowdown"]: "↓",
+    ["ArrowLeft"]: "←",
+    ["ArrowRight"]: "→",
+    ["ArrowUp"]: "↑",
+    ["ArrowDown"]: "↓",
     [" "]: "Espace",
-    ["escape"]: "Échap.",
-    ["backspace"]: "Ret. arrière",
-    ["enter"]: "Entrée",
+    ["Escape"]: "Échap.",
+    ["Backspace"]: "Ret. arrière",
+    ["Enter"]: "Entrée",
 }, {
     get(obj, keyName) {
-        return keyName.toLowerCase() in obj ? obj[keyName] : keyName.toUpperCase()
+        return keyName in obj ? obj[keyName] : keyName.toUpperCase()
     }
 })
 
@@ -38,9 +38,9 @@ class Settings {
 
         this.key = new Proxy(keyMaps, {
             set(km, action, key) {
-                key = key.toLowerCase()
-                km.action[key] = action
-                return km.key[action] = jsKeyRenamer[key]
+                key = jsKeyRenamer[key]
+                km.action[key.toLowerCase()] = action
+                return km.key[action] = key
             },
             has(km, action) {
                 return action in km.key
@@ -51,9 +51,8 @@ class Settings {
         })
         this.action = new Proxy(keyMaps, {
             set(km, key, action) {
-                key = key.toLowerCase()
                 km.key[action] = key
-                return km.action[key] = action
+                return km.action[key.toLowerCase()] = action
             },
             has(km, key) {
                 return key.toLowerCase() in km.action
