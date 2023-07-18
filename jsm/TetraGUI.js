@@ -126,32 +126,31 @@ export class TetraGUI extends GUI {
             scene.hardDropSound.setVolume(volume/100)
         })
 
-        this.debug = window.location.search.includes("debug")
-        if (this.debug) {
-            let debug = this.addFolder("debug")
-            let cameraPosition = debug.addFolder("camera.position").close()
+        if (window.location.search.includes("dev")) {
+            let dev = this.addFolder("dev")
+            let cameraPosition = dev.addFolder("camera.position").close()
             cameraPosition.add(scene.camera.position, "x")
             cameraPosition.add(scene.camera.position, "y")
             cameraPosition.add(scene.camera.position, "z")
         
-            let light = debug.addFolder("lights intensity").close()
+            let light = dev.addFolder("lights intensity").close()
             light.add(scene.ambientLight, "intensity").name("ambient").min(0).max(20)
             light.add(scene.directionalLight, "intensity").name("directional").min(0).max(20)
             
-            let directionalLightPosition = debug.addFolder("directionalLight.position").close()
+            let directionalLightPosition = dev.addFolder("directionalLight.position").close()
             directionalLightPosition.add(scene.directionalLight.position, "x")
             directionalLightPosition.add(scene.directionalLight.position, "y")
             directionalLightPosition.add(scene.directionalLight.position, "z")
         
-            let vortex = debug.addFolder("vortex opacity").close()
+            let vortex = dev.addFolder("vortex opacity").close()
             vortex.add(scene.vortex.darkCylinder.material, "opacity").name("dark").min(0).max(1)
             vortex.add(scene.vortex.colorFullCylinder.material, "opacity").name("colorFull").min(0).max(1)
 
-            this.materialType = "MeshStandardMaterial"
             let material
-
             function changeMaterial(type) {
                 material?.destroy()
+                material = dev.addFolder("minoes material")
+                material.add(Mino.mesh.material, "constructor", ["MeshBasicMaterial", "MeshStandardMaterial", "MeshPhysicalMaterial"]).name("type").onChange(changeMaterial)
                 switch(type) {
                     case "MeshBasicMaterial":
                         Mino.mesh.material = new THREE.MeshBasicMaterial({
@@ -190,7 +189,6 @@ export class TetraGUI extends GUI {
                         })
                     break
                 }
-                material = debug.addFolder("material type")
                 if ("opacity"             in Mino.mesh.material) material.add(Mino.mesh.material, "opacity").min(0).max(1)
                 if ("reflectivity"        in Mino.mesh.material) material.add(Mino.mesh.material, "reflectivity").min(0).max(1)
                 if ("roughness"           in Mino.mesh.material) material.add(Mino.mesh.material, "roughness").min(0).max(1)
@@ -203,7 +201,6 @@ export class TetraGUI extends GUI {
                 if ("thickness"           in Mino.mesh.material) material.add(Mino.mesh.material, "thickness").min(0).max(5)
                 if ("transmission"        in Mino.mesh.material) material.add(Mino.mesh.material, "transmission").min(0).max(1)
             }
-            debug.add(this, "materialType", ["MeshBasicMaterial", "MeshStandardMaterial", "MeshPhysicalMaterial"]).name("material type").onChange(changeMaterial)
             changeMaterial(this.materialType)
             material.close()
 
