@@ -65,7 +65,7 @@ let game = {
 
         stats.clock.start()
         stats.clock.elapsedTime = stats.elapsedTime
-        scene.music.play()
+        if (settings.musicVolume) scene.music.play()
 
         if (playfield.piece) scheduler.setInterval(game.fall, stats.fallPeriod)
         else this.generate()
@@ -253,22 +253,6 @@ function onkeyup(event) {
 
 /* Scene */
 
-const loadingManager = new THREE.LoadingManager()
-loadingManager.onStart = function (url, itemsLoaded, itemsTotal) {
-    loadingPercent.innerText = "0%"
-}
-loadingManager.onProgress = function (url, itemsLoaded, itemsTotal) {
-    loadingPercent.innerText = Math.floor(100 * itemsLoaded / itemsTotal) + '%'
-}
-loadingManager.onLoad = function () {
-    loaddingCircle.remove()
-    renderer.setAnimationLoop(animate)
-    gui.startButton.show()
-}
-loadingManager.onError = function (url) {
-    loadingPercent.innerText = "Erreur"
-}
-
 
 const renderer = new THREE.WebGLRenderer({
     powerPreference: "high-performance",
@@ -284,11 +268,9 @@ document.body.appendChild(renderer.domElement)
 const stats     = new Stats()
 const settings  = new Settings()
 
-const scene = new TetraScene(loadingManager, settings)
+const scene = new TetraScene(settings)
 
 const gui = new TetraGUI(game, settings, stats, scene)
-
-const clock = new THREE.Clock()
 
 scene.add(Mino.mesh)
 
@@ -305,6 +287,23 @@ messagesSpan.onanimationend = function (event) {
     event.target.remove()
 }
 
+scene.loadingManager.onStart = function (url, itemsLoaded, itemsTotal) {
+    loadingPercent.innerText = "0%"
+}
+scene.loadingManager.onProgress = function (url, itemsLoaded, itemsTotal) {
+    loadingPercent.innerText = Math.floor(100 * itemsLoaded / itemsTotal) + '%'
+}
+scene.loadingManager.onLoad = function () {
+    loaddingCircle.remove()
+    gui.startButton.show()
+    renderer.setAnimationLoop(animate)
+}
+scene.loadingManager.onError = function (url) {
+    loadingPercent.innerText = "Erreur"
+}
+
+
+const clock = new THREE.Clock()
 
 function animate() {
 

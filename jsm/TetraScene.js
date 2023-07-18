@@ -3,13 +3,15 @@ import { Vortex } from './Vortex.js'
 
 
 export class TetraScene extends THREE.Scene {
-    constructor(loadingManager, settings) {
+    constructor(settings) {
         super()
+
+        this.loadingManager = new THREE.LoadingManager()
 
         this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
         this.camera.position.set(5, 0, 16)
 
-        this.vortex = new Vortex(loadingManager)
+        this.vortex = new Vortex(this.loadingManager)
         this.add(this.vortex)
         
         this.ambientLight = new THREE.AmbientLight(0xffffff, 1)
@@ -24,14 +26,13 @@ export class TetraScene extends THREE.Scene {
         
         const listener = new THREE.AudioListener()
         this.camera.add( listener )
-        const audioLoader = new THREE.AudioLoader(loadingManager)
+        const audioLoader = new THREE.AudioLoader(this.loadingManager)
         
         this.music = new THREE.Audio(listener)
         audioLoader.load('audio/Tetris_T-Spin_OC_ReMix.mp3', function( buffer ) {
             this.music.setBuffer(buffer)
             this.music.setLoop(true)
             this.music.setVolume(settings.musicVolume/100)
-            //if (game.playing) this.music.play()
         }.bind(this))
         this.lineClearSound = new THREE.Audio(listener)
         audioLoader.load('audio/line-clear.ogg', function( buffer ) {
