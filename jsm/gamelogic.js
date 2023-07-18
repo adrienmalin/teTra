@@ -141,11 +141,15 @@ class Mino extends THREE.Object3D {
         this.position.addScaledVector(this.velocity, delta)
         this.rotateOnWorldAxis(this.rotationAngle, delta * this.angularVelocity)
         if (Math.sqrt(this.position.x * this.position.x + this.position.z * this.position.z) > 40 || this.position.y < -50) {
-            this.constructor.mesh.delete(this)
+            this.dispose()
             return false
         } else {
             return true
         }
+    }
+
+    dispose() {
+        this.constructor.mesh.delete(this)
     }
 }
 
@@ -388,16 +392,18 @@ class Playfield extends THREE.Group {
         this.hardDropAnimation.setDuration(0.2)
 
         this.freedMinoes = new Set()
-
-        this.init()
     }
 
     init() {
         this.cells = Array(ROWS).fill().map(() => Array(COLUMNS))
+        if (this.piece) this.remove(this.piece)
+        this.piece = undefined
 
         this.ghost = new Ghost()
         this.ghost.visible = false
         this.add(this.ghost)
+
+        this.visible = true
     }
 
     cellIsEmpty(p) {
@@ -421,12 +427,16 @@ class Playfield extends THREE.Group {
 
     lock() {
         this.piece.locking = false
-        return Array.from(this.piece.children).every(mino => {
+        let minoes = Array.from(this.piece.children)
+        minoes.forEach(mino => {
             this.add(mino)
             mino.position.add(this.piece.position)
+        })
+        if (minoes.every(mino => mino.position.y >= SKYLINE)) return false
+        return minoes.every(mino => {
             if (this.cellIsEmpty(mino.position)) {
                 this.cells[mino.position.y][mino.position.x] = mino
-                return mino.position.y < SKYLINE
+                return true
             } else {
                 return false
             }
@@ -490,17 +500,14 @@ class NextQueue extends THREE.Group {
     }
 
     init() {
-        this.positions.forEach((position) => {
-            this.add(new Tetromino.random(position))
-        })
+        this.clear()
+        this.positions.forEach(position => this.add(new Tetromino.random(position)))
     }
 
     shift() {
         let fistPiece = this.children.shift()
         this.add(new Tetromino.random())
-        this.positions.forEach((position, i) => {
-            this.children[i].position.copy(position)
-        })
+        this.positions.forEach((position, i) => this.children[i].position.copy(position))
         return fistPiece
     }
 

@@ -7,7 +7,6 @@ import { Mino, environnement } from './gamelogic.js'
 export class TetraGUI extends GUI {
     constructor(game, settings, stats, scene) {
         super({title: "teTra"})
-        this.domElement.tabIndex = 1
 
         this.startButton = this.add(game, "start").name("Jouer").hide()
         this.pauseButton = this.add(game, "pause").name("Pause").hide()
@@ -45,7 +44,7 @@ export class TetraGUI extends GUI {
                     })
                     loadingManager.onLoad = function() {
                         scene.vortex.darkCylinder.material.map = darkTexture
-                        scene.vortex.darkCylinder.material.opacity = 0.006
+                        scene.vortex.darkCylinder.material.opacity = 0.03
                         scene.vortex.colorFullCylinder.material.map = colorfullTexture
                         scene.vortex.colorFullCylinder.material.opacity = 0.7
                         

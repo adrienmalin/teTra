@@ -23,31 +23,21 @@ let game = {
     playing: false,
 
     start: function() {
-        gui.startButton.hide()
         stats.init()
-        gui.stats.show()
+
+        gui.startButton.hide()
         gui.settings.close()
+        gui.stats.show()
 
         Mino.mesh.clear()
-        
-        holdQueue.remove(holdQueue.piece)
+
+        nextQueue.init()
         holdQueue.piece = undefined
-        if (nextQueue.pieces) nextQueue.pieces.forEach(piece => nextQueue.remove(piece))
+        holdQueue.clear()
         playfield.init()
-        
-        scene.remove(playfield.piece)
-        if (playfield.piece) playfield.remove(playfield.piece)
-        playfield.piece = null
-        scene.music.currentTime = 0
-        playfield.visible = true
 
         this.playing = true
         stats.clock.start()
-
-        renderer.domElement.tabIndex = 1
-        gui.domElement.tabIndex = 1
-
-        nextQueue.init()
 
         stats.level = settings.startLevel
         this.resume()
@@ -57,7 +47,7 @@ let game = {
         document.onkeydown = onkeydown
         document.onkeyup = onkeyup
         window.onblur = game.pause
-        if (!gui.debug) gui.domElement.onfocus = game.pause
+        gui.settings.domElement.onclick = game.pause
 
         document.body.classList.remove("pause")
         gui.resumeButton.hide()
@@ -65,10 +55,14 @@ let game = {
 
         stats.clock.start()
         stats.clock.elapsedTime = stats.elapsedTime
+        
         if (settings.musicVolume) scene.music.play()
 
-        if (playfield.piece) scheduler.setInterval(game.fall, stats.fallPeriod)
-        else this.generate()
+        if (playfield.piece) {
+            scheduler.setInterval(game.fall, stats.fallPeriod)
+        } else {
+            this.generate()
+        }
     },
 
     generate: function(nextPiece=nextQueue.shift()) {
@@ -94,13 +88,12 @@ let game = {
         if (playfield.lock(playfield.piece)) {
             let tSpin = playfield.piece.tSpin
             let nbClearedLines = playfield.clearLines()
-            playfield.remove(playfield.piece)
             if (settings.sfxVolume) {
                 if (nbClearedLines == 4 || (tSpin && nbClearedLines)) {
-                    scene.tetrisSound.currentTime = 0
+                    scene.tetrisSound.stop()
                     scene.tetrisSound.play()
                 } else if (nbClearedLines || tSpin) {
-                    scene.lineClearSound.currentTime = 0
+                    scene.lineClearSound.stop()
                     scene.lineClearSound.play()
                 }
             }
@@ -113,6 +106,8 @@ let game = {
     },
 
     pause: function() {
+        gui.settings.domElement.onclick = null
+
         stats.elapsedTime = stats.clock.elapsedTime
         stats.clock.stop()
     
@@ -137,9 +132,9 @@ let game = {
         document.onkeydown = null
         window.onblur = null
         renderer.domElement.onfocus = null
-        gui.domElement.onfocus = null
+        gui.settings.domElement.onfocus = null
         game.playing = false
-        scene.music.pause()
+        scene.music.stop()
         stats.clock.stop()
         messagesSpan.addNewChild("div", { className: "show-level-animation", innerHTML: `<h1>GAME<br/>OVER</h1>` })
 
@@ -167,9 +162,8 @@ let playerActions = {
 
     hardDrop: function () {
         scheduler.clearTimeout(game.lockDown)
-        scene.hardDropSound.play()
         if (settings.sfxVolume) {
-            scene.hardDropSound.currentTime = 0
+            scene.hardDropSound.stop()
             scene.hardDropSound.play()
         }
         while (playfield.piece.move(TRANSLATION.DOWN)) stats.score += 2
@@ -263,6 +257,7 @@ renderer.setSize(window.innerWidth, window.innerHeight)
 renderer.setClearColor(0x000000, 10)
 renderer.toneMapping = THREE.ACESFilmicToneMapping
 document.body.appendChild(renderer.domElement)
+renderer.domElement.tabIndex = 1
 
 
 const stats     = new Stats()
