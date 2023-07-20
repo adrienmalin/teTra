@@ -27,7 +27,7 @@ export class Vortex extends THREE.Group {
                     texture.repeat.set(1, 1)
                 }),
                 blending: THREE.AdditiveBlending,
-                opacity: 0.03
+                opacity: 0.055
             })
         )
         this.add(this.darkCylinder)

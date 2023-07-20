@@ -117,7 +117,8 @@ let game = {
         scheduler.clearInterval(autorepeat)
     
         scene.music.pause()
-        document.onkeydown = null
+        document.onkeydown = resumeOnKeyDown
+        document.onkeyup = null
         window.onblur = null
         
         pauseSpan.onfocus = game.resume
@@ -241,6 +242,14 @@ function onkeyup(event) {
                 scheduler.clearInterval(autorepeat)
             }
         }
+    }
+}
+
+function resumeOnKeyDown(event) {
+    let key = event.key
+    if(playerActions[settings.action[key]] == playerActions.pause) {
+        event.preventDefault()
+        game.resume()
     }
 }
 

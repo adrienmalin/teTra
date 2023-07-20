@@ -44,7 +44,7 @@ export class TetraGUI extends GUI {
                     })
                     loadingManager.onLoad = function() {
                         scene.vortex.darkCylinder.material.map = darkTexture
-                        scene.vortex.darkCylinder.material.opacity = 0.03
+                        scene.vortex.darkCylinder.material.opacity = 0.055
                         scene.vortex.colorFullCylinder.material.map = colorfullTexture
                         scene.vortex.colorFullCylinder.material.opacity = 0.7
                         
@@ -120,7 +120,8 @@ export class TetraGUI extends GUI {
             scene.hardDropSound.setVolume(volume/100)
         })
 
-        if (window.location.search.includes("dev")) {
+        this.dev = window.location.search.includes("dev")
+        if (this.dev) {
             let dev = this.addFolder("dev")
             let cameraPosition = dev.addFolder("camera.position").close()
             cameraPosition.add(scene.camera.position, "x")
