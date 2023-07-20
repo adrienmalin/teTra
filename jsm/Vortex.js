@@ -42,7 +42,7 @@ export class Vortex extends THREE.Group {
                     texture.repeat.set(2, 1)
                 }),
                 blending: THREE.AdditiveBlending,
-                opacity: 0.7
+                opacity: 0.6
             })
         )
         this.add(this.colorFullCylinder)
