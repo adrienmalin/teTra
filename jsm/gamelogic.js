@@ -30,7 +30,7 @@ const TRANSLATION = {
 }
 
 const ROTATION = {
-    CW: 1,  // ClockWise
+    CW:  1,  // ClockWise
     CCW: 3,  // CounterClockWise
 }
 
@@ -57,7 +57,7 @@ const envRenderTarget = new THREE.WebGLCubeRenderTarget(256)
 const environnement = envRenderTarget.texture
 environnement.type = THREE.HalfFloatType
 environnement.camera = new THREE.CubeCamera(1, 1000, envRenderTarget)
-environnement.camera.position.set(5, 10)
+environnement.camera.position.set(5, 10, 0)
 
 
 class InstancedMino extends THREE.InstancedMesh {
@@ -121,7 +121,7 @@ class Mino extends THREE.Object3D {
             side: THREE.DoubleSide,
             transparent: true,
             opacity: 0.6,
-            roughness: 0.06,
+            roughness: 0.4,
             metalness: 0.95,
         })
         this.mesh = new InstancedMino(minoGeometry, minoMaterial, 2*ROWS*COLUMNS)

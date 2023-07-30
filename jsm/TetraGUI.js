@@ -54,19 +54,19 @@ export class TetraGUI extends GUI {
                         scene.vortex.colorFullTextureRotation = 0.006
                         scene.vortex.colorFullMoveForward     = 0.015
 
-                        scene.ambientLight.intensity     = 1
-                        scene.directionalLight.intensity = 1
+                        scene.ambientLight.intensity     = 4
+                        scene.directionalLight.intensity = 4
                         
-                        Mino.material.opacity   = 0.6
-                        Mino.material.roughness = 0.4
-                        Mino.material.metalness = 0.95
+                        Mino.mesh.material.opacity   = 0.6
+                        Mino.mesh.material.roughness = 0.4
+                        Mino.mesh.material.metalness = 0.95
                     }
                 break
                 case "Espace":
                     darkTexture = new THREE.TextureLoader(loadingManager).load("./images/dark.jpg", texture => {
                         texture.wrapS = THREE.RepeatWrapping
                         texture.wrapT = THREE.MirroredRepeatWrapping
-                        texture.repeat.set(2, 4)
+                        texture.repeat.set(1, 2)
                     })
                     colorfullTexture = new THREE.TextureLoader(loadingManager).load("./images/colorfull.jpg", texture => {
                         texture.wrapS = THREE.RepeatWrapping
@@ -75,18 +75,22 @@ export class TetraGUI extends GUI {
                     })
                     loadingManager.onLoad = function() {
                         scene.vortex.darkCylinder.material.map = darkTexture
-                        scene.vortex.darkCylinder.material.opacity = 0.055
+                        scene.vortex.darkCylinder.material.opacity = 0.1
                         scene.vortex.colorFullCylinder.material.map = colorfullTexture
-                        scene.vortex.colorFullCylinder.material.opacity = 0.6
+                        scene.vortex.colorFullCylinder.material.opacity = 0.4
                         
                         scene.vortex.globalRotation = 0.028
                         scene.vortex.darkTextureRotation = 0.006
-                        scene.vortex.darkMoveForward = 0.007
+                        scene.vortex.darkMoveForward = 0.02
                         scene.vortex.colorFullTextureRotation = 0.006
-                        scene.vortex.colorFullMoveForward = 0.02
+                        scene.vortex.colorFullMoveForward = 0.007
 
-                        scene.ambientLight.intensity = 0.6
-                        scene.directionalLight.intensity = 1
+                        scene.ambientLight.intensity     = 20
+                        scene.directionalLight.intensity = 10
+                        
+                        Mino.mesh.material.opacity   = 0.6
+                        Mino.mesh.material.roughness = 0.08
+                        Mino.mesh.material.metalness = 0.98
                     }
                 break
             }
