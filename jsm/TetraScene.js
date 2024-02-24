@@ -8,16 +8,16 @@ export class TetraScene extends THREE.Scene {
 
         this.loadingManager = new THREE.LoadingManager()
 
-        this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
-        this.camera.position.set(5, 0, 16)
+        this.camera = new THREE.PerspectiveCamera(100, window.innerWidth / window.innerHeight, 0.1, 1000)
+        this.camera.position.set(5, 3, 12)
 
         this.vortex = new Vortex(this.loadingManager)
         this.add(this.vortex)
         
-        this.ambientLight = new THREE.AmbientLight(0xffffff, 4)
+        this.ambientLight = new THREE.AmbientLight(0xffffff, 1)
         this.add(this.ambientLight)
         
-        this.directionalLight = new THREE.DirectionalLight(0xffffff, 4)
+        this.directionalLight = new THREE.DirectionalLight(0xffffff, 2)
         this.directionalLight.position.set(5, 0, 20)
         this.add(this.directionalLight)
 

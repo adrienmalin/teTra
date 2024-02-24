@@ -17,7 +17,7 @@ const COLORS = {
     T: 0xedb2ff,
     Z: 0xffb8c5,
     LOCKING: "white",
-    GHOST: 0xc0c0c0,
+    GHOST: 0x99a9b2,
     EDGE: 0x88abe0
 }
 
@@ -121,7 +121,7 @@ class Mino extends THREE.Object3D {
             side: THREE.DoubleSide,
             transparent: true,
             opacity: 0.6,
-            roughness: 0.4,
+            roughness: 0.2,
             metalness: 0.95,
         })
         this.mesh = new InstancedMino(minoGeometry, minoMaterial, 2*ROWS*COLUMNS)

@@ -14,7 +14,7 @@ class TetraControls extends OrbitControls {
       this.maxPolarAngle   = 2.14
       this.minAzimuthAngle = 0.9 - Math.PI / 2
       this.maxAzimuthAngle = 2.14 - Math.PI / 2
-      this.target.set(5, 9, 0)
+      this.target.set(5, 7, 0)
       
       this.addEventListener("start", () => domElement.style.cursor = "grabbing")
       this.addEventListener("end", () => domElement.style.cursor = "grab")

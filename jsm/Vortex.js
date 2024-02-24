@@ -11,7 +11,7 @@ export class Vortex extends THREE.Group {
         this.darkMoveForward = 0.009
         
         this.colorFullTextureRotation = 0.006
-        this.colorFullMoveForward = 0.015
+        this.colorFullMoveForward = 0.025
 
         const commonCylinderGeometry = new THREE.CylinderGeometry(35, 35, 500, 12, 1, true)
 
@@ -27,7 +27,7 @@ export class Vortex extends THREE.Group {
                     texture.repeat.set(1, 1)
                 }),
                 blending: THREE.AdditiveBlending,
-                opacity: 0.055
+                opacity: 0.17
             })
         )
         this.add(this.darkCylinder)
@@ -42,7 +42,7 @@ export class Vortex extends THREE.Group {
                     texture.repeat.set(2, 1)
                 }),
                 blending: THREE.AdditiveBlending,
-                opacity: 0.6
+                opacity: 0.7
             })
         )
         this.add(this.colorFullCylinder)

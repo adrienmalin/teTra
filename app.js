@@ -274,7 +274,9 @@ const settings  = new Settings()
 
 const scene = new TetraScene(settings)
 
-const gui = new TetraGUI(game, settings, stats, scene)
+const controls = new TetraControls(scene.camera, renderer.domElement)
+
+const gui = new TetraGUI(game, settings, stats, scene, controls)
 
 scene.add(Mino.mesh)
 
@@ -284,8 +286,6 @@ const playfield = new Playfield()
 scene.add(playfield)
 const nextQueue = new NextQueue()
 scene.add(nextQueue)
-
-const controls = new TetraControls(scene.camera, renderer.domElement)
 
 messagesSpan.onanimationend = function (event) {
     event.target.remove()

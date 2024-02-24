@@ -5,7 +5,7 @@ import { Mino, environnement } from './gamelogic.js'
 
 
 export class TetraGUI extends GUI {
-    constructor(game, settings, stats, scene) {
+    constructor(game, settings, stats, scene, controls) {
         super({title: "teTra"})
 
         this.startButton = this.add(game, "start").name("Jouer").hide()
@@ -44,18 +44,18 @@ export class TetraGUI extends GUI {
                     })
                     loadingManager.onLoad = function() {
                         scene.vortex.darkCylinder.material.map          = darkTexture
-                        scene.vortex.darkCylinder.material.opacity      = 0.055
+                        scene.vortex.darkCylinder.material.opacity      = 0.17
                         scene.vortex.colorFullCylinder.material.map     = colorfullTexture
-                        scene.vortex.colorFullCylinder.material.opacity = 0.6
+                        scene.vortex.colorFullCylinder.material.opacity = 0.7
                         
                         scene.vortex.globalRotation           = 0.028
                         scene.vortex.darkTextureRotation      = 0.005
                         scene.vortex.darkMoveForward          = 0.009
                         scene.vortex.colorFullTextureRotation = 0.006
-                        scene.vortex.colorFullMoveForward     = 0.015
+                        scene.vortex.colorFullMoveForward     = 0.025
 
-                        scene.ambientLight.intensity     = 4
-                        scene.directionalLight.intensity = 4
+                        scene.ambientLight.intensity     = 1
+                        scene.directionalLight.intensity = 2
                         
                         Mino.mesh.material.opacity   = 0.6
                         Mino.mesh.material.roughness = 0.4
@@ -66,18 +66,18 @@ export class TetraGUI extends GUI {
                     darkTexture = new THREE.TextureLoader(loadingManager).load("./images/dark.jpg", texture => {
                         texture.wrapS = THREE.RepeatWrapping
                         texture.wrapT = THREE.MirroredRepeatWrapping
-                        texture.repeat.set(1, 2)
+                        texture.repeat.set(2, 2)
                     })
                     colorfullTexture = new THREE.TextureLoader(loadingManager).load("./images/colorfull.jpg", texture => {
                         texture.wrapS = THREE.RepeatWrapping
                         texture.wrapT = THREE.MirroredRepeatWrapping
-                        texture.repeat.set(1, 2)
+                        texture.repeat.set(2, 2)
                     })
                     loadingManager.onLoad = function() {
                         scene.vortex.darkCylinder.material.map = darkTexture
-                        scene.vortex.darkCylinder.material.opacity = 0.1
+                        scene.vortex.darkCylinder.material.opacity = 0.05
                         scene.vortex.colorFullCylinder.material.map = colorfullTexture
-                        scene.vortex.colorFullCylinder.material.opacity = 0.4
+                        scene.vortex.colorFullCylinder.material.opacity = 0.25
                         
                         scene.vortex.globalRotation = 0.028
                         scene.vortex.darkTextureRotation = 0.006
@@ -131,10 +131,11 @@ export class TetraGUI extends GUI {
         this.dev = window.location.search.includes("dev")
         if (this.dev) {
             let dev = this.addFolder("dev")
-            let cameraPosition = dev.addFolder("camera.position").close()
+            let cameraPosition = dev.addFolder("camera").close()
             cameraPosition.add(scene.camera.position, "x")
             cameraPosition.add(scene.camera.position, "y")
             cameraPosition.add(scene.camera.position, "z")
+            cameraPosition.add(scene.camera, "fov", 0, 200).onChange(() => scene.camera.updateProjectionMatrix())
         
             let light = dev.addFolder("lights intensity").close()
             light.add(scene.ambientLight, "intensity").name("ambient").min(0).max(20)
@@ -170,7 +171,7 @@ export class TetraGUI extends GUI {
                             side: THREE.DoubleSide,
                             transparent: true,
                             opacity: 0.6,
-                            roughness: 0.06,
+                            roughness: 0.02,
                             metalness: 0.95,
                         })
                     break
@@ -207,8 +208,17 @@ export class TetraGUI extends GUI {
             changeMaterial(this.materialType)
             material.close()
 
-            this.fps = new FPS.default()
-            document.body.appendChild(this.fps.dom)
+            let fps = new FPS.default()
+            document.body.appendChild(fps.dom)
+
+            this.update = function() {
+                fps.update()
+            }
+
+            controls.addEventListener("change", () => cameraPosition.controllersRecursive().forEach((control) => {
+                control.updateDisplay()
+            }))
+
         }
 
         this.load()
@@ -234,7 +244,5 @@ export class TetraGUI extends GUI {
         }
     }
 
-    update() {
-        this.fps?.update()
-    }
+    update() {}
 }
