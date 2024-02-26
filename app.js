@@ -274,11 +274,27 @@ renderer.toneMapping = THREE.ACESFilmicToneMapping
 document.body.appendChild(renderer.domElement)
 renderer.domElement.tabIndex = 1
 
+const loadingManager = new THREE.LoadingManager(
+    function() {
+        loaddingCircle.remove()
+        gui.startButton.show()
+        renderer.setAnimationLoop(animate)
+    },
+    function (url, itemsLoaded, itemsTotal) {
+        loadingPercent.innerText = Math.floor(100 * itemsLoaded / itemsTotal) + '%'
+    },
+    function (url) {
+        loadingPercent.innerText = "Erreur"
+    }
+)
+loadingManager.onStart = function (url, itemsLoaded, itemsTotal) {
+    loadingPercent.innerText = "0%"
+}
 
 const stats     = new Stats()
 const settings  = new Settings()
 
-const scene = new TetraScene(settings)
+const scene = new TetraScene(settings, loadingManager)
 
 const controls = new TetraControls(scene.camera, renderer.domElement)
 
@@ -295,21 +311,6 @@ scene.add(nextQueue)
 
 messagesSpan.onanimationend = function (event) {
     event.target.remove()
-}
-
-scene.loadingManager.onStart = function (url, itemsLoaded, itemsTotal) {
-    loadingPercent.innerText = "0%"
-}
-scene.loadingManager.onProgress = function (url, itemsLoaded, itemsTotal) {
-    loadingPercent.innerText = Math.floor(100 * itemsLoaded / itemsTotal) + '%'
-}
-scene.loadingManager.onLoad = function () {
-    loaddingCircle.remove()
-    gui.startButton.show()
-    renderer.setAnimationLoop(animate)
-}
-scene.loadingManager.onError = function (url) {
-    loadingPercent.innerText = "Erreur"
 }
 
 

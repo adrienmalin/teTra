@@ -120,7 +120,7 @@ export class TetraGUI extends GUI {
 
         this.settings.volume = this.settings.addFolder("Volume").open()
         this.settings.volume.add(settings,"musicVolume").name("Musique").min(0).max(100).step(1).onChange(volume => {
-            scene.music.setVolume(volume/100)
+            scene.music.volume = settings.musicVolume / 100
         })
         this.settings.volume.add(settings,"sfxVolume").name("Effets").min(0).max(100).step(1).onChange(volume => {
             scene.lineClearSound.setVolume(volume/100)

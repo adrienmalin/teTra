@@ -3,15 +3,13 @@ import { Vortex } from './Vortex.js'
 
 
 export class TetraScene extends THREE.Scene {
-    constructor(settings) {
+    constructor(settings, loadingManager) {
         super()
-
-        this.loadingManager = new THREE.LoadingManager()
 
         this.camera = new THREE.PerspectiveCamera(100, window.innerWidth / window.innerHeight, 0.1, 1000)
         this.camera.position.set(5, 3, 12)
 
-        this.vortex = new Vortex(this.loadingManager)
+        this.vortex = new Vortex(loadingManager)
         this.add(this.vortex)
         
         this.ambientLight = new THREE.AmbientLight(0xffffff, 1)
@@ -23,17 +21,14 @@ export class TetraScene extends THREE.Scene {
 
 
         /* Sounds */
+        this.music = new Audio('audio/benevolence.m4a')
+        this.music.loop = true
+        this.music.volume = settings.musicVolume / 100
         
         const listener = new THREE.AudioListener()
         this.camera.add( listener )
-        const audioLoader = new THREE.AudioLoader(this.loadingManager)
-        
-        this.music = new THREE.Audio(listener)
-        audioLoader.load('audio/benevolence.m4a', function( buffer ) {
-            this.music.setBuffer(buffer)
-            this.music.setLoop(true)
-            this.music.setVolume(settings.musicVolume/100)
-        }.bind(this))
+        const audioLoader = new THREE.AudioLoader(loadingManager)
+
         this.lineClearSound = new THREE.Audio(listener)
         audioLoader.load('audio/line-clear.ogg', function( buffer ) {
             this.lineClearSound.setBuffer(buffer)
