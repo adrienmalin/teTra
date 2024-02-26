@@ -21,10 +21,8 @@ export class TetraScene extends THREE.Scene {
 
 
         /* Sounds */
-        this.music = new Audio('audio/benevolence.m4a')
-        this.music.loop = true
-        this.music.volume = settings.musicVolume / 100
-        
+        this.music = music
+
         const listener = new THREE.AudioListener()
         this.camera.add( listener )
         const audioLoader = new THREE.AudioLoader(loadingManager)
