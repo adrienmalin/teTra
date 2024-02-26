@@ -18,7 +18,7 @@ export class TetraScene extends THREE.Scene {
         this.add(this.ambientLight)
         
         this.directionalLight = new THREE.DirectionalLight(0xffffff, 2)
-        this.directionalLight.position.set(5, 0, 20)
+        this.directionalLight.position.set(5, -20, 20)
         this.add(this.directionalLight)
 
 
@@ -29,7 +29,7 @@ export class TetraScene extends THREE.Scene {
         const audioLoader = new THREE.AudioLoader(this.loadingManager)
         
         this.music = new THREE.Audio(listener)
-        audioLoader.load('audio/Tetris_T-Spin_OC_ReMix.mp3', function( buffer ) {
+        audioLoader.load('audio/benevolence.m4a', function( buffer ) {
             this.music.setBuffer(buffer)
             this.music.setLoop(true)
             this.music.setVolume(settings.musicVolume/100)

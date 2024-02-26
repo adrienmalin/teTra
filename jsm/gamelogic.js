@@ -120,9 +120,9 @@ class Mino extends THREE.Object3D {
             envMap: environnement,
             side: THREE.DoubleSide,
             transparent: true,
-            opacity: 0.6,
+            opacity: 0.8,
             roughness: 0.2,
-            metalness: 0.95,
+            metalness: 0.9,
         })
         this.mesh = new InstancedMino(minoGeometry, minoMaterial, 2*ROWS*COLUMNS)
     }

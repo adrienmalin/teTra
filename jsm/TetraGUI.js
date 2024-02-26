@@ -170,9 +170,9 @@ export class TetraGUI extends GUI {
                             envMap: environnement,
                             side: THREE.DoubleSide,
                             transparent: true,
-                            opacity: 0.6,
-                            roughness: 0.02,
-                            metalness: 0.95,
+                            opacity: 0.8,
+                            roughness: 0.2,
+                            metalness: 0.9,
                         })
                     break
                     case "MeshPhysicalMaterial":
