@@ -88,16 +88,14 @@ let game = {
         if (playfield.lock(playfield.piece)) {
             let tSpin = playfield.piece.tSpin
             let nbClearedLines = playfield.clearLines()
+            stats.lockDown(nbClearedLines, tSpin)
             if (settings.sfxVolume) {
                 if (nbClearedLines == 4 || (tSpin && nbClearedLines)) {
-                    scene.tetrisSound.stop()
-                    scene.tetrisSound.play()
+                    playSound(scene.tetrisSound, stats.combo)
                 } else if (nbClearedLines || tSpin) {
-                    scene.lineClearSound.stop()
-                    scene.lineClearSound.play()
+                    playSound(scene.lineClearSound, stats.combo)
                 }
             }
-            stats.lockDown(nbClearedLines, tSpin)
     
             game.generate()
         } else {
@@ -143,6 +141,14 @@ let game = {
         gui.startButton.name("Rejouer")
         gui.startButton.show()
     },
+}
+
+
+function playSound(sound, note=0) {
+    sound.stop()
+    sound.currentTime = 0
+    sound.playbackRate = Math.pow(5/4, note)
+    sound.play()
 }
 
 
