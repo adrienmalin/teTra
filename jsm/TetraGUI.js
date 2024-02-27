@@ -54,12 +54,12 @@ export class TetraGUI extends GUI {
                         scene.vortex.colorFullTextureRotation = 0.006
                         scene.vortex.colorFullMoveForward     = 0.025
 
-                        scene.ambientLight.intensity     = 1
-                        scene.directionalLight.intensity = 2
+                        //scene.ambientLight.intensity     = 1
+                        scene.directionalLight.intensity = 1.8
                         
-                        Mino.mesh.material.opacity   = 0.6
-                        Mino.mesh.material.roughness = 0.4
-                        Mino.mesh.material.metalness = 0.95
+                        Mino.mesh.material.opacity   = 0.7
+                        Mino.mesh.material.roughness = 0.48
+                        Mino.mesh.material.metalness = 0.9
                     }
                 break
                 case "Espace":
@@ -138,7 +138,7 @@ export class TetraGUI extends GUI {
             cameraPosition.add(scene.camera, "fov", 0, 200).onChange(() => scene.camera.updateProjectionMatrix())
         
             let light = dev.addFolder("lights intensity").close()
-            light.add(scene.ambientLight, "intensity").name("ambient").min(0).max(20)
+            //light.add(scene.ambientLight, "intensity").name("ambient").min(0).max(20)
             light.add(scene.directionalLight, "intensity").name("directional").min(0).max(20)
             
             let directionalLightPosition = dev.addFolder("directionalLight.position").close()
@@ -170,9 +170,9 @@ export class TetraGUI extends GUI {
                             envMap: environnement,
                             side: THREE.DoubleSide,
                             transparent: true,
-                            opacity: 0.8,
-                            roughness: 0.2,
-                            metalness: 0.9,
+                            opacity:   0.7,
+                            roughness: 0.48,
+                            metalness: 0.67,
                         })
                     break
                     case "MeshPhysicalMaterial":
@@ -182,7 +182,7 @@ export class TetraGUI extends GUI {
                             transparent: true,
                             opacity: 0.6,
                             roughness: 0.5,
-                            metalness: 0.9,
+                            metalness: 0.67,
                             attenuationDistance: 0.5,
                             ior: 2,
                             sheen: 0,

@@ -120,9 +120,9 @@ class Mino extends THREE.Object3D {
             envMap: environnement,
             side: THREE.DoubleSide,
             transparent: true,
-            opacity: 0.8,
-            roughness: 0.2,
-            metalness: 0.9,
+            opacity: 0.7,
+            roughness: 0.48,
+            metalness: 0.67,
         })
         this.mesh = new InstancedMino(minoGeometry, minoMaterial, 2*ROWS*COLUMNS)
     }
@@ -353,7 +353,7 @@ Z.prototype.freeColor = new THREE.Color(COLORS.Z)
 class Playfield extends THREE.Group {
     constructor() {
         super()
-        this.visible = false
+        //this.visible = false
 
         const edgeMaterial = new THREE.MeshStandardMaterial({
             color: COLORS.EDGE,
@@ -361,7 +361,7 @@ class Playfield extends THREE.Group {
             transparent: true,
             opacity: 0.2,
             roughness: 0.1,
-            metalness: 0.9,
+            metalness: 0.67,
         })
         const edgeShape = new THREE.Shape()
             .moveTo(-.3, SKYLINE)
