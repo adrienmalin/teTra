@@ -36,6 +36,8 @@ let game = {
         holdQueue.clear()
         playfield.init()
 
+        scene.music.currentTime = 0
+
         this.playing = true
         stats.clock.start()
 
@@ -133,7 +135,7 @@ let game = {
         renderer.domElement.onfocus = null
         gui.settings.domElement.onfocus = null
         game.playing = false
-        scene.music.stop()
+        scene.music.pause()
         stats.clock.stop()
         messagesSpan.addNewChild("div", { className: "show-level-animation", innerHTML: `<h1>GAME<br/>OVER</h1>` })
 
