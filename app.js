@@ -343,7 +343,3 @@ window.onbeforeunload = function (event) {
     localStorage["teTraHighScore"] = stats.highScore
     return !game.playing
 }
-
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./jsm/service-worker.js');
-}

@@ -12,10 +12,10 @@ export class TetraScene extends THREE.Scene {
         this.vortex = new Vortex(loadingManager)
         this.add(this.vortex)
         
-        /*this.ambientLight = new THREE.AmbientLight(0xffffff, 1)
-        this.add(this.ambientLight)*/
+        this.ambientLight = new THREE.AmbientLight(0xffffff, 1)
+        this.add(this.ambientLight)
         
-        this.directionalLight = new THREE.DirectionalLight(0xffffff, 1.8)
+        this.directionalLight = new THREE.DirectionalLight(0xffffff, 5)
         this.directionalLight.position.set(5, -20, 20)
         this.add(this.directionalLight)
 

@@ -54,8 +54,8 @@ export class TetraGUI extends GUI {
                         scene.vortex.colorFullTextureRotation = 0.006
                         scene.vortex.colorFullMoveForward     = 0.025
 
-                        //scene.ambientLight.intensity     = 1
-                        scene.directionalLight.intensity = 1.8
+                        scene.ambientLight.intensity     = 0.6
+                        scene.directionalLight.intensity = 5
                         
                         Mino.mesh.material.opacity   = 0.7
                         Mino.mesh.material.roughness = 0.48
@@ -81,16 +81,16 @@ export class TetraGUI extends GUI {
                         
                         scene.vortex.globalRotation = 0.028
                         scene.vortex.darkTextureRotation = 0.006
-                        scene.vortex.darkMoveForward = 0.02
+                        scene.vortex.darkMoveForward = 0.03
                         scene.vortex.colorFullTextureRotation = 0.006
-                        scene.vortex.colorFullMoveForward = 0.007
+                        scene.vortex.colorFullMoveForward = 0.012
 
                         scene.ambientLight.intensity     = 20
                         scene.directionalLight.intensity = 10
                         
-                        Mino.mesh.material.opacity   = 0.6
-                        Mino.mesh.material.roughness = 0.08
-                        Mino.mesh.material.metalness = 0.98
+                        //Mino.mesh.material.opacity   = 0.6
+                        //Mino.mesh.material.roughness = 0.08
+                        //Mino.mesh.material.metalness = 0.98
                     }
                 break
             }
@@ -138,7 +138,7 @@ export class TetraGUI extends GUI {
             cameraPosition.add(scene.camera, "fov", 0, 200).onChange(() => scene.camera.updateProjectionMatrix())
         
             let light = dev.addFolder("lights intensity").close()
-            //light.add(scene.ambientLight, "intensity").name("ambient").min(0).max(20)
+            light.add(scene.ambientLight, "intensity").name("ambient").min(0).max(20)
             light.add(scene.directionalLight, "intensity").name("directional").min(0).max(20)
             
             let directionalLightPosition = dev.addFolder("directionalLight.position").close()
