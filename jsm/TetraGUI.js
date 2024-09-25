@@ -4,9 +4,86 @@ import * as FPS from 'three/addons/libs/stats.module.js'
 import { Mino, environnement } from './gamelogic.js'
 
 
+let jsKeyRenamer = new Proxy({
+    ["←"]: "ArrowLeft",
+    ["→"]: "ArrowRight",
+    ["↑"]: "ArrowUp",
+    ["↓"]: "ArrowDown",
+    ["Espace"]:  " ",
+    ["Échap."]: "Escape",
+    ["Ret. arrière"]: "Backspace",
+    ["Entrée"]: "Enter",
+}, {
+    get(obj, keyName) {
+        return keyName in obj ? obj[keyName] : keyName
+    }
+})
+let friendyKeyRenamer = new Proxy({
+    ["ArrowLeft"]: "←",
+    ["ArrowRight"]: "→",
+    ["ArrowUp"]: "↑",
+    ["ArrowDown"]: "↓",
+    [" "]: "Espace",
+    ["Escape"]: "Échap.",
+    ["Backspace"]: "Ret. arrière",
+    ["Enter"]: "Entrée",
+}, {
+    get(obj, keyName) {
+        return keyName in obj ? obj[keyName] : keyName.toUpperCase()
+    }
+})
+
+
 export class TetraGUI extends GUI {
     constructor(game, settings, stats, scene, controls) {
         super({title: "teTra"})
+        this.startLevel = 1
+
+        let keyMaps = {
+            key: {},
+            action: {}
+        }
+
+        this.key = new Proxy(keyMaps, {
+            set(km, action, key) {
+                key = jsKeyRenamer[key]
+                km.action[key.toLowerCase()] = action
+                return km.key[action] = key
+            },
+            has(km, action) {
+                return action in km.key
+            },
+            get(km, action) {
+                return friendyKeyRenamer[km.key[action]]
+            }
+        })
+        this.action = new Proxy(keyMaps, {
+            set(km, key, action) {
+                km.key[action] = key
+                return km.action[key.toLowerCase()] = action
+            },
+            has(km, key) {
+                return key.toLowerCase() in km.action
+            },
+            get(km, key) {
+                return km.action[key.toLowerCase()]
+            }
+        })
+
+        this.key.moveLeft = "ArrowLeft"
+        this.key.moveRight = "ArrowRight"
+        this.key.rotateCCW = "w"
+        this.key.rotateCW = "ArrowUp"
+        this.key.softDrop = "ArrowDown"
+        this.key.hardDrop = " "
+        this.key.hold = "c"
+        this.key.pause = "Escape"
+
+        this.arrDelay = 50
+        this.dasDelay = 300
+
+        this.musicVolume = 50
+        this.sfxVolume = 50
 
         this.startButton = this.add(game, "start").name("Jouer").hide()
         this.pauseButton = this.add(game, "pause").name("Pause").hide()
@@ -27,71 +104,24 @@ export class TetraGUI extends GUI {
         this.settings = this.addFolder("Options").open()
 
         this.settings.add(settings, "startLevel").name("Niveau initial").min(1).max(15).step(1)
-        this.settings.add(scene.vortex, "background", ["Plasma", "Espace"]).name("Fond").onChange(background => {
-            const loadingManager = new THREE.LoadingManager()
-            let darkTexture, colorfullTexture
-            switch (background) {
+        this.settings.add(settings, "theme", ["Plasma", "Espace"]).name("Thème").onChange(theme => {
+            scene.vortex.theme = theme
+            switch (theme) {
                 case "Plasma":
-                    darkTexture = new THREE.TextureLoader(loadingManager).load("./images/plasma.jpg", texture => {
-                        texture.wrapS = THREE.RepeatWrapping
-                        texture.wrapT = THREE.MirroredRepeatWrapping
-                        texture.repeat.set(1, 1)
-                    })
-                    colorfullTexture = new THREE.TextureLoader(loadingManager).load("./images/plasma2.jpg", texture => {
-                        texture.wrapS = THREE.RepeatWrapping
-                        texture.wrapT = THREE.MirroredRepeatWrapping
-                        texture.repeat.set(2, 1)
-                    })
-                    loadingManager.onLoad = function() {
-                        scene.vortex.darkCylinder.material.map          = darkTexture
-                        scene.vortex.darkCylinder.material.opacity      = 0.17
-                        scene.vortex.colorFullCylinder.material.map     = colorfullTexture
-                        scene.vortex.colorFullCylinder.material.opacity = 0.7
-                        
-                        scene.vortex.globalRotation           = 0.028
-                        scene.vortex.darkTextureRotation      = 0.005
-                        scene.vortex.darkMoveForward          = 0.009
-                        scene.vortex.colorFullTextureRotation = 0.006
-                        scene.vortex.colorFullMoveForward     = 0.025
-
-                        scene.ambientLight.intensity     = 0.6
-                        scene.directionalLight.intensity = 5
-                        
-                        Mino.mesh.material.opacity   = 0.7
-                        Mino.mesh.material.roughness = 0.48
-                        Mino.mesh.material.metalness = 0.9
-                    }
+                    scene.ambientLight.intensity     = 0.6
+                    scene.directionalLight.intensity = 5
+                    
+                    Mino.mesh.material.opacity   = 0.7
+                    Mino.mesh.material.roughness = 0.48
+                    Mino.mesh.material.metalness = 0.9
                 break
                 case "Espace":
-                    darkTexture = new THREE.TextureLoader(loadingManager).load("./images/dark.jpg", texture => {
-                        texture.wrapS = THREE.RepeatWrapping
-                        texture.wrapT = THREE.MirroredRepeatWrapping
-                        texture.repeat.set(2, 2)
-                    })
-                    colorfullTexture = new THREE.TextureLoader(loadingManager).load("./images/colorfull.jpg", texture => {
-                        texture.wrapS = THREE.RepeatWrapping
-                        texture.wrapT = THREE.MirroredRepeatWrapping
-                        texture.repeat.set(2, 2)
-                    })
-                    loadingManager.onLoad = function() {
-                        scene.vortex.darkCylinder.material.map = darkTexture
-                        scene.vortex.darkCylinder.material.opacity = 0.05
-                        scene.vortex.colorFullCylinder.material.map = colorfullTexture
-                        scene.vortex.colorFullCylinder.material.opacity = 0.25
-                        
-                        scene.vortex.globalRotation = 0.028
-                        scene.vortex.darkTextureRotation = 0.006
-                        scene.vortex.darkMoveForward = 0.03
-                        scene.vortex.colorFullTextureRotation = 0.006
-                        scene.vortex.colorFullMoveForward = 0.012
-
-                        scene.ambientLight.intensity     = 20
-                        scene.directionalLight.intensity = 10
-                        
-                        //Mino.mesh.material.opacity   = 0.6
-                        //Mino.mesh.material.roughness = 0.08
-                        //Mino.mesh.material.metalness = 0.98
-                    }
+                    scene.ambientLight.intensity     = 20
+                    scene.directionalLight.intensity = 10
+                    
+                    Mino.mesh.material.opacity   = 0.6
+                    Mino.mesh.material.roughness = 0.05
+                    Mino.mesh.material.metalness = 0.997
                 break
             }
         })
@@ -193,17 +223,17 @@ export class TetraGUI extends GUI {
                         })
                     break
                 }
-                if ("opacity"             in Mino.mesh.material) material.add(Mino.mesh.material, "opacity").min(0).max(1)
-                if ("reflectivity"        in Mino.mesh.material) material.add(Mino.mesh.material, "reflectivity").min(0).max(1)
-                if ("roughness"           in Mino.mesh.material) material.add(Mino.mesh.material, "roughness").min(0).max(1)
-                if ("metalness"           in Mino.mesh.material) material.add(Mino.mesh.material, "metalness").min(0).max(1)
-                if ("attenuationDistance" in Mino.mesh.material) material.add(Mino.mesh.material, "attenuationDistance").min(0)
-                if ("ior"                 in Mino.mesh.material) material.add(Mino.mesh.material, "ior").min(1).max(2)
-                if ("sheen"               in Mino.mesh.material) material.add(Mino.mesh.material, "sheen").min(0).max(1)
-                if ("sheenRoughness"      in Mino.mesh.material) material.add(Mino.mesh.material, "sheenRoughness").min(0).max(1)
-                if ("specularIntensity"   in Mino.mesh.material) material.add(Mino.mesh.material, "specularIntensity").min(0).max(1)
-                if ("thickness"           in Mino.mesh.material) material.add(Mino.mesh.material, "thickness").min(0).max(5)
-                if ("transmission"        in Mino.mesh.material) material.add(Mino.mesh.material, "transmission").min(0).max(1)
+                if ("opacity"             in Mino.mesh.material) material.add(Mino.mesh.material, "opacity"            ).min(0).max(1).listen()
+                if ("reflectivity"        in Mino.mesh.material) material.add(Mino.mesh.material, "reflectivity"       ).min(0).max(1).listen()
+                if ("roughness"           in Mino.mesh.material) material.add(Mino.mesh.material, "roughness"          ).min(0).max(1).listen()
+                if ("metalness"           in Mino.mesh.material) material.add(Mino.mesh.material, "metalness"          ).min(0).max(1).listen()
+                if ("attenuationDistance" in Mino.mesh.material) material.add(Mino.mesh.material, "attenuationDistance").min(0).listen()
+                if ("ior"                 in Mino.mesh.material) material.add(Mino.mesh.material, "ior"                ).min(1).max(2).listen()
+                if ("sheen"               in Mino.mesh.material) material.add(Mino.mesh.material, "sheen"              ).min(0).max(1).listen()
+                if ("sheenRoughness"      in Mino.mesh.material) material.add(Mino.mesh.material, "sheenRoughness"     ).min(0).max(1).listen()
+                if ("specularIntensity"   in Mino.mesh.material) material.add(Mino.mesh.material, "specularIntensity"  ).min(0).max(1).listen()
+                if ("thickness"           in Mino.mesh.material) material.add(Mino.mesh.material, "thickness"          ).min(0).max(5).listen()
+                if ("transmission"        in Mino.mesh.material) material.add(Mino.mesh.material, "transmission"       ).min(0).max(1).listen()
             }
             changeMaterial(this.materialType)
             material.close()

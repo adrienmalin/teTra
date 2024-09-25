@@ -276,9 +276,9 @@ renderer.toneMapping = THREE.ACESFilmicToneMapping
 document.body.appendChild(renderer.domElement)
 renderer.domElement.tabIndex = 1
 
-const loadingManager = new THREE.LoadingManager(
+let loadingManager = new THREE.LoadingManager(
     function() {
-        loaddingCircle.remove()
+        loaddingCircle.style.display = "none"
         gui.startButton.show()
         renderer.setAnimationLoop(animate)
     },
@@ -291,15 +291,13 @@ const loadingManager = new THREE.LoadingManager(
 )
 loadingManager.onStart = function (url, itemsLoaded, itemsTotal) {
     loadingPercent.innerText = "0%"
+    loaddingCircle.style.display = "block"
 }
 
 const stats     = new Stats()
 const settings  = new Settings()
-
 const scene = new TetraScene(settings, loadingManager)
-
 const controls = new TetraControls(scene.camera, renderer.domElement)
-
 const gui = new TetraGUI(game, settings, stats, scene, controls)
 
 scene.add(Mino.mesh)
@@ -319,7 +317,6 @@ messagesSpan.onanimationend = function (event) {
 const clock = new THREE.Clock()
 
 function animate() {
-
     const delta = clock.getDelta()
     scene.updateMatrixWorld()
     scene.update(delta)

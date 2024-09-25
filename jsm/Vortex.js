@@ -5,6 +5,8 @@ export class Vortex extends THREE.Group {
     constructor(loadingManager) {
         super()
 
+        this.loadingManager = loadingManager
+
         this.globalRotation = 0.028
         
         this.darkTextureRotation = 0.006
@@ -14,20 +16,12 @@ export class Vortex extends THREE.Group {
         this.colorFullMoveForward = 0.025
 
         const commonCylinderGeometry = new THREE.CylinderGeometry(35, 35, 500, 12, 1, true)
-
-        this.background = "Plasma"
         
         this.darkCylinder = new THREE.Mesh(
             commonCylinderGeometry,
             new THREE.MeshLambertMaterial({
                 side: THREE.BackSide,
-                map: new THREE.TextureLoader(loadingManager).load("./images/plasma.jpg", (texture) => {
-                    texture.wrapS = THREE.RepeatWrapping
-                    texture.wrapT = THREE.MirroredRepeatWrapping
-                    texture.repeat.set(1, 1)
-                }),
                 blending: THREE.AdditiveBlending,
-                opacity: 0.17
             })
         )
         this.add(this.darkCylinder)
@@ -36,18 +30,64 @@ export class Vortex extends THREE.Group {
             commonCylinderGeometry,
             new THREE.MeshBasicMaterial({
                 side: THREE.BackSide,
-                map: new THREE.TextureLoader(loadingManager).load("./images/plasma2.jpg", (texture) => {
-                    texture.wrapS = THREE.RepeatWrapping
-                    texture.wrapT = THREE.MirroredRepeatWrapping
-                    texture.repeat.set(2, 1)
-                }),
                 blending: THREE.AdditiveBlending,
-                opacity: 0.7
             })
         )
         this.add(this.colorFullCylinder)
 
         this.position.set(5, 10, -10)
+    }
+
+    set theme(theme) {
+        switch (theme) {
+            case "Plasma":
+                new THREE.TextureLoader(this.loadingManager).load("./images/plasma.jpg", texture => {
+                    texture.wrapS = THREE.RepeatWrapping
+                    texture.wrapT = THREE.MirroredRepeatWrapping
+                    texture.repeat.set(1, 1)
+                    this.darkCylinder.material.map = texture
+                })
+                this.darkCylinder.material.opacity = 0.17
+
+                new THREE.TextureLoader(this.loadingManager).load("./images/plasma2.jpg", texture => {
+                    texture.wrapS = THREE.RepeatWrapping
+                    texture.wrapT = THREE.MirroredRepeatWrapping
+                    texture.repeat.set(2, 1)
+                    this.colorFullCylinder.material.map = texture
+                })
+                this.colorFullCylinder.material.opacity = 0.7
+
+                this.globalRotation           = 0.028
+                this.darkTextureRotation      = 0.005
+                this.darkMoveForward          = 0.009
+                this.colorFullTextureRotation = 0.006
+                this.colorFullMoveForward     = 0.025
+            break
+            
+            case "Espace":
+                new THREE.TextureLoader(this.loadingManager).load("./images/dark.jpg", texture => {
+                    texture.wrapS = THREE.RepeatWrapping
+                    texture.wrapT = THREE.MirroredRepeatWrapping
+                    texture.repeat.set(2, 2)
+                    this.darkCylinder.material.map = texture
+                })
+                this.darkCylinder.material.opacity = 0.05
+
+                new THREE.TextureLoader(this.loadingManager).load("./images/colorfull.jpg", texture => {
+                    texture.wrapS = THREE.RepeatWrapping
+                    texture.wrapT = THREE.MirroredRepeatWrapping
+                    texture.repeat.set(2, 2)
+                    this.colorFullCylinder.material.map = texture
+                })
+                this.colorFullCylinder.material.opacity = 0.34
+
+                this.globalRotation = 0.028
+                this.darkTextureRotation = 0.006
+                this.darkMoveForward = 0.03
+                this.colorFullTextureRotation = 0.006
+                this.colorFullMoveForward = 0.012
+            break
+        }
     }
 
     update(delta) {

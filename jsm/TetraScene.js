@@ -30,17 +30,17 @@ export class TetraScene extends THREE.Scene {
         this.lineClearSound = new THREE.Audio(listener)
         audioLoader.load('audio/line-clear.ogg', function( buffer ) {
             this.lineClearSound.setBuffer(buffer)
-            this.lineClearSound.setVolume(settings.sfxVolume/100)
         }.bind(this))
         this.tetrisSound = new THREE.Audio(listener)
         audioLoader.load('audio/tetris.ogg', function( buffer ) {
             this.tetrisSound.setBuffer(buffer)
+            this.lineClearSound.setVolume(settings.sfxVolume/100)
             this.tetrisSound.setVolume(settings.sfxVolume/100)
+            this.hardDropSound.setVolume(settings.sfxVolume/100)
         }.bind(this))
         this.hardDropSound = new THREE.Audio(listener)
         audioLoader.load('audio/hard-drop.wav', function( buffer ) {
             this.hardDropSound.setBuffer(buffer)
-            this.hardDropSound.setVolume(settings.sfxVolume/100)
         }.bind(this))
     }
 

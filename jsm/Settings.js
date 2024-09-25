@@ -76,6 +76,8 @@ class Settings {
 
         this.musicVolume = 50
         this.sfxVolume = 50
+
+        this.theme = "Plasma"
     }
 }
 
