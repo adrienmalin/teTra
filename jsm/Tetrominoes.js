@@ -1,5 +1,6 @@
 import * as THREE from 'three'
 import { scheduler } from './scheduler.js'
+import { TileMaterial } from './TileMaterial.js'
 
 
 Array.prototype.pick = function () { return this.splice(Math.floor(Math.random() * this.length), 1)[0] }
@@ -54,10 +55,17 @@ const COLUMNS = 10
 
 
 const envRenderTarget = new THREE.WebGLCubeRenderTarget(256)
-const environnement = envRenderTarget.texture
-environnement.type = THREE.HalfFloatType
-environnement.camera = new THREE.CubeCamera(1, 1000, envRenderTarget)
-environnement.camera.position.set(5, 10, 0)
+const environment = envRenderTarget.texture
+environment.type = THREE.HalfFloatType
+environment.camera = new THREE.CubeCamera(1, 1000, envRenderTarget)
+environment.camera.position.set(5, 10, 0)
+
+
+const sideMaterial = new THREE.MeshStandardMaterial({
+    color: 0x222222,
+    roughness: 0.8,
+    metalness: 0.8,
+})
 
 
 class InstancedMino extends THREE.InstancedMesh {
@@ -65,6 +73,8 @@ class InstancedMino extends THREE.InstancedMesh {
         super(geometry, material, count)
         this.instances = new Set()
         this.count = 0
+        this.offsets = new Uint8Array(2*count)
+        this.update = this.updateColor
     }
 
     add(instance) {
@@ -79,26 +89,83 @@ class InstancedMino extends THREE.InstancedMesh {
         this.instances.clear()
     }
 
-    update() {
+    setOffsetAt(index, offset) {
+        this.offsets[index * 2] = offset
+    }
+
+    resetColor() {
+        if (this.instanceColor) {
+            this.instanceColor.array.fill(0xffffff)
+            this.instanceColor.needsUpdate = true
+        }
+    }
+
+    updateColor() {
         this.count = 0
         this.instances.forEach(mino => {
             if (mino.parent?.visible) {
-                this.setColorAt(this.count, mino.color)
                 this.setMatrixAt(this.count, mino.matrixWorld)
+                this.setColorAt(this.count, mino.color)
                 this.count++
             }
         })
         if (this.count) {
-            this.instanceColor.needsUpdate = true
             this.instanceMatrix.needsUpdate = true
+            this.instanceColor.needsUpdate = true
+        }
+    }
+
+    updateOffset() {
+        this.count = 0
+        this.instances.forEach(mino => {
+            if (mino.parent?.visible) {
+                this.setMatrixAt(this.count, mino.matrixWorld)
+                this.setOffsetAt(this.count, mino.offset)
+                this.count++
+            }
+        })
+        if (this.count) {
+            this.instanceMatrix.needsUpdate = true
+            this.geometry.setAttribute('offset', new THREE.InstancedBufferAttribute(this.offsets, 2))
         }
     }
 }
 
 
 class Mino extends THREE.Object3D {
-    static instances = new Set()
-    static mesh
+    static materials = {
+        Plasma: new THREE.MeshStandardMaterial({
+            envMap: environment,
+            side: THREE.DoubleSide,
+            transparent: true,
+            opacity: 0.7,
+            roughness: 0.48,
+            metalness: 0.67,
+        }),
+        Espace: new THREE.MeshStandardMaterial({
+            envMap: environment,
+            side: THREE.DoubleSide,
+            transparent: true,
+            opacity:   0.8,
+            roughness: 0.05,
+            metalness: 0.997,
+        }),
+        Rétro: [sideMaterial, sideMaterial, sideMaterial, sideMaterial, sideMaterial, sideMaterial]
+    }
+    static {
+        new THREE.TextureLoader().load("images/sprites.png", (texture) => {
+            this.materials.Rétro[0] = new TileMaterial({
+                color: 0xd0d4c1,
+                map: texture,
+                bumpMap: texture,
+                bumpScale: 4,
+                roughness: 0.25,
+                metalness: 0.8,
+                transparent: true,
+            }, 8, 8)
+        })
+    }
+    static meshes
     static {
         let minoFaceShape = new THREE.Shape()
         minoFaceShape.moveTo(.1, .1)
@@ -116,24 +183,17 @@ class Mino extends THREE.Object3D {
             bevelSegments: 1
         }
         let minoGeometry = new THREE.ExtrudeGeometry(minoFaceShape, minoExtrudeSettings)
-        let minoMaterial = new THREE.MeshStandardMaterial({
-            envMap: environnement,
-            side: THREE.DoubleSide,
-            transparent: true,
-            opacity: 0.7,
-            roughness: 0.48,
-            metalness: 0.67,
-        })
-        this.mesh = new InstancedMino(minoGeometry, minoMaterial, 2*ROWS*COLUMNS)
+        this.meshes = new InstancedMino(minoGeometry, this.materials.Plasma, 2*ROWS*COLUMNS)
     }
 
-    constructor(color) {
+    constructor(color, offset) {
         super()
         this.color = color
+        this.offset = offset
         this.velocity = P(50 - 100 * Math.random(), 50 - 100 * Math.random(), 50 - 100 * Math.random())
         this.rotationAngle = P(Math.random(), Math.random(), Math.random()).normalize()
         this.angularVelocity = 5 - 10 * Math.random()
-        this.constructor.mesh.add(this)
+        this.constructor.meshes.add(this)
     }
 
     explode(delta) {
@@ -149,7 +209,7 @@ class Mino extends THREE.Object3D {
     }
 
     dispose() {
-        this.constructor.mesh.delete(this)
+        this.constructor.meshes.delete(this)
     }
 }
 
@@ -164,7 +224,7 @@ class Tetromino extends THREE.Group {
     constructor(position) {
         super()
         if (position) this.position.copy(position)
-        this.minoesPosition[FACING.NORTH].forEach(() => this.add(new Mino(this.freeColor)))
+        this.minoesPosition[FACING.NORTH].forEach(() => this.add(new Mino(this.freeColor, this.offset)))
         this.facing             = FACING.NORTH
         this.rotatedLast        = false
         this.rotationPoint4Used = false
@@ -251,6 +311,7 @@ class Ghost extends Tetromino {
     copy(piece) {
         this.position.copy(piece.position)
         this.minoesPosition = piece.minoesPosition
+        //this.children.forEach(mino => mino.offset = piece.offset)
         this.facing = piece.facing
         this.visible = true
         while (this.canMove(TRANSLATION.DOWN)) this.position.y--
@@ -260,6 +321,7 @@ Ghost.prototype.freeColor = new THREE.Color(COLORS.GHOST)
 Ghost.prototype.minoesPosition = [
     [P(0, 0, 0), P(0, 0, 0), P(0, 0, 0), P(0, 0, 0)],
 ]
+Ghost.prototype.offset = 0
 
 
 class I extends Tetromino { }
@@ -276,6 +338,7 @@ I.prototype.srs = [
     { [ROTATION.CW]: [P(0, 0), P(1, 0), P(-2, 0), P(1, -2), P(-2, 1)], [ROTATION.CCW]: [P(0, 0), P(-2, 0), P(1, 0), P(-2, -1), P(1, 2)] },
 ]
 I.prototype.freeColor = new THREE.Color(COLORS.I)
+I.prototype.offset = 1
 
 class J extends Tetromino { }
 J.prototype.minoesPosition = [
@@ -285,8 +348,10 @@ J.prototype.minoesPosition = [
     [P(0, 1), P(-1, -1), P(0, 0), P(0, -1)],
 ]
 J.prototype.freeColor = new THREE.Color(COLORS.J)
+J.prototype.offset = 2
 
-class L extends Tetromino { }
+class L extends Tetromino {
+}
 L.prototype.minoesPosition = [
     [P(-1, 0), P(0, 0), P(1, 0), P(1, 1)],
     [P(0, 1), P(0, 0), P(0, -1), P(1, -1)],
@@ -294,6 +359,7 @@ L.prototype.minoesPosition = [
     [P(0, 1), P(0, 0), P(0, -1), P(-1, 1)],
 ]
 L.prototype.freeColor = new THREE.Color(COLORS.L)
+L.prototype.offset = 3
 
 class O extends Tetromino { }
 O.prototype.minoesPosition = [
@@ -303,6 +369,7 @@ O.prototype.srs = [
     { [ROTATION.CW]: [], [ROTATION.CCW]: [] }
 ]
 O.prototype.freeColor = new THREE.Color(COLORS.O)
+O.prototype.offset = 4
 
 class S extends Tetromino { }
 S.prototype.minoesPosition = [
@@ -312,6 +379,7 @@ S.prototype.minoesPosition = [
     [P(-1, 1), P(0, 0), P(-1, 0), P(0, -1)],
 ]
 S.prototype.freeColor = new THREE.Color(COLORS.S)
+S.prototype.offset = 5
 
 class T extends Tetromino {
     get tSpin() {
@@ -339,6 +407,7 @@ T.prototype.tSlots = [
     [P(-1, -1), P(-1, 1), P(1, 1), P(1, -1)],
 ]
 T.prototype.freeColor = new THREE.Color(COLORS.T)
+T.prototype.offset = 6
 
 class Z extends Tetromino { }
 Z.prototype.minoesPosition = [
@@ -348,18 +417,19 @@ Z.prototype.minoesPosition = [
     [P(0, 1), P(-1, 0), P(0, 0), P(-1, -1)]
 ]
 Z.prototype.freeColor = new THREE.Color(COLORS.Z)
+Z.prototype.offset = 7
 
 
 class Playfield extends THREE.Group {
-    constructor() {
+    constructor(loadingManager) {
         super()
         //this.visible = false
 
         const edgeMaterial = new THREE.MeshStandardMaterial({
             color: COLORS.EDGE,
-            envMap: environnement,
+            envMap: environment,
             transparent: true,
-            opacity: 0.2,
+            opacity: 0.3,
             roughness: 0.1,
             metalness: 0.67,
         })
@@ -373,14 +443,56 @@ class Playfield extends THREE.Group {
             .lineTo(COLUMNS + .3, -.3)
             .lineTo(-.3, -.3)
             .moveTo(-.3, SKYLINE)
-        const edge = new THREE.Mesh(
+        this.edge = new THREE.Mesh(
             new THREE.ExtrudeGeometry(edgeShape, {
                 depth: 1,
                 bevelEnabled: false,
             }),
             edgeMaterial
         )
-        this.add(edge)
+        this.add(this.edge)
+
+        const retroEdgeShape = new THREE.Shape()
+            .moveTo(-1, SKYLINE)
+            .lineTo(0, SKYLINE)
+            .lineTo(0, 0)
+            .lineTo(COLUMNS, 0)
+            .lineTo(COLUMNS, SKYLINE)
+            .lineTo(COLUMNS + 1, SKYLINE)
+            .lineTo(COLUMNS + 1, -1)
+            .lineTo(-1, -1)
+            .moveTo(-1, SKYLINE)
+        const retroEdgeTexture = new THREE.TextureLoader(loadingManager).load("images/edge.png", (texture) => {
+            texture.wrapS = THREE.RepeatWrapping
+            texture.wrapT = THREE.RepeatWrapping
+        })
+        const retroEdgeMaterial = new THREE.MeshStandardMaterial({
+            color: 0xd0d4c1,
+            map: retroEdgeTexture,
+            bumpMap: retroEdgeTexture,
+            bumpScale: 0.5,
+            roughness: 0.25,
+            metalness: 0.8,
+        })
+        this.retroEdge = new THREE.Mesh(
+            new THREE.ExtrudeGeometry(retroEdgeShape, {
+                depth: 1,
+                bevelEnabled: false,
+            }),
+            [retroEdgeMaterial, sideMaterial, sideMaterial, sideMaterial, sideMaterial, sideMaterial],
+        )
+        this.add(this.retroEdge)
+        const back = new THREE.Mesh(
+          new THREE.PlaneGeometry(COLUMNS, SKYLINE),
+          new THREE.MeshStandardMaterial({
+              color: 0xc5d0a1,
+              roughness: 0.9,
+              metalness: 0.9,
+          })
+        )
+        back.position.set(COLUMNS/2, SKYLINE/2, 0)
+        this.retroEdge.add(back)
+        this.retroEdge.visible = false
 
         const positionKF = new THREE.VectorKeyframeTrack('.position', [0, 1, 2], [0, 0, 0, 0, -0.2, 0, 0, 0, 0])
         const clip = new THREE.AnimationClip('HardDrop', 3, [positionKF])
@@ -515,4 +627,4 @@ class NextQueue extends THREE.Group {
 NextQueue.prototype.positions = [P(0, 0), P(0, -3), P(0, -6), P(0, -9), P(0, -12), P(0, -15), P(0, -18)]
 
 
-export { T_SPIN, FACING, TRANSLATION, ROTATION, COLORS, environnement, Mino, Tetromino, Playfield, HoldQueue, NextQueue }
+export { T_SPIN, FACING, TRANSLATION, ROTATION, COLORS, environment, Mino, Tetromino, Playfield, HoldQueue, NextQueue }

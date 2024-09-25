@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 import { scheduler } from './jsm/scheduler.js'
-import { TRANSLATION, ROTATION, environnement, Mino, Playfield, HoldQueue, NextQueue } from './jsm/gamelogic.js'
+import { TRANSLATION, ROTATION, environment, Mino, Playfield, HoldQueue, NextQueue } from './jsm/Tetrominoes.js'
 import { Settings } from './jsm/Settings.js'
 import { Stats } from './jsm/Stats.js'
 import { TetraGUI } from './jsm/TetraGUI.js'
@@ -29,7 +29,7 @@ let game = {
         gui.settings.close()
         gui.stats.show()
 
-        Mino.mesh.clear()
+        Mino.meshes.clear()
 
         nextQueue.init()
         holdQueue.piece = undefined
@@ -298,16 +298,17 @@ const stats     = new Stats()
 const settings  = new Settings()
 const scene = new TetraScene(settings, loadingManager)
 const controls = new TetraControls(scene.camera, renderer.domElement)
-const gui = new TetraGUI(game, settings, stats, scene, controls)
 
-scene.add(Mino.mesh)
-
+scene.add(Mino.meshes)
 const holdQueue = new HoldQueue()
 scene.add(holdQueue)
-const playfield = new Playfield()
+const playfield = new Playfield(loadingManager)
 scene.add(playfield)
 const nextQueue = new NextQueue()
 scene.add(nextQueue)
+
+const gui = new TetraGUI(game, settings, stats, scene, controls, playfield)
+gui.load()
 
 messagesSpan.onanimationend = function (event) {
     event.target.remove()
@@ -321,12 +322,12 @@ function animate() {
     scene.updateMatrixWorld()
     scene.update(delta)
     playfield.update(delta)
-    Mino.mesh.update()
+    Mino.meshes.update()
     controls.update()
     gui.update()
 
     renderer.render(scene, scene.camera)
-    environnement.camera.update(renderer, scene)
+    environment.camera.update(renderer, scene)
 }
 
 window.addEventListener("resize", () => {

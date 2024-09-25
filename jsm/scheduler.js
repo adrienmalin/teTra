@@ -33,7 +33,7 @@ class Scheduler {
 }
 
 
-const scheduler = new Scheduler
+const scheduler = new Scheduler()
 
 
 export { scheduler }

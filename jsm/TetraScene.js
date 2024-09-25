@@ -44,6 +44,24 @@ export class TetraScene extends THREE.Scene {
         }.bind(this))
     }
 
+    set theme(theme) {
+        switch (theme) {
+            case "Plasma":
+                this.ambientLight.intensity     = 0.6
+                this.directionalLight.intensity = 5
+            break
+            case "Espace":
+                this.ambientLight.intensity     = 20
+                this.directionalLight.intensity = 10
+            break
+            case "Rétro":
+                this.ambientLight.intensity     = 1
+                this.directionalLight.intensity = 10
+            break
+        }
+        this.vortex.theme = theme
+    }
+
     update(delta) {
         this.vortex.update(delta)
     }

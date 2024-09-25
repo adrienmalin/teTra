@@ -10,8 +10,8 @@ class TetraControls extends OrbitControls {
       this.dampingFactor   = 0.04
       this.maxDistance     = 21
       this.keys            = {}
-      this.minPolarAngle   = 0.9
-      this.maxPolarAngle   = 2.14
+      this.minPolarAngle   = 1
+      this.maxPolarAngle   = 2.1
       this.minAzimuthAngle = 0.9 - Math.PI / 2
       this.maxAzimuthAngle = 2.14 - Math.PI / 2
       this.target.set(5, 7, 0)

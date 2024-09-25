@@ -1,5 +1,5 @@
 import { Clock } from 'three'
-import { T_SPIN } from './gamelogic.js'
+import { T_SPIN } from './Tetrominoes.js'
 
 
 // score = AWARDED_LINE_CLEARS[tSpin][nbClearedLines]

@@ -15,7 +15,7 @@ export class Vortex extends THREE.Group {
         this.colorFullTextureRotation = 0.006
         this.colorFullMoveForward = 0.025
 
-        const commonCylinderGeometry = new THREE.CylinderGeometry(35, 35, 500, 12, 1, true)
+        const commonCylinderGeometry = new THREE.CylinderGeometry(35, 35, 1000, 12, 1, true)
         
         this.darkCylinder = new THREE.Mesh(
             commonCylinderGeometry,
@@ -24,6 +24,7 @@ export class Vortex extends THREE.Group {
                 blending: THREE.AdditiveBlending,
             })
         )
+        this.darkCylinder.position.y = -100
         this.add(this.darkCylinder)
         
         this.colorFullCylinder = new THREE.Mesh(
@@ -33,6 +34,7 @@ export class Vortex extends THREE.Group {
                 blending: THREE.AdditiveBlending,
             })
         )
+        this.colorFullCylinder.position.y = -100
         this.add(this.colorFullCylinder)
 
         this.position.set(5, 10, -10)
@@ -44,7 +46,7 @@ export class Vortex extends THREE.Group {
                 new THREE.TextureLoader(this.loadingManager).load("./images/plasma.jpg", texture => {
                     texture.wrapS = THREE.RepeatWrapping
                     texture.wrapT = THREE.MirroredRepeatWrapping
-                    texture.repeat.set(1, 1)
+                    texture.repeat.set(1, 2)
                     this.darkCylinder.material.map = texture
                 })
                 this.darkCylinder.material.opacity = 0.17
@@ -52,7 +54,7 @@ export class Vortex extends THREE.Group {
                 new THREE.TextureLoader(this.loadingManager).load("./images/plasma2.jpg", texture => {
                     texture.wrapS = THREE.RepeatWrapping
                     texture.wrapT = THREE.MirroredRepeatWrapping
-                    texture.repeat.set(2, 1)
+                    texture.repeat.set(2, 2)
                     this.colorFullCylinder.material.map = texture
                 })
                 this.colorFullCylinder.material.opacity = 0.7
@@ -62,6 +64,8 @@ export class Vortex extends THREE.Group {
                 this.darkMoveForward          = 0.009
                 this.colorFullTextureRotation = 0.006
                 this.colorFullMoveForward     = 0.025
+
+                this.visible = true
             break
             
             case "Espace":
@@ -86,17 +90,29 @@ export class Vortex extends THREE.Group {
                 this.darkMoveForward = 0.03
                 this.colorFullTextureRotation = 0.006
                 this.colorFullMoveForward = 0.012
+
+                this.visible = true
+            break
+
+            case "Rétro":
+                this.visible = false
             break
         }
     }
 
     update(delta) {
-        this.rotation.y += this.globalRotation * delta
-
-        this.darkCylinder.material.map.offset.y += this.darkMoveForward * delta
-        this.darkCylinder.material.map.offset.x += this.darkTextureRotation * delta
-
-        this.colorFullCylinder.material.map.offset.y += this.colorFullMoveForward * delta
-        this.colorFullCylinder.material.map.offset.x += this.colorFullTextureRotation * delta
+        if (this.visible) {
+            this.rotation.y += this.globalRotation * delta
+    
+            if (this.darkCylinder.material.map) {
+                this.darkCylinder.material.map.offset.y += this.darkMoveForward * delta
+                this.darkCylinder.material.map.offset.x += this.darkTextureRotation * delta
+            }
+    
+            if (this.colorFullCylinder.material.map) {
+                this.colorFullCylinder.material.map.offset.y += this.colorFullMoveForward * delta
+                this.colorFullCylinder.material.map.offset.x += this.colorFullTextureRotation * delta
+            }
+        }
     }
 }
