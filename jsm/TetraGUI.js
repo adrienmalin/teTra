@@ -87,13 +87,13 @@ export class TetraGUI extends GUI {
             cameraPosition.add(scene.camera, "fov", 0, 200).onChange(() => scene.camera.updateProjectionMatrix())
         
             let light = dev.addFolder("lights intensity").close()
-            light.add(scene.ambientLight, "intensity").name("ambient").min(0).max(20)
-            light.add(scene.directionalLight, "intensity").name("directional").min(0).max(20)
+            light.add(scene.ambientLight, "intensity").name("ambient").min(0).max(20).listen()
+            light.add(scene.directionalLight, "intensity").name("directional").min(0).max(20).listen()
             
             let directionalLightPosition = dev.addFolder("directionalLight.position").close()
-            directionalLightPosition.add(scene.directionalLight.position, "x")
-            directionalLightPosition.add(scene.directionalLight.position, "y")
-            directionalLightPosition.add(scene.directionalLight.position, "z")
+            directionalLightPosition.add(scene.directionalLight.position, "x").listen()
+            directionalLightPosition.add(scene.directionalLight.position, "y").listen()
+            directionalLightPosition.add(scene.directionalLight.position, "z").listen()
         
             let vortex = dev.addFolder("vortex opacity").close()
             vortex.add(scene.vortex.darkCylinder.material, "opacity").name("dark").min(0).max(1)
