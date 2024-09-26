@@ -253,7 +253,7 @@ class Tetromino extends THREE.Group {
 
     canMove(translation, facing=this.facing) {
         let testPosition = this.position.clone().add(translation)
-        return this.minoesPosition[facing].every(minoPosition => this.parent.cellIsEmpty(minoPosition.clone().add(testPosition)))
+        return this.minoesPosition[facing].every(minoPosition => this.parent?.cellIsEmpty(minoPosition.clone().add(testPosition)))
     }
 
     move(translation, rotatedFacing, rotationPoint) {
@@ -266,12 +266,12 @@ class Tetromino extends THREE.Group {
             }
             if (this.canMove(TRANSLATION.DOWN)) {
                 this.locking = false
-                this.parent.ghost.copy(this)
+                this.parent?.ghost.copy(this)
                 scheduler.clearTimeout(this.onLockDown)
             } else {
                 scheduler.resetTimeout(this.onLockDown, this.lockDelay)
                 this.locking = true
-                this.parent.ghost.visible = false
+                this.parent?.ghost.visible = false
             }
             return true
         } else if (translation == TRANSLATION.DOWN) {
@@ -479,7 +479,6 @@ class Playfield extends THREE.Group {
             }),
             [retroEdgeMaterial, sideMaterial, sideMaterial, sideMaterial, sideMaterial, sideMaterial],
         )
-        this.add(this.retroEdge)
         const back = new THREE.Mesh(
           new THREE.PlaneGeometry(COLUMNS, SKYLINE),
           new THREE.MeshStandardMaterial({
@@ -491,6 +490,7 @@ class Playfield extends THREE.Group {
         back.position.set(COLUMNS/2, SKYLINE/2, 0)
         this.retroEdge.add(back)
         this.retroEdge.visible = false
+        this.add(this.retroEdge)
 
         const positionKF = new THREE.VectorKeyframeTrack('.position', [0, 1, 2], [0, 0, 0, 0, -0.2, 0, 0, 0, 0])
         const clip = new THREE.AnimationClip('HardDrop', 3, [positionKF])
@@ -524,6 +524,7 @@ class Playfield extends THREE.Group {
 
     set piece(piece) {
         if (piece) {
+            this.remove(this.piece)
             this.add(piece)
             piece.position.set(4, SKYLINE)
             this.ghost.copy(piece)
@@ -569,7 +570,10 @@ class Playfield extends THREE.Group {
 
     updateFreedMinoes(delta) {
         this.freedMinoes.forEach(mino => {
-            if (mino.explode(delta)) this.freedMinoes.delete(mino)
+            if (mino.explode(delta)) {
+                this.remove(mino)
+                this.freedMinoes.delete(mino)
+            }
         })
     }
 
@@ -588,6 +592,7 @@ class HoldQueue extends THREE.Group {
 
     set piece(piece) {
         if(piece) {
+            this.remove(this.piece)
             piece.holdEnabled = false
             piece.locking = false
             piece.position.set(0, 0)
@@ -616,6 +621,7 @@ class NextQueue extends THREE.Group {
 
     shift() {
         let fistPiece = this.children.shift()
+        this.remove(fistPiece)
         this.add(new Tetromino.random())
         this.positions.forEach((position, i) => this.children[i].position.copy(position))
         return fistPiece

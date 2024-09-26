@@ -81,7 +81,7 @@ export class Vortex extends THREE.Group {
                     texture.repeat.set(2, 2)
                     this.colorFullCylinder.material.map = texture
                 })
-                this.colorFullCylinder.material.opacity = 0.34
+                this.colorFullCylinder.material.opacity = 0.14
 
                 this.globalRotation = 0.028
                 this.darkTextureRotation = 0.006

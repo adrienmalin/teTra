@@ -323,10 +323,11 @@ function animate() {
     playfield.update(delta)
     Mino.meshes.update()
     controls.update()
-    gui.update()
 
     renderer.render(scene, scene.camera)
     environment.camera.update(renderer, scene)
+
+    gui.update()
 }
 
 window.addEventListener("resize", () => {
