@@ -157,17 +157,19 @@ export class TetraGUI extends GUI {
             changeMaterial(this.materialType)
             material.close()
 
+            controls.addEventListener("change", () => cameraPosition.controllersRecursive().forEach((control) => {
+                control.updateDisplay()
+            }))
+
+        }
+
+        if (window.location.search.includes("fps")) {
             let fps = new FPS.default()
             document.body.appendChild(fps.dom)
 
             this.update = function() {
                 fps.update()
             }
-
-            controls.addEventListener("change", () => cameraPosition.controllersRecursive().forEach((control) => {
-                control.updateDisplay()
-            }))
-
         }
     }
 
