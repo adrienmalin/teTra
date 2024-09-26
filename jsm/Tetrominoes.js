@@ -154,11 +154,11 @@ class Mino extends THREE.Object3D {
     }
     static {
         new THREE.TextureLoader().load("images/sprites.png", (texture) => {
-            this.materials.Rétro[0] = new TileMaterial({
+            this.materials.Rétro[0] = this.materials.Rétro[2] = new TileMaterial({
                 color: 0xd0d4c1,
                 map: texture,
                 bumpMap: texture,
-                bumpScale: 4,
+                bumpScale: 5,
                 roughness: 0.25,
                 metalness: 0.8,
                 transparent: true,
@@ -470,7 +470,7 @@ class Playfield extends THREE.Group {
             color: 0xd0d4c1,
             map: retroEdgeTexture,
             bumpMap: retroEdgeTexture,
-            bumpScale: 0.5,
+            bumpScale: 0.3,
             roughness: 0.25,
             metalness: 0.8,
         })
