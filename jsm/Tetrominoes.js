@@ -17,9 +17,10 @@ const COLORS = {
     S: 0xC8FBA8,
     T: 0xedb2ff,
     Z: 0xffb8c5,
-    LOCKING: "white",
+    LOCKING: 0xffffff,
     GHOST: 0x99a9b2,
-    EDGE: 0x88abe0
+    EDGE: 0x88abe0,
+    RETRO: 0xffffff,
 }
 
 const TRANSLATION = {
@@ -94,10 +95,7 @@ class InstancedMino extends THREE.InstancedMesh {
     }
 
     resetColor() {
-        if (this.instanceColor) {
-            this.instanceColor.array.fill(0xffffff)
-            this.instanceColor.needsUpdate = true
-        }
+        this.instanceColor = null
     }
 
     updateColor() {
@@ -158,7 +156,7 @@ class Mino extends THREE.Object3D {
                 color: 0xd0d4c1,
                 map: texture,
                 bumpMap: texture,
-                bumpScale: 5,
+                bumpScale: 1.5,
                 roughness: 0.25,
                 metalness: 0.8,
                 transparent: true,
@@ -459,8 +457,8 @@ class Playfield extends THREE.Group {
             .lineTo(COLUMNS, 0)
             .lineTo(COLUMNS, SKYLINE)
             .lineTo(COLUMNS + 1, SKYLINE)
-            .lineTo(COLUMNS + 1, -1)
-            .lineTo(-1, -1)
+            .lineTo(COLUMNS + 1, -.5)
+            .lineTo(-1, -.5)
             .moveTo(-1, SKYLINE)
         const retroEdgeTexture = new THREE.TextureLoader(loadingManager).load("images/edge.png", (texture) => {
             texture.wrapS = THREE.RepeatWrapping
@@ -515,7 +513,7 @@ class Playfield extends THREE.Group {
         this.ghost.visible = false
         this.add(this.ghost)
 
-        this.visible = true
+        // this.visible = true
     }
 
     cellIsEmpty(p) {
