@@ -200,9 +200,9 @@ class Mino extends THREE.Object3D {
         this.rotateOnWorldAxis(this.rotationAngle, delta * this.angularVelocity)
         if (Math.sqrt(this.position.x * this.position.x + this.position.z * this.position.z) > 40 || this.position.y < -50) {
             this.dispose()
-            return false
-        } else {
             return true
+        } else {
+            return false
         }
     }
 
@@ -569,7 +569,7 @@ class Playfield extends THREE.Group {
 
     updateFreedMinoes(delta) {
         this.freedMinoes.forEach(mino => {
-            if (mino.explode(delta)) this.freedMinoes.delete(this)
+            if (mino.explode(delta)) this.freedMinoes.delete(mino)
         })
     }
 
