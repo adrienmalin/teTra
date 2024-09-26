@@ -24,7 +24,6 @@ export class Vortex extends THREE.Group {
                 blending: THREE.AdditiveBlending,
             })
         )
-        this.darkCylinder.position.y = -100
         this.add(this.darkCylinder)
         
         this.colorFullCylinder = new THREE.Mesh(
@@ -34,10 +33,9 @@ export class Vortex extends THREE.Group {
                 blending: THREE.AdditiveBlending,
             })
         )
-        this.colorFullCylinder.position.y = -100
         this.add(this.colorFullCylinder)
 
-        this.position.set(5, 10, -10)
+        this.position.set(5, 100, -10)
     }
 
     set theme(theme) {

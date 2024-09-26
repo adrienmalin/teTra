@@ -136,7 +136,7 @@ class Mino extends THREE.Object3D {
             envMap: environment,
             side: THREE.DoubleSide,
             transparent: true,
-            opacity: 0.7,
+            opacity: 0.8,
             roughness: 0.48,
             metalness: 0.67,
         }),
@@ -145,8 +145,8 @@ class Mino extends THREE.Object3D {
             side: THREE.DoubleSide,
             transparent: true,
             opacity:   0.8,
-            roughness: 0.05,
-            metalness: 0.997,
+            roughness: 0.1,
+            metalness: 0.99,
         }),
         Rétro: [sideMaterial, sideMaterial, sideMaterial, sideMaterial, sideMaterial, sideMaterial]
     }

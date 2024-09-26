@@ -16,9 +16,9 @@ export class TetraScene extends THREE.Scene {
         this.add(this.ambientLight)
         
         this.directionalLight = new THREE.DirectionalLight(0xffffff, 5)
-        this.directionalLight.position.set(5, -20, 20)
         this.add(this.directionalLight)
 
+        this.theme = settings.theme
 
         /* Sounds */
         this.music = music
