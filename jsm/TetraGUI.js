@@ -5,7 +5,7 @@ import { Mino, environment } from './Tetrominoes.js'
 
 
 export class TetraGUI extends GUI {
-    constructor(game, settings, stats, scene, controls, playfield, loadingManager) {
+    constructor(game, settings, stats, scene, controls, playfield) {
         super({title: "teTra"})
         
         this.startButton  = this.add(game, "start").name("Jouer").hide()

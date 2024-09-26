@@ -264,7 +264,6 @@ function resumeOnKeyDown(event) {
 
 /* Scene */
 
-
 const renderer = new THREE.WebGLRenderer({
     powerPreference: "high-performance",
     antialias: true,
