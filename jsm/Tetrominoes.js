@@ -271,7 +271,7 @@ class Tetromino extends THREE.Group {
             } else {
                 scheduler.resetTimeout(this.onLockDown, this.lockDelay)
                 this.locking = true
-                this.parent?.ghost.visible = false
+                this.parent.ghost.visible = false
             }
             return true
         } else if (translation == TRANSLATION.DOWN) {

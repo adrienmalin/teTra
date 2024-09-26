@@ -7,7 +7,7 @@ export class TetraScene extends THREE.Scene {
         super()
 
         this.camera = new THREE.PerspectiveCamera(100, window.innerWidth / window.innerHeight, 0.1, 1000)
-        this.camera.position.set(5, 3, 12)
+        this.camera.position.set(5, 4, 12)
 
         this.vortex = new Vortex(loadingManager)
         this.add(this.vortex)
