@@ -132,19 +132,13 @@ class InstancedMino extends THREE.InstancedMesh {
 
 class Mino extends THREE.Object3D {
     static materials = {
-        Plasma: new THREE.MeshPhysicalMaterial({
+        Plasma: new THREE.MeshStandardMaterial({
             envMap: environment,
             side: THREE.DoubleSide,
             transparent: true,
-            opacity: 0.7,
-            roughness: 0.6,
-            ior: 1.8,
-            metalness: 0.6,
-            sheen: 0,
-            sheenRoughness: 1,
-            specularIntensity: 1,
-            thickness: 5,
-            transmission: 1,
+            opacity: 0.8,
+            roughness: 0.48,
+            metalness: 0.67,
         }),
         Espace: new THREE.MeshStandardMaterial({
             envMap: environment,
