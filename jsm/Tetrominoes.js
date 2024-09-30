@@ -189,7 +189,7 @@ class Mino extends THREE.Object3D {
         super()
         this.color = color
         this.offset = offset
-        this.velocity = P(50 - 100 * Math.random(), 50 - 100 * Math.random(), 50 - 100 * Math.random())
+        this.velocity = P(50 - 100 * Math.random(), 70 - 100 * Math.random(), 50 - 100 * Math.random())
         this.rotationAngle = P(Math.random(), Math.random(), Math.random()).normalize()
         this.angularVelocity = 5 - 10 * Math.random()
         this.constructor.meshes.add(this)
@@ -223,6 +223,7 @@ class Tetromino extends THREE.Group {
     constructor(position) {
         super()
         if (position) this.position.copy(position)
+        this.offset             = this.offset.clone()
         this.minoesPosition[FACING.NORTH].forEach(() => this.add(new Mino(this.freeColor, this.offset)))
         this.facing             = FACING.NORTH
         this.rotatedLast        = false
@@ -243,8 +244,10 @@ class Tetromino extends THREE.Group {
     set locking(locking) {
         if (locking) {
             this.color = this.lockingColor
+            this.offset.y = 2
         } else {
             this.color = this.freeColor
+            this.offset.y = 0
         }
     }
 
@@ -320,6 +323,7 @@ Ghost.prototype.freeColor = new THREE.Color(COLORS.GHOST)
 Ghost.prototype.minoesPosition = [
     [P(0, 0, 0), P(0, 0, 0), P(0, 0, 0), P(0, 0, 0)],
 ]
+Ghost.prototype.offset = P(0, 1)
 
 
 class I extends Tetromino { }
@@ -336,8 +340,8 @@ I.prototype.srs = [
     { [ROTATION.CW]: [P(0, 0), P(1, 0), P(-2, 0), P(1, -2), P(-2, 1)], [ROTATION.CCW]: [P(0, 0), P(-2, 0), P(1, 0), P(-2, -1), P(1, 2)] },
 ]
 I.prototype.freeColor = new THREE.Color(COLORS.I)
-I.prototype.offset = P(0, 1)
-I.prototype.ghostOffset = P(0, 0)
+I.prototype.offset = P(0, 0)
+I.prototype.ghostOffset = P(0, 1)
 
 class J extends Tetromino { }
 J.prototype.minoesPosition = [
@@ -347,8 +351,8 @@ J.prototype.minoesPosition = [
     [P(0, 1), P(-1, -1), P(0, 0), P(0, -1)],
 ]
 J.prototype.freeColor = new THREE.Color(COLORS.J)
-J.prototype.offset = P(1, 1)
-J.prototype.ghostOffset = P(1, 0)
+J.prototype.offset = P(1, 0)
+J.prototype.ghostOffset = P(1, 1)
 
 class L extends Tetromino {
 }
@@ -359,8 +363,8 @@ L.prototype.minoesPosition = [
     [P(0, 1), P(0, 0), P(0, -1), P(-1, 1)],
 ]
 L.prototype.freeColor = new THREE.Color(COLORS.L)
-L.prototype.offset = P(2, 1)
-L.prototype.ghostOffset = P(2, 0)
+L.prototype.offset = P(2, 0)
+L.prototype.ghostOffset = P(2, 1)
 
 class O extends Tetromino { }
 O.prototype.minoesPosition = [
@@ -370,8 +374,8 @@ O.prototype.srs = [
     { [ROTATION.CW]: [], [ROTATION.CCW]: [] }
 ]
 O.prototype.freeColor = new THREE.Color(COLORS.O)
-O.prototype.offset = P(3, 1)
-O.prototype.ghostOffset = P(3, 0)
+O.prototype.offset = P(3, 0)
+O.prototype.ghostOffset = P(3, 1)
 
 class S extends Tetromino { }
 S.prototype.minoesPosition = [
@@ -381,8 +385,8 @@ S.prototype.minoesPosition = [
     [P(-1, 1), P(0, 0), P(-1, 0), P(0, -1)],
 ]
 S.prototype.freeColor = new THREE.Color(COLORS.S)
-S.prototype.offset = P(4, 1)
-S.prototype.ghostOffset = P(4, 0)
+S.prototype.offset = P(4, 0)
+S.prototype.ghostOffset = P(4, 1)
 
 class T extends Tetromino {
     get tSpin() {
@@ -410,8 +414,8 @@ T.prototype.tSlots = [
     [P(-1, -1), P(-1, 1), P(1, 1), P(1, -1)],
 ]
 T.prototype.freeColor = new THREE.Color(COLORS.T)
-T.prototype.offset = P(5, 1)
-T.prototype.ghostOffset = P(5, 0)
+T.prototype.offset = P(5, 0)
+T.prototype.ghostOffset = P(5, 1)
 
 class Z extends Tetromino { }
 Z.prototype.minoesPosition = [
@@ -421,8 +425,8 @@ Z.prototype.minoesPosition = [
     [P(0, 1), P(-1, 0), P(0, 0), P(-1, -1)]
 ]
 Z.prototype.freeColor = new THREE.Color(COLORS.Z)
-Z.prototype.offset = P(6, 1)
-Z.prototype.ghostOffset = P(6, 0)
+Z.prototype.offset = P(6, 0)
+Z.prototype.ghostOffset = P(6, 1)
 
 
 class Playfield extends THREE.Group {
@@ -464,8 +468,8 @@ class Playfield extends THREE.Group {
             .lineTo(COLUMNS, 0)
             .lineTo(COLUMNS, SKYLINE)
             .lineTo(COLUMNS + 1, SKYLINE)
-            .lineTo(COLUMNS + 1, -.5)
-            .lineTo(-1, -.5)
+            .lineTo(COLUMNS + 1, -1/3)
+            .lineTo(-1, -1/3)
             .moveTo(-1, SKYLINE)
         const retroEdgeTexture = new THREE.TextureLoader(loadingManager).load("images/edge.png", (texture) => {
             texture.wrapS = THREE.RepeatWrapping
@@ -494,7 +498,7 @@ class Playfield extends THREE.Group {
               metalness: 0.9,
           })
         )
-        back.position.set(COLUMNS/2, SKYLINE/2, 0)
+        back.position.set(COLUMNS/2, SKYLINE/2)
         this.retroEdge.add(back)
         this.retroEdge.visible = false
         this.add(this.retroEdge)

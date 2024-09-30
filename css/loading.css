@@ -34,8 +34,8 @@ body { background-color: black; }
 }
 
 @keyframes spinCube {
-    0% { transform: translateZ(20px) rotateX(  0deg) rotateY(  0deg) rotateZ(  0deg); }
-  100% { transform: translateZ(20px) rotateX(360deg) rotateY(  0deg) rotateZ(360deg); }
+    0% { transform: translateZ(20px) rotateX(  0deg) rotateY(  0deg); }
+  100% { transform: translateZ(20px) rotateX(360deg) rotateY(360deg); }
 }
 
 .face {
