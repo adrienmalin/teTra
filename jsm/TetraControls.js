@@ -1,8 +1,7 @@
-
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 
 
-class TetraControls extends OrbitControls {
+export default class TetraControls extends OrbitControls {
   constructor(camera, domElement) {
       super(camera, domElement)
       this.autoRotate
@@ -20,5 +19,3 @@ class TetraControls extends OrbitControls {
       this.addEventListener("end", () => domElement.style.cursor = "grab")
   }
 }
-
-export { TetraControls }

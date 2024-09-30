@@ -33,6 +33,4 @@ class Scheduler {
 }
 
 
-const scheduler = new Scheduler()
-
-export { scheduler }
+export const scheduler = new Scheduler()

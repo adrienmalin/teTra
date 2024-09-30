@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+
+body { background-color: black; }
+
+.loading {
+  box-sizing: border-box;
+  font-family: "Open Sans", sans-serif;
+  font-size: 1.4rem;
+  color: hsla(240, 100%, 70%, 0.6);
+  text-align: center;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.scene {
+  width: 200px;
+  height: 200px;
+  margin: auto;
+  perspective: 200px;
+}
+
+.cube {
+  width: 40px;
+  height: 40px;
+  position: relative;
+  transform-style: preserve-3d;
+  transform: translateZ(20px);
+  left: 80px;
+  top: 80px;
+}
+
+.cube.is-spinning {
+  animation: spinCube 5s infinite ease-in-out;
+}
+
+@keyframes spinCube {
+    0% { transform: translateZ(20px) rotateX(  0deg) rotateY(  0deg) rotateZ(  0deg); }
+  100% { transform: translateZ(20px) rotateX(360deg) rotateY(  0deg) rotateZ(360deg); }
+}
+
+.face {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  background: hsla(240, 100%, 0%, 0.4);
+  border: 1px solid hsla(240, 100%, 70%, 0.6);
+}
+
+.front  { transform: rotateY(  0deg) translateZ(20px); }
+.right  { transform: rotateY( 90deg) translateZ(20px); }
+.back   { transform: rotateY(180deg) translateZ(20px); }
+.left   { transform: rotateY(-90deg) translateZ(20px); }
+.top    { transform: rotateX( 90deg) translateZ(20px); }
+.bottom { transform: rotateX(-90deg) translateZ(20px); }
+
+.cube.is-backface-hidden .face {
+  backface-visibility: hidden;
+}
+
+.mino0 { left: -40px; top: -20px; }
+.mino1 { left:   0px; top: -20px; }
+.mino2 { left:  40px; top: -20px; }
+.mino3 { left:   0px; top:  20px; }
+        </style>
+    </head>
+    <body>
+        <div class="loading">
+            <div class="scene">
+                <div class="cube is-spinning">
+                    <div class="mino0 front face"></div>
+                    <div class="mino0 back face"></div>
+                    <div class="mino0 right face"></div>
+                    <div class="mino0 left face"></div>
+                    <div class="mino0 top face"></div>
+                    <div class="mino0 bottom face"></div>
+                    <div class="mino1 front face"></div>
+                    <div class="mino1 back face"></div>
+                    <div class="mino1 right face"></div>
+                    <div class="mino1 left face"></div>
+                    <div class="mino1 top face"></div>
+                    <div class="mino1 bottom face"></div>
+                    <div class="mino2 front face"></div>
+                    <div class="mino2 back face"></div>
+                    <div class="mino2 right face"></div>
+                    <div class="mino2 left face"></div>
+                    <div class="mino2 top face"></div>
+                    <div class="mino2 bottom face"></div>
+                    <div class="mino3 front face"></div>
+                    <div class="mino3 back face"></div>
+                    <div class="mino3 right face"></div>
+                    <div class="mino3 left face"></div>
+                    <div class="mino3 top face"></div>
+                    <div class="mino3 bottom face"></div>
+                </div>
+            </div>
+            <div>
+                <div>Chargement</div>
+                <div id="loadingPercent">0%</div>
+            </div>
+        </div>
+    </body>
+</html>

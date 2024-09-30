@@ -1,10 +1,10 @@
 import * as THREE from 'three'
 import { scheduler } from './jsm/scheduler.js'
 import { TRANSLATION, ROTATION, environment, Mino, Playfield, HoldQueue, NextQueue } from './jsm/Tetrominoes.js'
-import { Settings } from './jsm/Settings.js'
+import Settings from './jsm/Settings.js'
 import { Stats } from './jsm/Stats.js'
 import { TetraGUI } from './jsm/TetraGUI.js'
-import { TetraControls } from './jsm/TetraControls.js'
+import TetraControls from './jsm/TetraControls.js'
 import { TetraScene } from './jsm/TetraScene.js'
 
 
@@ -277,7 +277,7 @@ renderer.domElement.tabIndex = 1
 
 let loadingManager = new THREE.LoadingManager(
     function() {
-        loaddingCircle.style.display = "none"
+        loadingDiv.style.display = "none"
         gui.startButton.show()
         renderer.setAnimationLoop(animate)
     },
@@ -290,7 +290,7 @@ let loadingManager = new THREE.LoadingManager(
 )
 loadingManager.onStart = function (url, itemsLoaded, itemsTotal) {
     loadingPercent.innerText = "0%"
-    loaddingCircle.style.display = "block"
+    loadingDiv.style.display = "block"
 }
 
 const stats     = new Stats()

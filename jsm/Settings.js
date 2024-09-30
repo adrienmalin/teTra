@@ -27,7 +27,7 @@ let friendyKeyRenamer = new Proxy({
     }
 })
 
-class Settings {
+export default class Settings {
     constructor() {
         this.startLevel = 1
 
@@ -80,6 +80,3 @@ class Settings {
         this.theme = "Plasma"
     }
 }
-
-
-export { Settings }
