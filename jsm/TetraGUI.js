@@ -6,7 +6,7 @@ import { Mino, environment } from './Tetrominoes.js'
 
 export class TetraGUI extends GUI {
     constructor(game, settings, stats, scene, controls, playfield) {
-        super({title: "teTra"})
+        super({title: "ᵀᴱTᴿᴬ"})
         
         this.startButton  = this.add(game, "start").name("Jouer").hide()
         this.pauseButton  = this.add(game, "pause").name("Pause").hide()
@@ -130,13 +130,9 @@ export class TetraGUI extends GUI {
                             side: THREE.DoubleSide,
                             transparent: true,
                             opacity: 0.7,
-                            roughness: 0.6,
+                            roughness: 0.5,
                             ior: 1.8,
-                            metalness: 0.6,
-                            sheen: 0,
-                            sheenRoughness: 1,
-                            specularIntensity: 1,
-                            thickness: 5,
+                            metalness: 0.9,
                             transmission: 1,
                         })
                     break
