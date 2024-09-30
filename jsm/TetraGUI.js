@@ -12,7 +12,7 @@ export class TetraGUI extends GUI {
         this.pauseButton  = this.add(game, "pause").name("Pause").hide()
         this.resumeButton = this.add(game, "resume").name("Reprendre").hide()
 
-        this.stats = this.addFolder("Stats").hide()
+        this.stats = this.addFolder("Statistiques").hide()
         this.stats.add(stats, "time").name("Temps").disable().listen()
         this.stats.add(stats, "score").name("Score").disable().listen()
         this.stats.add(stats, "highScore").name("Meilleur score").disable().listen()
@@ -30,17 +30,14 @@ export class TetraGUI extends GUI {
 
         this.settings.add(settings, "theme", ["Plasma", "Espace", "Rétro"]).name("Thème").onChange(theme => {
             scene.theme = theme
-            Mino.meshes.material = Mino.materials[theme]
+            Mino.meshes.theme = theme
             if (theme == "Rétro") {
                 playfield.edge.visible = false
                 playfield.retroEdge.visible = true
-                Mino.meshes.resetColor()
-                Mino.meshes.update = Mino.meshes.updateOffset
                 music.src = "audio/Tetris_MkVaffQuasi_Ultimix_OC_ReMix.mp3"
             } else {
                 playfield.edge.visible = true
                 playfield.retroEdge.visible = false
-                Mino.meshes.update = Mino.meshes.updateColor
                 music.src = "audio/benevolence.m4a"
             }
         })

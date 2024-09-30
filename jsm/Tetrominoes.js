@@ -90,6 +90,25 @@ class InstancedMino extends THREE.InstancedMesh {
         this.instances.clear()
     }
 
+    set theme(theme) {
+        this._theme = theme
+        if(Mino.materials[theme]) Mino.meshes.material = Mino.materials[theme]
+        if (theme == "Rétro") {
+            this.geometry = Mino.retroGeometry
+            this.position.set(.5, .5, .5)
+            this.resetColor()
+            this.update = Mino.meshes.updateOffset
+        } else {
+            this.geometry = Mino.geometry
+            this.position.set(0, 0, 0)
+            this.update = Mino.meshes.updateColor
+        }
+    }
+
+    get theme() {
+        return this._theme
+    }
+
     setOffsetAt(index, offset) {
         this.offsets[2*index] = offset.x
         this.offsets[2*index + 1] = offset.y
@@ -148,12 +167,11 @@ class Mino extends THREE.Object3D {
             opacity:   0.8,
             roughness: 0.1,
             metalness: 0.99,
-        }),
-        Rétro: [sideMaterial, sideMaterial, sideMaterial, sideMaterial, sideMaterial, sideMaterial]
+        })
     }
     static {
         new THREE.TextureLoader().load("images/sprites.png", (texture) => {
-            this.materials.Rétro[0] = this.materials.Rétro[2] = new TileMaterial({
+            this.materials.Rétro = new TileMaterial({
                 color: 0xd0d4c1,
                 map: texture,
                 bumpMap: texture,
@@ -162,6 +180,7 @@ class Mino extends THREE.Object3D {
                 metalness: 0.8,
                 transparent: true,
             }, 8, 8)
+            if (this.meshes.theme == "Rétro") this.meshes.material = this.materials.Rétro
         })
     }
     static meshes
@@ -181,8 +200,9 @@ class Mino extends THREE.Object3D {
             bevelOffset: 0,
             bevelSegments: 1
         }
-        let minoGeometry = new THREE.ExtrudeGeometry(minoFaceShape, minoExtrudeSettings)
-        this.meshes = new InstancedMino(minoGeometry, this.materials.Plasma, 2*ROWS*COLUMNS)
+        this.geometry = new THREE.ExtrudeGeometry(minoFaceShape, minoExtrudeSettings)
+        this.retroGeometry = new THREE.BoxGeometry()
+        this.meshes = new InstancedMino(this.geometry, this.materials.Plasma, 2*ROWS*COLUMNS)
     }
 
     constructor(color, offset) {
