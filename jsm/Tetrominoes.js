@@ -91,7 +91,8 @@ class InstancedMino extends THREE.InstancedMesh {
     }
 
     setOffsetAt(index, offset) {
-        this.offsets[index * 2] = offset
+        this.offsets[2*index] = offset.x
+        this.offsets[2*index + 1] = offset.y
     }
 
     resetColor() {
@@ -136,9 +137,9 @@ class Mino extends THREE.Object3D {
             envMap: environment,
             side: THREE.DoubleSide,
             transparent: true,
-            opacity: 0.8,
-            roughness: 0.48,
-            metalness: 0.67,
+            opacity: 0.7,
+            roughness: 0.5,
+            metalness: 1,
         }),
         Espace: new THREE.MeshStandardMaterial({
             envMap: environment,
@@ -295,7 +296,7 @@ class Tetromino extends THREE.Group {
 }
 Tetromino.prototype.lockingColor = new THREE.Color(COLORS.LOCKING)
 // Super Rotation System
-// freedom of movement = srs[this.parent.piece.facing][rotation]
+// freedom of movement = srs[this.facing][rotation]
 Tetromino.prototype.srs = [
     { [ROTATION.CW]: [P(0, 0), P(-1, 0), P(-1, 1), P(0, -2), P(-1, -2)], [ROTATION.CCW]: [P(0, 0), P(1, 0), P(1, 1), P(0, -2), P(1, -2)] },
     { [ROTATION.CW]: [P(0, 0), P(1, 0), P(1, -1), P(0, 2), P(1, 2)], [ROTATION.CCW]: [P(0, 0), P(1, 0), P(1, -1), P(0, 2), P(1, 2)] },
@@ -309,7 +310,7 @@ class Ghost extends Tetromino {
     copy(piece) {
         this.position.copy(piece.position)
         this.minoesPosition = piece.minoesPosition
-        //this.children.forEach(mino => mino.offset = piece.offset)
+        this.children.forEach(mino => {mino.offset = piece.ghostOffset})
         this.facing = piece.facing
         this.visible = true
         while (this.canMove(TRANSLATION.DOWN)) this.position.y--
@@ -319,7 +320,6 @@ Ghost.prototype.freeColor = new THREE.Color(COLORS.GHOST)
 Ghost.prototype.minoesPosition = [
     [P(0, 0, 0), P(0, 0, 0), P(0, 0, 0), P(0, 0, 0)],
 ]
-Ghost.prototype.offset = 0
 
 
 class I extends Tetromino { }
@@ -336,7 +336,8 @@ I.prototype.srs = [
     { [ROTATION.CW]: [P(0, 0), P(1, 0), P(-2, 0), P(1, -2), P(-2, 1)], [ROTATION.CCW]: [P(0, 0), P(-2, 0), P(1, 0), P(-2, -1), P(1, 2)] },
 ]
 I.prototype.freeColor = new THREE.Color(COLORS.I)
-I.prototype.offset = 1
+I.prototype.offset = P(0, 1)
+I.prototype.ghostOffset = P(0, 0)
 
 class J extends Tetromino { }
 J.prototype.minoesPosition = [
@@ -346,7 +347,8 @@ J.prototype.minoesPosition = [
     [P(0, 1), P(-1, -1), P(0, 0), P(0, -1)],
 ]
 J.prototype.freeColor = new THREE.Color(COLORS.J)
-J.prototype.offset = 2
+J.prototype.offset = P(1, 1)
+J.prototype.ghostOffset = P(1, 0)
 
 class L extends Tetromino {
 }
@@ -357,7 +359,8 @@ L.prototype.minoesPosition = [
     [P(0, 1), P(0, 0), P(0, -1), P(-1, 1)],
 ]
 L.prototype.freeColor = new THREE.Color(COLORS.L)
-L.prototype.offset = 3
+L.prototype.offset = P(2, 1)
+L.prototype.ghostOffset = P(2, 0)
 
 class O extends Tetromino { }
 O.prototype.minoesPosition = [
@@ -367,7 +370,8 @@ O.prototype.srs = [
     { [ROTATION.CW]: [], [ROTATION.CCW]: [] }
 ]
 O.prototype.freeColor = new THREE.Color(COLORS.O)
-O.prototype.offset = 4
+O.prototype.offset = P(3, 1)
+O.prototype.ghostOffset = P(3, 0)
 
 class S extends Tetromino { }
 S.prototype.minoesPosition = [
@@ -377,7 +381,8 @@ S.prototype.minoesPosition = [
     [P(-1, 1), P(0, 0), P(-1, 0), P(0, -1)],
 ]
 S.prototype.freeColor = new THREE.Color(COLORS.S)
-S.prototype.offset = 5
+S.prototype.offset = P(4, 1)
+S.prototype.ghostOffset = P(4, 0)
 
 class T extends Tetromino {
     get tSpin() {
@@ -405,7 +410,8 @@ T.prototype.tSlots = [
     [P(-1, -1), P(-1, 1), P(1, 1), P(1, -1)],
 ]
 T.prototype.freeColor = new THREE.Color(COLORS.T)
-T.prototype.offset = 6
+T.prototype.offset = P(5, 1)
+T.prototype.ghostOffset = P(5, 0)
 
 class Z extends Tetromino { }
 Z.prototype.minoesPosition = [
@@ -415,7 +421,8 @@ Z.prototype.minoesPosition = [
     [P(0, 1), P(-1, 0), P(0, 0), P(-1, -1)]
 ]
 Z.prototype.freeColor = new THREE.Color(COLORS.Z)
-Z.prototype.offset = 7
+Z.prototype.offset = P(6, 1)
+Z.prototype.ghostOffset = P(6, 0)
 
 
 class Playfield extends THREE.Group {
