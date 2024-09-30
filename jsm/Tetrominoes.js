@@ -5,7 +5,7 @@ import { TileMaterial } from './TileMaterial.js'
 
 Array.prototype.pick = function () { return this.splice(Math.floor(Math.random() * this.length), 1)[0] }
 
-let P = (x, y, z = 0) => new THREE.Vector3(x, y, z)
+let P = (x, y, z=0) => new THREE.Vector3(x, y, z)
 
 const GRAVITY = -30
 
@@ -260,13 +260,12 @@ class Tetromino extends THREE.Group {
         return this.minoesPosition[facing].every(minoPosition => this.parent?.cellIsEmpty(minoPosition.clone().add(testPosition)))
     }
 
-    move(translation, rotatedFacing, rotationPoint) {
+    move(translation, rotatedFacing) {
         if (this.canMove(translation, rotatedFacing)) {
             this.position.add(translation)
             this.rotatedLast = rotatedFacing
             if (rotatedFacing != undefined) {
                 this.facing = rotatedFacing
-                if (rotationPoint == 4) this.rotationPoint4Used = true
             }
             if (this.canMove(TRANSLATION.DOWN)) {
                 this.locking = false
@@ -288,9 +287,12 @@ class Tetromino extends THREE.Group {
 
     rotate(rotation) {
         let testFacing = (this.facing + rotation) % 4
-        return this.srs[this.facing][rotation].some(
-            (translation, rotationPoint) => this.move(translation, testFacing, rotationPoint)
-        )
+        return this.srs[this.facing][rotation].some((translation, rotationPoint) => {
+            if (this.move(translation, testFacing)) {
+                if (rotationPoint == 4) this.rotationPoint4Used = true
+                return true
+            }
+        })
     }
 
     get tSpin() {
