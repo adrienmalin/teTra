@@ -4,7 +4,7 @@ body { background-color: black; }
   box-sizing: border-box;
   font-family: "Open Sans", sans-serif;
   font-size: 1.4rem;
-  color: hsla(240, 100%, 70%, 0.6);
+  color: lightsteelblue;
   text-align: center;
   position: absolute;
   top: 50%;
