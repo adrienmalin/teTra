@@ -626,7 +626,7 @@ class Playfield extends THREE.Group {
 class HoldQueue extends THREE.Group {
     constructor() {
         super()
-        this.position.set(-4, SKYLINE - 2)
+        this.position.set(-5, SKYLINE - 2)
     }
 
     set piece(piece) {
@@ -650,7 +650,7 @@ class HoldQueue extends THREE.Group {
 class NextQueue extends THREE.Group {
     constructor() {
         super()
-        this.position.set(13, SKYLINE - 2)
+        this.position.set(14, SKYLINE - 2)
     }
 
     init() {
