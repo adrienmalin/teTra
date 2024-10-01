@@ -172,9 +172,9 @@ class Mino extends THREE.Object3D {
                 color: COLORS.RETRO,
                 map: texture,
                 bumpMap: texture,
-                bumpScale: 2,
+                bumpScale: 1.5,
                 roughness: 0.25,
-                metalness: 0.8,
+                metalness: 0.9,
                 transparent: true,
             }, 8, 8)
         })
@@ -183,9 +183,9 @@ class Mino extends THREE.Object3D {
                 color: COLORS.RETRO,
                 map: texture,
                 bumpMap: texture,
-                bumpScale: 2,
+                bumpScale: 1.5,
                 roughness: 0.25,
-                metalness: 0.8,
+                metalness: 0.9,
                 transparent: true,
             }, 1, 1)
         })
@@ -507,9 +507,9 @@ class Playfield extends THREE.Group {
             color: COLORS.RETRO,
             map: retroEdgeTexture,
             bumpMap: retroEdgeTexture,
-            bumpScale: 0.3,
+            bumpScale: 1.5,
             roughness: 0.25,
-            metalness: 0.8,
+            metalness: 0.9,
         })
         this.retroEdge = new THREE.Mesh(
             new THREE.ExtrudeGeometry(retroEdgeShape, {
