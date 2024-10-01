@@ -15,6 +15,11 @@ class Scheduler {
       }
   }
 
+  resetInterval(func, delay, ...args) {
+      this.clearInterval(func)
+      this.setInterval(func, delay, ...args)
+  }
+
   setTimeout(func, delay, ...args) {
       this.timeoutTasks.set(func, window.setTimeout(func, delay, ...args))
   }

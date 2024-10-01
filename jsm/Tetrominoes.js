@@ -306,7 +306,7 @@ class Tetromino extends THREE.Group {
         } else if (translation == TRANSLATION.DOWN) {
             this.locked = true
             if (!scheduler.timeoutTasks.has(this.onLockDown))
-                scheduler.setTimeout(this.onLockDown, this.lockDelay)
+                scheduler.resetTimeout(this.onLockDown, this.lockDelay)
         }
 
     }

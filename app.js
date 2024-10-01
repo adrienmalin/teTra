@@ -62,7 +62,7 @@ let game = {
         if (settings.musicVolume) scene.music.play()
 
         if (playfield.piece) {
-            scheduler.setInterval(game.fall, stats.fallPeriod)
+            scheduler.resetInterval(game.fall, stats.fallPeriod)
         } else {
             this.generate()
         }
@@ -74,7 +74,7 @@ let game = {
         playfield.piece.onLockDown = game.lockDown
     
         if (playfield.piece.canMove(TRANSLATION.NONE)) {
-            scheduler.setInterval(game.fall, stats.fallPeriod)
+            scheduler.resetInterval(game.fall, stats.fallPeriod)
         } else {
             game.over() // block out
         }
@@ -216,8 +216,8 @@ function onkeydown(event) {
                 actionsQueue.unshift(action)
                 scheduler.clearTimeout(repeat)
                 scheduler.clearInterval(autorepeat)
-                if (action == playerActions.softDrop) scheduler.setInterval(autorepeat, settings.fallPeriod / 20)
-                else scheduler.setTimeout(repeat, settings.dasDelay)
+                if (action == playerActions.softDrop) scheduler.resetInterval(autorepeat, settings.fallPeriod / 20)
+                else scheduler.resetTimeout(repeat, settings.dasDelay)
             }
         }
     }
@@ -226,7 +226,7 @@ function onkeydown(event) {
 function repeat() {
     if (actionsQueue.length) {
         actionsQueue[0]()
-        scheduler.setInterval(autorepeat, settings.arrDelay)
+        scheduler.resetInterval(autorepeat, settings.arrDelay)
     }
 }
 
