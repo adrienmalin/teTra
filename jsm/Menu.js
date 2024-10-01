@@ -23,7 +23,6 @@ export class Menu extends GUI {
         this.stats.add(stats, "maxCombo").name("Combos max").disable().listen()
         this.stats.add(stats, "maxB2B").name("BàB max").disable().listen()
 
-
         this.settings = this.addFolder("Options")
         this.settings.add(settings, "startLevel").name("Niveau initial").min(1).max(15).step(1)
 
@@ -39,6 +38,7 @@ export class Menu extends GUI {
                 playfield.retroEdge.visible = false
                 music.src = "audio/benevolence.m4a"
             }
+            if (dev) changeMaterial()
         })
 
         this.settings.key = this.settings.addFolder("Commandes").open()
@@ -72,34 +72,12 @@ export class Menu extends GUI {
             scene.tetrisSound.setVolume(volume/100)
             scene.hardDropSound.setVolume(volume/100)
         })
-
-        this.settings.dev = window.location.search.includes("dev")
-        if (this.settings.dev) {
-            let dev = this.settings.addFolder("dev")
-            let cameraPosition = dev.addFolder("camera").close()
-            cameraPosition.add(scene.camera.position, "x")
-            cameraPosition.add(scene.camera.position, "y")
-            cameraPosition.add(scene.camera.position, "z")
-            cameraPosition.add(scene.camera, "fov", 0, 200).onChange(() => scene.camera.updateProjectionMatrix())
         
-            let light = dev.addFolder("lights intensity").close()
-            light.add(scene.ambientLight, "intensity").name("ambient").min(0).max(20).listen()
-            light.add(scene.directionalLight, "intensity").name("directional").min(0).max(20).listen()
-            
-            let directionalLightPosition = dev.addFolder("directionalLight.position").close()
-            directionalLightPosition.add(scene.directionalLight.position, "x").listen()
-            directionalLightPosition.add(scene.directionalLight.position, "y").listen()
-            directionalLightPosition.add(scene.directionalLight.position, "z").listen()
-        
-            let vortex = dev.addFolder("vortex opacity").close()
-            vortex.add(scene.vortex.darkCylinder.material, "opacity").name("dark").min(0).max(1)
-            vortex.add(scene.vortex.colorFullCylinder.material, "opacity").name("colorFull").min(0).max(1)
-
-            let material
-            function changeMaterial(type) {
-                material?.destroy()
-                material = dev.addFolder("minoes material")
-                material.add(Mino.meshes.material, "constructor", ["MeshBasicMaterial", "MeshStandardMaterial", "MeshPhysicalMaterial"]).name("type").onChange(changeMaterial)
+        let material
+        function changeMaterial() {
+            material?.destroy()
+            material = dev.addFolder("minoes material")
+            material.add(Mino.meshes.material, "constructor", ["MeshBasicMaterial", "MeshStandardMaterial", "MeshPhysicalMaterial"]).listen().onChange(type => {
                 switch(type) {
                     case "MeshBasicMaterial":
                         Mino.meshes.material = new THREE.MeshBasicMaterial({
@@ -133,25 +111,50 @@ export class Menu extends GUI {
                         })
                     break
                 }
-                if ("opacity"             in Mino.meshes.material) material.add(Mino.meshes.material, "opacity"            ).min(0).max(1).listen()
-                if ("reflectivity"        in Mino.meshes.material) material.add(Mino.meshes.material, "reflectivity"       ).min(0).max(1).listen()
-                if ("roughness"           in Mino.meshes.material) material.add(Mino.meshes.material, "roughness"          ).min(0).max(1).listen()
-                if ("metalness"           in Mino.meshes.material) material.add(Mino.meshes.material, "metalness"          ).min(0).max(1).listen()
-                if ("attenuationDistance" in Mino.meshes.material) material.add(Mino.meshes.material, "attenuationDistance").min(0).listen()
-                if ("ior"                 in Mino.meshes.material) material.add(Mino.meshes.material, "ior"                ).min(1).max(2).listen()
-                if ("sheen"               in Mino.meshes.material) material.add(Mino.meshes.material, "sheen"              ).min(0).max(1).listen()
-                if ("sheenRoughness"      in Mino.meshes.material) material.add(Mino.meshes.material, "sheenRoughness"     ).min(0).max(1).listen()
-                if ("specularIntensity"   in Mino.meshes.material) material.add(Mino.meshes.material, "specularIntensity"  ).min(0).max(1).listen()
-                if ("thickness"           in Mino.meshes.material) material.add(Mino.meshes.material, "thickness"          ).min(0).max(5).listen()
-                if ("transmission"        in Mino.meshes.material) material.add(Mino.meshes.material, "transmission"       ).min(0).max(1).listen()
-            }
-            changeMaterial(this.settings.materialType)
+                Mino.meshes.update = Mino.meshes.updateColor
+                changeMaterial()
+            })
+            console.log("lnlnl")
+
+            let minoMaterial = Mino.meshes.material instanceof Array ? Mino.meshes.material[0] : Mino.meshes.material
+            if ("opacity"             in minoMaterial) material.add(minoMaterial, "opacity"            ).min(0).max(1)
+            if ("reflectivity"        in minoMaterial) material.add(minoMaterial, "reflectivity"       ).min(0).max(1)
+            if ("roughness"           in minoMaterial) material.add(minoMaterial, "roughness"          ).min(0).max(1)
+            if ("bumpScale"           in minoMaterial) material.add(minoMaterial, "bumpScale"          ).min(0).max(5)
+            if ("metalness"           in minoMaterial) material.add(minoMaterial, "metalness"          ).min(0).max(1)
+            if ("attenuationDistance" in minoMaterial) material.add(minoMaterial, "attenuationDistance").min(0)
+            if ("ior"                 in minoMaterial) material.add(minoMaterial, "ior"                ).min(1).max(2)
+            if ("sheen"               in minoMaterial) material.add(minoMaterial, "sheen"              ).min(0).max(1)
+            if ("sheenRoughness"      in minoMaterial) material.add(minoMaterial, "sheenRoughness"     ).min(0).max(1)
+            if ("specularIntensity"   in minoMaterial) material.add(minoMaterial, "specularIntensity"  ).min(0).max(1)
+            if ("thickness"           in minoMaterial) material.add(minoMaterial, "thickness"          ).min(0).max(5)
+            if ("transmission"        in minoMaterial) material.add(minoMaterial, "transmission"       ).min(0).max(1)
+        }
+
+        let dev
+        if (window.location.search.includes("dev")) {
+            dev = this.addFolder("dev")
+            let cameraPosition = dev.addFolder("camera").close()
+            cameraPosition.add(scene.camera.position, "x").listen()
+            cameraPosition.add(scene.camera.position, "y").listen()
+            cameraPosition.add(scene.camera.position, "z").listen()
+            cameraPosition.add(scene.camera, "fov", 0, 200).onChange(() => scene.camera.updateProjectionMatrix()).listen()
+        
+            let light = dev.addFolder("lights intensity").close()
+            light.add(scene.ambientLight, "intensity").name("ambient").min(0).max(20).listen()
+            light.add(scene.directionalLight, "intensity").name("directional").min(0).max(20).listen()
+            
+            let directionalLightPosition = dev.addFolder("directionalLight.position").close()
+            directionalLightPosition.add(scene.directionalLight.position, "x").listen()
+            directionalLightPosition.add(scene.directionalLight.position, "y").listen()
+            directionalLightPosition.add(scene.directionalLight.position, "z").listen()
+        
+            let vortex = dev.addFolder("vortex opacity").close()
+            vortex.add(scene.vortex.darkCylinder.material, "opacity").name("dark").min(0).max(1)
+            vortex.add(scene.vortex.colorFullCylinder.material, "opacity").name("colorFull").min(0).max(1)
+
+            changeMaterial(Mino.meshes.material.constructor.name)
             material.close()
-
-            controls.addEventListener("change", () => cameraPosition.controllersRecursive().forEach((control) => {
-                control.updateDisplay()
-            }))
-
         }
     }
 

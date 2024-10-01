@@ -92,12 +92,12 @@ class InstancedMino extends THREE.InstancedMesh {
 
     set theme(theme) {
         this._theme = theme
-        Mino.meshes.material = Mino.materials[theme]
+        this.material = Mino.materials[theme]
         if (theme == "Rétro") {
             this.resetColor()
-            this.update = Mino.meshes.updateOffset
+            this.update = this.updateOffset
         } else {
-            this.update = Mino.meshes.updateColor
+            this.update = this.updateColor
         }
     }
 
