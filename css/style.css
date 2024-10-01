@@ -11,12 +11,12 @@ span {
     position: absolute;
 }
 
-.lil-gui {
+.lil-menu {
     --background-color: rgba(33, 37, 41, 30%);
     --width: 200px;
 }
 @supports (backdrop-filter: blur()) {
-    .lil-gui {
+    .lil-menu {
         backdrop-filter: blur(15px);
     }
 }
@@ -27,11 +27,11 @@ span {
     left: 15px;
 }
 
-.lil-gui.root > .title {
+.lil-menu.root > .title {
     font-size: 1.5em;
 }
 
-.lil-gui .controller.disabled {
+.lil-menu .controller.disabled {
     opacity: .8;
 }
 

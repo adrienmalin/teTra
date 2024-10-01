@@ -1,10 +1,9 @@
 import * as THREE from 'three'
 import { GUI } from 'three/addons/libs/lil-gui.module.min.js'
-import * as FPS from 'three/addons/libs/stats.module.js'
 import { Mino, environment } from './Tetrominoes.js'
 
 
-export class TetraGUI extends GUI {
+export class Menu extends GUI {
     constructor(game, settings, stats, scene, controls, playfield) {
         super({title: "ᵀᴱTᴿᴬ"})
         
@@ -24,8 +23,8 @@ export class TetraGUI extends GUI {
         this.stats.add(stats, "maxCombo").name("Combos max").disable().listen()
         this.stats.add(stats, "maxB2B").name("BàB max").disable().listen()
 
-        this.settings = this.addFolder("Options").open()
 
+        this.settings = this.addFolder("Options")
         this.settings.add(settings, "startLevel").name("Niveau initial").min(1).max(15).step(1)
 
         this.settings.add(settings, "theme", ["Plasma", "Espace", "Rétro"]).name("Thème").onChange(theme => {
@@ -74,9 +73,9 @@ export class TetraGUI extends GUI {
             scene.hardDropSound.setVolume(volume/100)
         })
 
-        this.dev = window.location.search.includes("dev")
-        if (this.dev) {
-            let dev = this.addFolder("dev")
+        this.settings.dev = window.location.search.includes("dev")
+        if (this.settings.dev) {
+            let dev = this.settings.addFolder("dev")
             let cameraPosition = dev.addFolder("camera").close()
             cameraPosition.add(scene.camera.position, "x")
             cameraPosition.add(scene.camera.position, "y")
@@ -146,22 +145,13 @@ export class TetraGUI extends GUI {
                 if ("thickness"           in Mino.meshes.material) material.add(Mino.meshes.material, "thickness"          ).min(0).max(5).listen()
                 if ("transmission"        in Mino.meshes.material) material.add(Mino.meshes.material, "transmission"       ).min(0).max(1).listen()
             }
-            changeMaterial(this.materialType)
+            changeMaterial(this.settings.materialType)
             material.close()
 
             controls.addEventListener("change", () => cameraPosition.controllersRecursive().forEach((control) => {
                 control.updateDisplay()
             }))
 
-        }
-
-        if (window.location.search.includes("fps")) {
-            let fps = new FPS.default()
-            document.body.appendChild(fps.dom)
-
-            this.update = function() {
-                fps.update()
-            }
         }
     }
 
@@ -176,7 +166,7 @@ export class TetraGUI extends GUI {
     }
 
     changeKey() {
-        let controller = this
+        let controller = this.settings
         let input = controller.domElement.getElementsByTagName("input")[0]
         input.select()
         input.onkeydown = function (event) {
@@ -184,6 +174,4 @@ export class TetraGUI extends GUI {
             input.blur()
         }
     }
-
-    update() {}
 }

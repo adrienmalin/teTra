@@ -3,9 +3,10 @@ import { scheduler } from './jsm/scheduler.js'
 import { TRANSLATION, ROTATION, environment, Mino, Playfield, HoldQueue, NextQueue } from './jsm/Tetrominoes.js'
 import Settings from './jsm/Settings.js'
 import { Stats } from './jsm/Stats.js'
-import { TetraGUI } from './jsm/TetraGUI.js'
+import { Menu } from './jsm/Menu.js'
 import TetraControls from './jsm/TetraControls.js'
 import { TetraScene } from './jsm/TetraScene.js'
+import * as FPS from 'three/addons/libs/stats.module.js'
 
 
 HTMLElement.prototype.addNewChild = function (tag, properties) {
@@ -25,9 +26,9 @@ let game = {
     start: function() {
         stats.init()
 
-        gui.startButton.hide()
-        gui.settings.close()
-        gui.stats.show()
+        menu.startButton.hide()
+        menu.stats.show()
+        menu.settings.close()
 
         Mino.meshes.clear()
 
@@ -49,11 +50,11 @@ let game = {
         document.onkeydown = onkeydown
         document.onkeyup = onkeyup
         window.onblur = game.pause
-        gui.settings.domElement.onclick = game.pause
+        menu.settings.domElement.onclick = game.pause
 
         document.body.classList.remove("pause")
-        gui.resumeButton.hide()
-        gui.pauseButton.show()
+        menu.resumeButton.hide()
+        menu.pauseButton.show()
 
         stats.clock.start()
         stats.clock.elapsedTime = stats.elapsedTime
@@ -106,7 +107,7 @@ let game = {
     },
 
     pause: function() {
-        gui.settings.domElement.onclick = null
+        menu.settings.domElement.onclick = null
 
         stats.elapsedTime = stats.clock.elapsedTime
         stats.clock.stop()
@@ -123,8 +124,8 @@ let game = {
         
         pauseSpan.onfocus = game.resume
         document.body.classList.add("pause")
-        gui.pauseButton.hide()
-        gui.resumeButton.show()
+        menu.pauseButton.hide()
+        menu.resumeButton.show()
     },
 
     over: function() {
@@ -133,15 +134,15 @@ let game = {
         document.onkeydown = null
         window.onblur = null
         renderer.domElement.onfocus = null
-        gui.settings.domElement.onfocus = null
+        menu.settings.domElement.onfocus = null
         game.playing = false
         scene.music.pause()
         stats.clock.stop()
         messagesSpan.addNewChild("div", { className: "show-level-animation", innerHTML: `<h1>GAME<br/>OVER</h1>` })
 
-        gui.pauseButton.hide()
-        gui.startButton.name("Rejouer")
-        gui.startButton.show()
+        menu.pauseButton.hide()
+        menu.startButton.name("Rejouer")
+        menu.startButton.show()
     },
 }
 
@@ -278,7 +279,7 @@ renderer.domElement.tabIndex = 1
 let loadingManager = new THREE.LoadingManager(
     function() {
         loadingDiv.style.display = "none"
-        gui.startButton.show()
+        menu.startButton.show()
         renderer.setAnimationLoop(animate)
     },
     function (url, itemsLoaded, itemsTotal) {
@@ -306,8 +307,14 @@ scene.add(playfield)
 const nextQueue = new NextQueue()
 scene.add(nextQueue)
 
-const gui = new TetraGUI(game, settings, stats, scene, controls, playfield)
-gui.load()
+const menu = new Menu(game, settings, stats, scene, controls, playfield)
+menu.load()
+
+let fps
+if (window.location.search.includes("fps")) {
+    let fps = new FPS.default()
+    document.body.appendChild(fps.dom)
+}
 
 messagesSpan.onanimationend = function (event) {
     event.target.remove()
@@ -327,7 +334,7 @@ function animate() {
     renderer.render(scene, scene.camera)
     environment.camera.update(renderer, scene)
 
-    gui.update()
+    fps?.update()
 }
 
 window.addEventListener("resize", () => {
@@ -337,7 +344,7 @@ window.addEventListener("resize", () => {
 })
 
 window.onbeforeunload = function (event) {
-    gui.save()
+    menu.save()
     localStorage["teTraHighScore"] = stats.highScore
     return !game.playing
 }
