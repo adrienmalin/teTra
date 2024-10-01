@@ -157,7 +157,7 @@ class Mino extends THREE.Object3D {
             side: THREE.DoubleSide,
             transparent: true,
             opacity: 0.7,
-            roughness: 0.5,
+            roughness: 0.6,
             metalness: 1,
         }),
         Espace: new THREE.MeshStandardMaterial({
@@ -175,7 +175,7 @@ class Mino extends THREE.Object3D {
                 color: 0xd0d4c1,
                 map: texture,
                 bumpMap: texture,
-                bumpScale: 1.5,
+                bumpScale: 2,
                 roughness: 0.25,
                 metalness: 0.8,
                 transparent: true,
@@ -209,7 +209,7 @@ class Mino extends THREE.Object3D {
         super()
         this.color = color
         this.offset = offset
-        this.velocity = P(50 - 100 * Math.random(), 70 - 100 * Math.random(), 50 - 100 * Math.random())
+        this.velocity = P(50 - 100 * Math.random(), 60 - 100 * Math.random(), 50 - 100 * Math.random())
         this.rotationAngle = P(Math.random(), Math.random(), Math.random()).normalize()
         this.angularVelocity = 5 - 10 * Math.random()
         this.constructor.meshes.add(this)
