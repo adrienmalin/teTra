@@ -1,68 +1,70 @@
-body { background-color: black; }
-
 #loadingDiv {
   position: absolute;
+  top: 0;
+  left: 0;
   display: flex;
   flex-flow: column;
+  justify-content: center;
   box-sizing: border-box;
   font-family: "Open Sans", sans-serif;
   font-size: 1.4rem;
   color: lightsteelblue;
   text-align: center;
-  width: 100%;
-  height: 100%;
-  background: black;
+  width: 100vw;
+  height: 100vh;
+  padding: 30vh;
+  background-color: black;
   z-index: 1;
-  padding: 30vmin;
 }
 
 .scene {
   width: 200px;
   height: 200px;
-  margin: auto;
+  margin: 0 auto;
   perspective: 200px;
+  font-size: 40px;
 }
 
-.cube {
-  width: 40px;
-  height: 40px;
+.tetromino {
   position: relative;
+  top: 2em;
+  left: 2em;
+  width: 1em;
+  height: 1em;
   transform-style: preserve-3d;
-  transform: translateZ(20px);
-  left: 80px;
-  top: 80px;
-}
-
-.cube.is-spinning {
+  transform: translateZ(0.5em);
   animation: spinCube 5s infinite ease-in-out;
 }
 
 @keyframes spinCube {
-    0% { transform: translateZ(20px) rotateX(  0deg) rotateY(  0deg); }
-  100% { transform: translateZ(20px) rotateX(360deg) rotateY(360deg); }
+    0% { transform: translateZ(0.5em) rotateX(  0deg) rotateY(  0deg); }
+  100% { transform: translateZ(0.5em) rotateX(360deg) rotateY(360deg); }
 }
+
+.mino {
+  width: 1em;
+  height: 1em;
+  position: absolute;
+  transform-style: preserve-3d;
+}
+
+.first.mino  { top: -0.5em; left: -1em; }
+.second.mino { top: -0.5em; left:  0em; }
+.third.mino  { top: -0.5em; left:  1em; }
+.fourth.mino { top:  0.5em; left:  0em; }
 
 .face {
   position: absolute;
-  width: 40px;
-  height: 40px;
+  width: 1em;
+  height: 1em;
   padding: 0;
   background: hsla(240, 100%, 0%, 0.4);
   border: 1px solid hsla(240, 100%, 70%, 0.6);
 }
 
-.front  { transform: rotateY(  0deg) translateZ(20px); }
-.right  { transform: rotateY( 90deg) translateZ(20px); }
-.back   { transform: rotateY(180deg) translateZ(20px); }
-.left   { transform: rotateY(-90deg) translateZ(20px); }
-.top    { transform: rotateX( 90deg) translateZ(20px); }
-.bottom { transform: rotateX(-90deg) translateZ(20px); }
-
-.cube.is-backface-hidden .face {
-  backface-visibility: hidden;
-}
-
-.mino0 { left: -40px; top: -20px; }
-.mino1 { left:   0px; top: -20px; }
-.mino2 { left:  40px; top: -20px; }
-.mino3 { left:   0px; top:  20px; }
+.front.face  { transform: rotateY(  0deg) translateZ(0.5em); }
+.right.face  { transform: rotateY( 90deg) translateZ(0.5em); }
+.back.face   { transform: rotateY(180deg) translateZ(0.5em); }
+.left.face   { transform: rotateY(-90deg) translateZ(0.5em); }
+.top.face    { transform: rotateX( 90deg) translateZ(0.5em); }
+.bottom.face { transform: rotateX(-90deg) translateZ(0.5em); }

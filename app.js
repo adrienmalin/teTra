@@ -291,7 +291,7 @@ let loadingManager = new THREE.LoadingManager(
 )
 loadingManager.onStart = function (url, itemsLoaded, itemsTotal) {
     loadingPercent.innerText = "0%"
-    loadingDiv.style.display = "inherit"
+    loadingDiv.style.display = "flex"
 }
 
 const stats     = new Stats()
