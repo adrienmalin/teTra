@@ -48,10 +48,10 @@
   transform-style: preserve-3d;
 }
 
-.first.mino  { top: -0.5em; left: -1em; }
-.second.mino { top: -0.5em; left:  0em; }
-.third.mino  { top: -0.5em; left:  1em; }
-.fourth.mino { top:  0.5em; left:  0em; }
+.T.tetromino .first.mino  { top: -0.5em; left: -1em; }
+.T.tetromino .second.mino { top: -0.5em; left:  0em; }
+.T.tetromino .third.mino  { top: -0.5em; left:  1em; }
+.T.tetromino .fourth.mino { top:  0.5em; left:  0em; }
 
 .face {
   position: absolute;
