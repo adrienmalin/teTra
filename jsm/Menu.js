@@ -4,7 +4,7 @@ import { Mino, environment } from './Tetrominoes.js'
 
 
 export class Menu extends GUI {
-    constructor(game, settings, stats, scene, controls, playfield) {
+    constructor(game, settings, stats, scene, minoes, playfield) {
         super({title: "ᵀᴱTᴿᴬ"})
         
         this.startButton  = this.add(game, "start").name("Jouer").hide()
@@ -28,7 +28,7 @@ export class Menu extends GUI {
 
         this.settings.add(settings, "theme", ["Plasma", "Espace", "Rétro"]).name("Thème").onChange(theme => {
             scene.theme = theme
-            Mino.meshes.theme = theme
+            minoes.theme = theme
             if (theme == "Rétro") {
                 playfield.edge.visible = false
                 playfield.retroEdge.visible = true
@@ -77,10 +77,10 @@ export class Menu extends GUI {
         function changeMaterial() {
             material?.destroy()
             material = dev.addFolder("minoes material")
-            material.add(Mino.meshes.material, "constructor", ["MeshBasicMaterial", "MeshStandardMaterial", "MeshPhysicalMaterial"]).listen().onChange(type => {
+            material.add(minoes.material, "constructor", ["MeshBasicMaterial", "MeshStandardMaterial", "MeshPhysicalMaterial"]).listen().onChange(type => {
                 switch(type) {
                     case "MeshBasicMaterial":
-                        Mino.meshes.material = new THREE.MeshBasicMaterial({
+                        minoes.material = new THREE.MeshBasicMaterial({
                             envMap: environment,
                             side: THREE.DoubleSide,
                             transparent: true,
@@ -89,7 +89,7 @@ export class Menu extends GUI {
                         })
                     break
                     case "MeshStandardMaterial":
-                        Mino.meshes.material = new THREE.MeshStandardMaterial({
+                        minoes.material = new THREE.MeshStandardMaterial({
                             envMap: environment,
                             side: THREE.DoubleSide,
                             transparent: true,
@@ -99,7 +99,7 @@ export class Menu extends GUI {
                         })
                     break
                     case "MeshPhysicalMaterial":
-                        Mino.meshes.material = new THREE.MeshPhysicalMaterial({
+                        minoes.material = new THREE.MeshPhysicalMaterial({
                             envMap: environment,
                             side: THREE.DoubleSide,
                             transparent: true,
@@ -111,11 +111,11 @@ export class Menu extends GUI {
                         })
                     break
                 }
-                Mino.meshes.update = Mino.meshes.updateColor
+                minoes.update = minoes.updateColor
                 changeMaterial()
             })
 
-            let minoMaterial = Mino.meshes.material instanceof Array ? Mino.meshes.material[0] : Mino.meshes.material
+            let minoMaterial = minoes.material instanceof Array ? minoes.material[0] : minoes.material
             if ("opacity"             in minoMaterial) material.add(minoMaterial, "opacity"            ).min(0).max(1)
             if ("reflectivity"        in minoMaterial) material.add(minoMaterial, "reflectivity"       ).min(0).max(1)
             if ("roughness"           in minoMaterial) material.add(minoMaterial, "roughness"          ).min(0).max(1)
@@ -152,7 +152,7 @@ export class Menu extends GUI {
             vortex.add(scene.vortex.darkCylinder.material, "opacity").name("dark").min(0).max(1)
             vortex.add(scene.vortex.colorFullCylinder.material, "opacity").name("colorFull").min(0).max(1)
 
-            changeMaterial(Mino.meshes.material.constructor.name)
+            changeMaterial(minoes.material.constructor.name)
             material.close()
         }
     }

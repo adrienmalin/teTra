@@ -69,107 +69,7 @@ const sideMaterial = new THREE.MeshStandardMaterial({
 })
 
 
-class InstancedMino extends THREE.InstancedMesh {
-    constructor(geometry, material, count) {
-        super(geometry, material, count)
-        this.instances = new Set()
-        this.count = 0
-        this.offsets = new Uint8Array(2*count)
-        this.update = this.updateColor
-    }
-
-    add(instance) {
-        this.instances.add(instance)
-    }
-
-    delete(instance) {
-        this.instances.delete(instance)
-    }
-
-    clear() {
-        this.instances.clear()
-    }
-
-    set theme(theme) {
-        if (theme == "Rétro") {
-            this.resetColor()
-            this.update = this.updateOffset
-            if (Mino.materials["Rétro"]) {
-                this.material = Mino.materials["Rétro"]
-            } else {
-                Mino.materials["Rétro"] = []
-                const loadingManager = new THREE.LoadingManager(() => InstancedMino.material = Mino.materials["Rétro"])
-                new THREE.TextureLoader(loadingManager).load("images/sprites.png", (texture) => {
-                    Mino.materials.Rétro[0] = Mino.materials.Rétro[2] = new TileMaterial({
-                        color: COLORS.RETRO,
-                        map: texture,
-                        bumpMap: texture,
-                        bumpScale: 1.5,
-                        roughness: 0.25,
-                        metalness: 0.9,
-                        transparent: true,
-                    }, 8, 8)
-                })
-                new THREE.TextureLoader(loadingManager).load("images/edges.png", (texture) => {
-                    Mino.materials.Rétro[1] = Mino.materials.Rétro[3] = Mino.materials.Rétro[4] = Mino.materials.Rétro[5] = new TileMaterial({
-                        color: COLORS.RETRO,
-                        map: texture,
-                        bumpMap: texture,
-                        bumpScale: 1.5,
-                        roughness: 0.25,
-                        metalness: 0.9,
-                        transparent: true,
-                    }, 1, 1)
-                })
-            }
-        } else {
-            this.update = this.updateColor
-            this.material = Mino.materials[theme]
-        }
-    }
-
-    setOffsetAt(index, offset) {
-        this.offsets[2*index] = offset.x
-        this.offsets[2*index + 1] = offset.y
-    }
-
-    resetColor() {
-        this.instanceColor = null
-    }
-
-    updateColor() {
-        this.count = 0
-        this.instances.forEach(mino => {
-            if (mino.parent?.visible) {
-                this.setMatrixAt(this.count, mino.matrixWorld)
-                this.setColorAt(this.count, mino.color)
-                this.count++
-            }
-        })
-        if (this.count) {
-            this.instanceMatrix.needsUpdate = true
-            this.instanceColor.needsUpdate = true
-        }
-    }
-
-    updateOffset() {
-        this.count = 0
-        this.instances.forEach(mino => {
-            if (mino.parent?.visible) {
-                this.setMatrixAt(this.count, mino.matrixWorld)
-                this.setOffsetAt(this.count, mino.offset)
-                this.count++
-            }
-        })
-        if (this.count) {
-            this.instanceMatrix.needsUpdate = true
-            this.geometry.setAttribute('offset', new THREE.InstancedBufferAttribute(this.offsets, 2))
-        }
-    }
-}
-
-
-class Mino extends THREE.Object3D {
+export class InstancedMino extends THREE.InstancedMesh {
     static materials = {
         Plasma: new THREE.MeshStandardMaterial({
             envMap: environment,
@@ -188,8 +88,8 @@ class Mino extends THREE.Object3D {
             metalness: 0.99,
         })
     }
-    static meshes
-    static {
+
+    constructor() {
         let minoFaceShape = new THREE.Shape()
         minoFaceShape.moveTo(.1, .1)
         minoFaceShape.lineTo(.1, .9)
@@ -206,8 +106,92 @@ class Mino extends THREE.Object3D {
             bevelSegments: 1
         }
         const geometry = new THREE.ExtrudeGeometry(minoFaceShape, minoExtrudeSettings)
-        this.meshes = new InstancedMino(geometry, undefined, 2*ROWS*COLUMNS)
+        super(geometry, undefined, 2*ROWS*COLUMNS)
+        this.offsets = new Uint8Array(2*this.count)
+        this.count = 0
     }
+
+    set theme(theme) {
+        if (theme == "Rétro") {
+            this.resetColor()
+            this.update = this.updateOffset
+            if (this.constructor.materials["Rétro"]) {
+                this.material = this.constructor.materials["Rétro"]
+            } else {
+                this.constructor.materials["Rétro"] = []
+                const loadingManager = new THREE.LoadingManager(() => this.material = this.constructor.materials["Rétro"])
+                new THREE.TextureLoader(loadingManager).load("images/sprites.png", (texture) => {
+                    this.constructor.materials.Rétro[0] = this.constructor.materials.Rétro[2] = new TileMaterial({
+                        color: COLORS.RETRO,
+                        map: texture,
+                        bumpMap: texture,
+                        bumpScale: 1.4,
+                        roughness: 0.25,
+                        metalness: 0.9,
+                        transparent: true,
+                    }, 8, 8)
+                })
+                new THREE.TextureLoader(loadingManager).load("images/edges.png", (texture) => {
+                    this.constructor.materials.Rétro[1] = this.constructor.materials.Rétro[3] = this.constructor.materials.Rétro[4] = this.constructor.materials.Rétro[5] = new TileMaterial({
+                        color: COLORS.RETRO,
+                        map: texture,
+                        bumpMap: texture,
+                        bumpScale: 1.4,
+                        roughness: 0.25,
+                        metalness: 0.9,
+                        transparent: true,
+                    }, 1, 1)
+                })
+            }
+        } else {
+            this.update = this.updateColor
+            this.material = this.constructor.materials[theme]
+        }
+    }
+
+    setOffsetAt(index, offset) {
+        this.offsets[2*index] = offset.x
+        this.offsets[2*index + 1] = offset.y
+    }
+
+    resetColor() {
+        this.instanceColor = null
+    }
+
+    updateColor() {
+        this.count = 0
+        Mino.instances.forEach(mino => {
+            if (mino.parent?.visible) {
+                this.setMatrixAt(this.count, mino.matrixWorld)
+                this.setColorAt(this.count, mino.color)
+                this.count++
+            }
+        })
+        if (this.count) {
+            this.instanceMatrix.needsUpdate = true
+            this.instanceColor.needsUpdate = true
+        }
+    }
+
+    updateOffset() {
+        this.count = 0
+        Mino.instances.forEach(mino => {
+            if (mino.parent?.visible) {
+                this.setMatrixAt(this.count, mino.matrixWorld)
+                this.setOffsetAt(this.count, mino.offset)
+                this.count++
+            }
+        })
+        if (this.count) {
+            this.instanceMatrix.needsUpdate = true
+            this.geometry.setAttribute('offset', new THREE.InstancedBufferAttribute(this.offsets, 2))
+        }
+    }
+}
+
+
+class Mino extends THREE.Object3D {
+    static instances = new Set()
 
     constructor(color, offset) {
         super()
@@ -216,7 +200,7 @@ class Mino extends THREE.Object3D {
         this.velocity = P(50 - 100 * Math.random(), 60 - 100 * Math.random(), 50 - 100 * Math.random())
         this.rotationAngle = P(Math.random(), Math.random(), Math.random()).normalize()
         this.angularVelocity = 5 - 10 * Math.random()
-        this.constructor.meshes.add(this)
+        this.constructor.instances.add(this)
     }
 
     explode(delta) {
@@ -232,7 +216,7 @@ class Mino extends THREE.Object3D {
     }
 
     dispose() {
-        this.constructor.meshes.delete(this)
+        this.constructor.instances.delete(this)
     }
 }
 

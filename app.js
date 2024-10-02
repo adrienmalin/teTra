@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 import { scheduler } from './jsm/scheduler.js'
-import { TRANSLATION, ROTATION, environment, Mino, Playfield, HoldQueue, NextQueue } from './jsm/Tetrominoes.js'
+import { TRANSLATION, ROTATION, environment, InstancedMino, Mino, Playfield, HoldQueue, NextQueue } from './jsm/Tetrominoes.js'
 import Settings from './jsm/Settings.js'
 import { Stats } from './jsm/Stats.js'
 import { Menu } from './jsm/Menu.js'
@@ -30,7 +30,7 @@ let game = {
         menu.stats.show()
         menu.settings.close()
 
-        Mino.meshes.clear()
+        Mino.instances.clear()
 
         nextQueue.init()
         holdQueue.piece = undefined
@@ -299,7 +299,8 @@ const settings  = new Settings()
 const scene = new TetraScene(settings, loadingManager)
 const controls = new TetraControls(scene.camera, renderer.domElement)
 
-scene.add(Mino.meshes)
+const minoes = new InstancedMino()
+scene.add(minoes)
 const holdQueue = new HoldQueue()
 scene.add(holdQueue)
 const playfield = new Playfield(loadingManager)
@@ -307,7 +308,7 @@ scene.add(playfield)
 const nextQueue = new NextQueue()
 scene.add(nextQueue)
 
-const menu = new Menu(game, settings, stats, scene, controls, playfield)
+const menu = new Menu(game, settings, stats, scene, minoes, playfield)
 menu.load()
 
 let fps
@@ -328,7 +329,7 @@ function animate() {
     scene.updateMatrixWorld()
     scene.update(delta)
     playfield.update(delta)
-    Mino.meshes.update()
+    minoes.update()
     controls.update()
 
     renderer.render(scene, scene.camera)
