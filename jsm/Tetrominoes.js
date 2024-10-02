@@ -70,25 +70,6 @@ const sideMaterial = new THREE.MeshStandardMaterial({
 
 
 export class InstancedMino extends THREE.InstancedMesh {
-    static materials = {
-        Plasma: new THREE.MeshStandardMaterial({
-            envMap: environment,
-            side: THREE.DoubleSide,
-            transparent: true,
-            opacity: 0.7,
-            roughness: 0.6,
-            metalness: 1,
-        }),
-        Espace: new THREE.MeshStandardMaterial({
-            envMap: environment,
-            side: THREE.DoubleSide,
-            transparent: true,
-            opacity:   0.8,
-            roughness: 0.1,
-            metalness: 0.99,
-        })
-    }
-
     constructor() {
         let minoFaceShape = new THREE.Shape()
         minoFaceShape.moveTo(.1, .1)
@@ -115,13 +96,13 @@ export class InstancedMino extends THREE.InstancedMesh {
         if (theme == "Rétro") {
             this.resetColor()
             this.update = this.updateOffset
-            if (this.constructor.materials["Rétro"]) {
-                this.material = this.constructor.materials["Rétro"]
+            if (this.materials["Rétro"]) {
+                this.material = this.materials["Rétro"]
             } else {
-                this.constructor.materials["Rétro"] = []
-                const loadingManager = new THREE.LoadingManager(() => this.material = this.constructor.materials["Rétro"])
+                this.materials["Rétro"] = []
+                const loadingManager = new THREE.LoadingManager(() => this.material = this.materials["Rétro"])
                 new THREE.TextureLoader(loadingManager).load("images/sprites.png", (texture) => {
-                    this.constructor.materials.Rétro[0] = this.constructor.materials.Rétro[2] = new TileMaterial({
+                    this.materials.Rétro[0] = this.materials.Rétro[2] = new TileMaterial({
                         color: COLORS.RETRO,
                         map: texture,
                         bumpMap: texture,
@@ -132,7 +113,7 @@ export class InstancedMino extends THREE.InstancedMesh {
                     }, 8, 8)
                 })
                 new THREE.TextureLoader(loadingManager).load("images/edges.png", (texture) => {
-                    this.constructor.materials.Rétro[1] = this.constructor.materials.Rétro[3] = this.constructor.materials.Rétro[4] = this.constructor.materials.Rétro[5] = new TileMaterial({
+                    this.materials.Rétro[1] = this.materials.Rétro[3] = this.materials.Rétro[4] = this.materials.Rétro[5] = new TileMaterial({
                         color: COLORS.RETRO,
                         map: texture,
                         bumpMap: texture,
@@ -145,7 +126,7 @@ export class InstancedMino extends THREE.InstancedMesh {
             }
         } else {
             this.update = this.updateColor
-            this.material = this.constructor.materials[theme]
+            this.material = this.materials[theme]
         }
     }
 
@@ -187,6 +168,24 @@ export class InstancedMino extends THREE.InstancedMesh {
             this.geometry.setAttribute('offset', new THREE.InstancedBufferAttribute(this.offsets, 2))
         }
     }
+}
+InstancedMino.prototype.materials = {
+    Plasma: new THREE.MeshStandardMaterial({
+        envMap: environment,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.7,
+        roughness: 0.6,
+        metalness: 1,
+    }),
+    Espace: new THREE.MeshStandardMaterial({
+        envMap: environment,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity:   0.8,
+        roughness: 0.1,
+        metalness: 0.99,
+    })
 }
 
 
