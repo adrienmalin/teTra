@@ -91,18 +91,41 @@ class InstancedMino extends THREE.InstancedMesh {
     }
 
     set theme(theme) {
-        this._theme = theme
-        this.material = Mino.materials[theme]
         if (theme == "Rétro") {
             this.resetColor()
             this.update = this.updateOffset
+            if (Mino.materials["Rétro"]) {
+                this.material = Mino.materials["Rétro"]
+            } else {
+                Mino.materials["Rétro"] = []
+                const loadingManager = new THREE.LoadingManager(() => InstancedMino.material = Mino.materials["Rétro"])
+                new THREE.TextureLoader(loadingManager).load("images/sprites.png", (texture) => {
+                    Mino.materials.Rétro[0] = Mino.materials.Rétro[2] = new TileMaterial({
+                        color: COLORS.RETRO,
+                        map: texture,
+                        bumpMap: texture,
+                        bumpScale: 1.5,
+                        roughness: 0.25,
+                        metalness: 0.9,
+                        transparent: true,
+                    }, 8, 8)
+                })
+                new THREE.TextureLoader(loadingManager).load("images/edges.png", (texture) => {
+                    Mino.materials.Rétro[1] = Mino.materials.Rétro[3] = Mino.materials.Rétro[4] = Mino.materials.Rétro[5] = new TileMaterial({
+                        color: COLORS.RETRO,
+                        map: texture,
+                        bumpMap: texture,
+                        bumpScale: 1.5,
+                        roughness: 0.25,
+                        metalness: 0.9,
+                        transparent: true,
+                    }, 1, 1)
+                })
+            }
         } else {
             this.update = this.updateColor
+            this.material = Mino.materials[theme]
         }
-    }
-
-    get theme() {
-        return this._theme
     }
 
     setOffsetAt(index, offset) {
@@ -163,31 +186,6 @@ class Mino extends THREE.Object3D {
             opacity:   0.8,
             roughness: 0.1,
             metalness: 0.99,
-        }),
-        Rétro: [sideMaterial, sideMaterial, sideMaterial, sideMaterial, sideMaterial, sideMaterial]
-    }
-    static {
-        new THREE.TextureLoader().load("images/sprites.png", (texture) => {
-            this.materials.Rétro[0] = this.materials.Rétro[2] = new TileMaterial({
-                color: COLORS.RETRO,
-                map: texture,
-                bumpMap: texture,
-                bumpScale: 1.5,
-                roughness: 0.25,
-                metalness: 0.9,
-                transparent: true,
-            }, 8, 8)
-        })
-        new THREE.TextureLoader().load("images/edges.png", (texture) => {
-            this.materials.Rétro[1] = this.materials.Rétro[3] =this.materials.Rétro[4] = this.materials.Rétro[4] = new TileMaterial({
-                color: COLORS.RETRO,
-                map: texture,
-                bumpMap: texture,
-                bumpScale: 1.5,
-                roughness: 0.25,
-                metalness: 0.9,
-                transparent: true,
-            }, 1, 1)
         })
     }
     static meshes
@@ -208,7 +206,7 @@ class Mino extends THREE.Object3D {
             bevelSegments: 1
         }
         const geometry = new THREE.ExtrudeGeometry(minoFaceShape, minoExtrudeSettings)
-        this.meshes = new InstancedMino(geometry, this.materials.Plasma, 2*ROWS*COLUMNS)
+        this.meshes = new InstancedMino(geometry, undefined, 2*ROWS*COLUMNS)
     }
 
     constructor(color, offset) {

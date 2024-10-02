@@ -114,7 +114,6 @@ export class Menu extends GUI {
                 Mino.meshes.update = Mino.meshes.updateColor
                 changeMaterial()
             })
-            console.log("lnlnl")
 
             let minoMaterial = Mino.meshes.material instanceof Array ? Mino.meshes.material[0] : Mino.meshes.material
             if ("opacity"             in minoMaterial) material.add(minoMaterial, "opacity"            ).min(0).max(1)
