@@ -4,7 +4,7 @@ import { TRANSLATION, ROTATION, environment, InstancedMino, Mino, Playfield, Hol
 import Settings from './jsm/Settings.js'
 import { Stats } from './jsm/Stats.js'
 import { Menu } from './jsm/Menu.js'
-import TetraControls from './jsm/TetraControls.js'
+import CameraControls from './jsm/CameraControls.js'
 import { TetraScene } from './jsm/TetraScene.js'
 import * as FPS from 'three/addons/libs/stats.module.js'
 
@@ -297,7 +297,7 @@ loadingManager.onStart = function (url, itemsLoaded, itemsTotal) {
 const stats     = new Stats()
 const settings  = new Settings()
 const scene = new TetraScene(settings, loadingManager)
-const controls = new TetraControls(scene.camera, renderer.domElement)
+const controls = new CameraControls(scene.camera, renderer.domElement)
 
 const minoes = new InstancedMino()
 scene.add(minoes)
