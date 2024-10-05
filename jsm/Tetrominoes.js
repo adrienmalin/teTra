@@ -89,7 +89,6 @@ export class InstancedMino extends THREE.InstancedMesh {
         const geometry = new THREE.ExtrudeGeometry(minoFaceShape, minoExtrudeSettings)
         super(geometry, undefined, 2*ROWS*COLUMNS)
         this.offsets = new Uint8Array(2*this.count)
-        this.count = 0
     }
 
     set theme(theme) {
@@ -106,7 +105,7 @@ export class InstancedMino extends THREE.InstancedMesh {
                         color: COLORS.RETRO,
                         map: texture,
                         bumpMap: texture,
-                        bumpScale: 1.4,
+                        bumpScale: 1.5,
                         roughness: 0.25,
                         metalness: 0.9,
                         transparent: true,
@@ -117,7 +116,7 @@ export class InstancedMino extends THREE.InstancedMesh {
                         color: COLORS.RETRO,
                         map: texture,
                         bumpMap: texture,
-                        bumpScale: 1.4,
+                        bumpScale: 1.5,
                         roughness: 0.25,
                         metalness: 0.9,
                         transparent: true,
