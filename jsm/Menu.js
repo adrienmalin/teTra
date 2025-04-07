@@ -43,21 +43,21 @@ export class Menu extends GUI {
 
         this.settings.key = this.settings.addFolder("Commandes").open()
         let moveLeftKeyController = this.settings.key.add(settings.key, "moveLeft").name('Gauche')
-        moveLeftKeyController.domElement.onclick = this.changeKey.bind(moveLeftKeyController)
+        moveLeftKeyController.domElement.onclick = this.changeKey(moveLeftKeyController)
         let moveRightKeyController = this.settings.key.add(settings.key, "moveRight").name('Droite')
-        moveRightKeyController.domElement.onclick = this.changeKey.bind(moveRightKeyController)
+        moveRightKeyController.domElement.onclick = this.changeKey(moveRightKeyController)
         let rotateCWKeyController = this.settings.key.add(settings.key, "rotateCW").name('Rotation horaire')
-        rotateCWKeyController.domElement.onclick = this.changeKey.bind(rotateCWKeyController)
+        rotateCWKeyController.domElement.onclick = this.changeKey(rotateCWKeyController)
         let rotateCCWKeyController = this.settings.key.add(settings.key, "rotateCCW").name('anti-horaire')
-        rotateCCWKeyController.domElement.onclick = this.changeKey.bind(rotateCCWKeyController)
+        rotateCCWKeyController.domElement.onclick = this.changeKey(rotateCCWKeyController)
         let softDropKeyController = this.settings.key.add(settings.key, "softDrop").name('Chute lente')
-        softDropKeyController.domElement.onclick = this.changeKey.bind(softDropKeyController)
+        softDropKeyController.domElement.onclick = this.changeKey(softDropKeyController)
         let hardDropKeyController = this.settings.key.add(settings.key, "hardDrop").name('Chute rapide')
-        hardDropKeyController.domElement.onclick = this.changeKey.bind(hardDropKeyController)
+        hardDropKeyController.domElement.onclick = this.changeKey(hardDropKeyController)
         let holdKeyController = this.settings.key.add(settings.key, "hold").name('Garder')
-        holdKeyController.domElement.onclick = this.changeKey.bind(holdKeyController)
+        holdKeyController.domElement.onclick = this.changeKey(holdKeyController)
         let pauseKeyController = this.settings.key.add(settings.key, "pause").name('Pause')
-        pauseKeyController.domElement.onclick = this.changeKey.bind(pauseKeyController)
+        pauseKeyController.domElement.onclick = this.changeKey(pauseKeyController)
 
         this.settings.delay = this.settings.addFolder("Répétition automatique").open()
         this.settings.delay.add(settings,"arrDelay").name("ARR (ms)").min(2).max(200).step(1);
@@ -167,8 +167,8 @@ export class Menu extends GUI {
         localStorage["teTraSettings"] = JSON.stringify(this.settings.save())
     }
 
-    changeKey() {
-        let controller = this.settings
+    changeKey(settings) {
+        let controller = settings
         let input = controller.domElement.getElementsByTagName("input")[0]
         input.select()
         input.onkeydown = function (event) {
