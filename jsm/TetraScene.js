@@ -12,10 +12,10 @@ export class TetraScene extends THREE.Scene {
         this.vortex = new Vortex(loadingManager)
         this.add(this.vortex)
         
-        this.ambientLight = new THREE.AmbientLight(0xffffff, 1)
+        this.ambientLight = new THREE.AmbientLight(0xffffff, 0.6)
         this.add(this.ambientLight)
         
-        this.directionalLight = new THREE.DirectionalLight(0xffffff, 5)
+        this.directionalLight = new THREE.DirectionalLight(0xffffff, 11)
         this.add(this.directionalLight)
 
         this.theme = settings.theme
@@ -48,7 +48,7 @@ export class TetraScene extends THREE.Scene {
         switch (theme) {
             case "Plasma":
                 this.ambientLight.intensity     = 0.6
-                this.directionalLight.intensity = 5
+                this.directionalLight.intensity = 11
                 this.directionalLight.position.set(5, -20, 20)
                 break
             case "Espace":

@@ -172,6 +172,7 @@ export class Menu extends GUI {
         let input = controller.domElement.getElementsByTagName("input")[0]
         input.select()
         input.onkeydown = function (event) {
+            event.preventDefault()
             controller.setValue(event.key)
             input.blur()
         }
