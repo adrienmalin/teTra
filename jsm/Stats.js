@@ -180,7 +180,7 @@ class Stats {
             this.b2b = -1
         }
 
-        if (speechSynthesisAvailable) {
+        if (speechSynthesisAvailable && this.settings.sfxVolume) {
             if (tSpin) speak(tSpin, this.settings.sfxVolume);
             if (nbClearedLines == 4) speak(`Tétra`, this.settings.sfxVolume);
             else if (nbClearedLines) speak(CLEARED_LINES_NAMES[nbClearedLines], this.settings.sfxVolume);
