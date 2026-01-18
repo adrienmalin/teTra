@@ -294,8 +294,8 @@ loadingManager.onStart = function (url, itemsLoaded, itemsTotal) {
     loadingDiv.style.display = "flex"
 }
 
-const stats     = new Stats()
 const settings  = new Settings()
+const stats     = new Stats(settings)
 const scene = new TetraScene(settings, loadingManager)
 const controls = new CameraControls(scene.camera, renderer.domElement)
 
