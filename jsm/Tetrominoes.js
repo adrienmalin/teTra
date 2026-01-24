@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js'
 import { scheduler } from './scheduler.js'
 import { TileMaterial } from './TileMaterial.js'
 
@@ -71,6 +72,10 @@ const sideMaterial = new THREE.MeshStandardMaterial({
 
 export class InstancedMino extends THREE.InstancedMesh {
     constructor() {
+        const roundedBoxGeometry = new RoundedBoxGeometry(1.03, 1.03, 1.03, 4, 0.15)
+        roundedBoxGeometry.translate(0.5, 0.5, 0)
+        super(roundedBoxGeometry, undefined, 2*ROWS*COLUMNS)
+        this.roundedBoxGeometry = roundedBoxGeometry
         let minoFaceShape = new THREE.Shape()
         minoFaceShape.moveTo(.1, .1)
         minoFaceShape.lineTo(.1, .9)
@@ -86,8 +91,7 @@ export class InstancedMino extends THREE.InstancedMesh {
             bevelOffset: 0,
             bevelSegments: 1
         }
-        const geometry = new THREE.ExtrudeGeometry(minoFaceShape, minoExtrudeSettings)
-        super(geometry, undefined, 2*ROWS*COLUMNS)
+        this.extrudeGeometry = new THREE.ExtrudeGeometry(minoFaceShape, minoExtrudeSettings)
         this.offsets = new Uint8Array(2*this.count)
     }
 
@@ -95,6 +99,7 @@ export class InstancedMino extends THREE.InstancedMesh {
         if (theme == "Rétro") {
             this.resetColor()
             this.update = this.updateOffset
+            this.geometry = this.extrudeGeometry
             if (this.materials["Rétro"]) {
                 this.material = this.materials["Rétro"]
             } else {
@@ -124,6 +129,7 @@ export class InstancedMino extends THREE.InstancedMesh {
                 })
             }
         } else {
+            this.geometry = this.roundedBoxGeometry
             this.update = this.updateColor
             this.material = this.materials[theme]
         }
@@ -173,8 +179,8 @@ InstancedMino.prototype.materials = {
         envMap: environment,
         side: THREE.DoubleSide,
         transparent: true,
-        opacity: 0.7,
-        roughness: 0.6,
+        opacity: 0.6,
+        roughness: 0.3,
         metalness: 1,
     }),
     Espace: new THREE.MeshStandardMaterial({
