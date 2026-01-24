@@ -180,8 +180,8 @@ InstancedMino.prototype.materials = {
         side: THREE.DoubleSide,
         transparent: true,
         opacity: 0.6,
-        roughness: 0.3,
-        metalness: 1,
+        roughness: 0.25,
+        metalness: 0.8,
     }),
     Espace: new THREE.MeshStandardMaterial({
         envMap: environment,
@@ -192,6 +192,23 @@ InstancedMino.prototype.materials = {
         metalness: 0.99,
     })
 }
+InstancedMino.prototype.materials['Plasma'].onBeforeCompile =
+InstancedMino.prototype.materials['Espace'].onBeforeCompile = shader => {
+    shader.vertexShader = `
+        varying vec3 vPos;
+        ${shader.vertexShader}
+    `.replace(
+        '#include <begin_vertex>',
+        `
+        #include <begin_vertex>
+        vPos = position;
+
+        // Bruit basé sur la position du sommet pour irrégularité
+        float n = sin(position.x*3.1 + position.y*5.2 + position.z*7.3) * 0.03;
+        transformed += normal * n;
+        `
+    );
+};
 
 
 class Mino extends THREE.Object3D {
@@ -452,9 +469,9 @@ class Playfield extends THREE.Group {
             color: COLORS.EDGE,
             envMap: environment,
             transparent: true,
-            opacity: 0.3,
-            roughness: 0.1,
-            metalness: 0.67,
+            opacity: 0.2,
+            roughness: 0.5,
+            metalness: 0.9,
         })
         const edgeShape = new THREE.Shape()
             .moveTo(-.3, SKYLINE)
@@ -495,7 +512,7 @@ class Playfield extends THREE.Group {
             bumpMap: retroEdgeTexture,
             bumpScale: 1.5,
             roughness: 0.25,
-            metalness: 0.9,
+            metalness: 0.8,
         })
         this.retroEdge = new THREE.Mesh(
             new THREE.ExtrudeGeometry(retroEdgeShape, {
