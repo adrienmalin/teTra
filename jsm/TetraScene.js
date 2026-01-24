@@ -52,8 +52,8 @@ export class TetraScene extends THREE.Scene {
                 this.directionalLight.position.set(5, -20, 20)
                 break
             case "Espace":
-                this.ambientLight.intensity     = 20
-                this.directionalLight.intensity = 10
+                this.ambientLight.intensity     = 7
+                this.directionalLight.intensity = 5
                 this.directionalLight.position.set(5, -20, 20)
             break
             case "Rétro":

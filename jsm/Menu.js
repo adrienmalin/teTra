@@ -128,6 +128,8 @@ export class Menu extends GUI {
             if ("specularIntensity"   in minoMaterial) material.add(minoMaterial, "specularIntensity"  ).min(0).max(1)
             if ("thickness"           in minoMaterial) material.add(minoMaterial, "thickness"          ).min(0).max(5)
             if ("transmission"        in minoMaterial) material.add(minoMaterial, "transmission"       ).min(0).max(1)
+            if ("clearcoat"           in minoMaterial) material.add(minoMaterial, "clearcoat"          ).min(0).max(1)
+            if ("clearcoatRoughness"  in minoMaterial) material.add(minoMaterial, "clearcoatRoughness" ).min(0).max(1)
         }
 
         let dev
@@ -149,8 +151,8 @@ export class Menu extends GUI {
             directionalLightPosition.add(scene.directionalLight.position, "z").listen()
         
             let vortex = dev.addFolder("vortex opacity").close()
-            vortex.add(scene.vortex.darkCylinder.material, "opacity").name("dark").min(0).max(1)
-            vortex.add(scene.vortex.colorFullCylinder.material, "opacity").name("colorFull").min(0).max(1)
+            vortex.add(scene.vortex.darkCylinder.material, "opacity").name("dark").min(0).max(1).listen()
+            vortex.add(scene.vortex.colorFullCylinder.material, "opacity").name("colorFull").min(0).max(1).listen()
 
             changeMaterial(minoes.material.constructor.name)
             material.close()

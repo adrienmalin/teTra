@@ -179,21 +179,20 @@ InstancedMino.prototype.materials = {
         envMap: environment,
         side: THREE.DoubleSide,
         transparent: true,
-        opacity: 0.6,
+        opacity: 0.5,
         roughness: 0.25,
-        metalness: 0.85,
+        metalness: 0.9,
     }),
     Espace: new THREE.MeshStandardMaterial({
         envMap: environment,
         side: THREE.DoubleSide,
         transparent: true,
         opacity:   0.8,
-        roughness: 0.1,
+        roughness: 0,
         metalness: 0.99,
     })
 }
-InstancedMino.prototype.materials['Plasma'].onBeforeCompile =
-InstancedMino.prototype.materials['Espace'].onBeforeCompile = shader => {
+InstancedMino.prototype.materials['Plasma'].onBeforeCompile = shader => {
     shader.vertexShader = `
         varying vec3 vPos;
         ${shader.vertexShader}
