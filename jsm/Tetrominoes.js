@@ -181,7 +181,7 @@ InstancedMino.prototype.materials = {
         transparent: true,
         opacity: 0.6,
         roughness: 0.25,
-        metalness: 0.8,
+        metalness: 0.85,
     }),
     Espace: new THREE.MeshStandardMaterial({
         envMap: environment,
@@ -218,7 +218,7 @@ class Mino extends THREE.Object3D {
         super()
         this.color = color
         this.offset = offset
-        this.velocity = P(50 - 100 * Math.random(), 60 - 100 * Math.random(), 50 - 100 * Math.random())
+        this.velocity = P(33 - 66 * Math.random(), 43 - 66 * Math.random(), 33 - 66 * Math.random())
         this.rotationAngle = P(Math.random(), Math.random(), Math.random()).normalize()
         this.angularVelocity = 5 - 10 * Math.random()
         this.constructor.instances.add(this)
