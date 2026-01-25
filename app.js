@@ -1,10 +1,9 @@
 import * as THREE from 'three'
 import { scheduler } from './jsm/scheduler.js'
-import { TRANSLATION, ROTATION, environment, InstancedMino, Mino, Playfield, HoldQueue, NextQueue } from './jsm/Tetrominoes.js'
+import { TRANSLATION, ROTATION, environment, Mino, HoldQueue, NextQueue } from './jsm/Tetrominoes.js'
 import Settings from './jsm/Settings.js'
 import { Stats } from './jsm/Stats.js'
 import { Menu } from './jsm/Menu.js'
-import CameraControls from './jsm/CameraControls.js'
 import { TetraScene } from './jsm/TetraScene.js'
 import * as FPS from 'three/addons/libs/stats.module.js'
 
@@ -35,7 +34,7 @@ let game = {
         nextQueue.init()
         holdQueue.piece = undefined
         holdQueue.clear()
-        playfield.init()
+        scene.playfield.init()
 
         scene.music.currentTime = 0
 
@@ -61,7 +60,7 @@ let game = {
         
         if (settings.musicVolume) scene.music.play()
 
-        if (playfield.piece) {
+        if (scene.playfield.piece) {
             scheduler.resetInterval(game.fall, stats.fallPeriod)
         } else {
             this.generate()
@@ -70,10 +69,10 @@ let game = {
 
     generate: function(nextPiece=nextQueue.shift()) {
         nextPiece.lockDelay = stats.lockDelay
-        playfield.piece = nextPiece
-        playfield.piece.onLockDown = game.lockDown
+        scene.playfield.piece = nextPiece
+        scene.playfield.piece.onLockDown = game.lockDown
     
-        if (playfield.piece.canMove(TRANSLATION.NONE)) {
+        if (scene.playfield.piece.canMove(TRANSLATION.NONE)) {
             scheduler.resetInterval(game.fall, stats.fallPeriod)
         } else {
             game.over() // block out
@@ -81,16 +80,16 @@ let game = {
     },
 
     fall: function() {
-        playfield.piece.move(TRANSLATION.DOWN)
+        scene.playfield.piece.move(TRANSLATION.DOWN)
     },
     
     lockDown: function() {
         scheduler.clearTimeout(game.lockDown)
         scheduler.clearInterval(game.fall)
     
-        if (playfield.lock(playfield.piece)) {
-            let tSpin = playfield.piece.tSpin
-            let nbClearedLines = playfield.clearLines()
+        if (scene.playfield.lock(scene.playfield.piece)) {
+            let tSpin = scene.playfield.piece.tSpin
+            let nbClearedLines = scene.playfield.clearLines()
             stats.lockDown(nbClearedLines, tSpin)
             if (settings.sfxVolume) {
                 if (nbClearedLines == 4 || (tSpin && nbClearedLines)) {
@@ -129,11 +128,11 @@ let game = {
     },
 
     over: function() {
-        playfield.piece.locking = false
+        scene.playfield.piece.locking = false
 
         document.onkeydown = null
         window.onblur = null
-        renderer.domElement.onfocus = null
+        scene.renderer.domElement.onfocus = null
         menu.settings.domElement.onfocus = null
         this.playing = false
         scene.music.pause()
@@ -170,16 +169,16 @@ function playSound(sound, note=0) {
 /* Handle player inputs */
 
 let playerActions = {
-    moveLeft: () => playfield.piece.move(TRANSLATION.LEFT),
+    moveLeft: () => scene.playfield.piece.move(TRANSLATION.LEFT),
 
-    moveRight: () => playfield.piece.move(TRANSLATION.RIGHT),
+    moveRight: () => scene.playfield.piece.move(TRANSLATION.RIGHT),
 
-    rotateCW: () => playfield.piece.rotate(ROTATION.CW),
+    rotateCW: () => scene.playfield.piece.rotate(ROTATION.CW),
 
-    rotateCCW: () => playfield.piece.rotate(ROTATION.CCW),
+    rotateCCW: () => scene.playfield.piece.rotate(ROTATION.CCW),
 
     softDrop: function () {
-        if (playfield.piece.move(TRANSLATION.DOWN)) stats.score++
+        if (scene.playfield.piece.move(TRANSLATION.DOWN)) stats.score++
     },
 
     hardDrop: function () {
@@ -188,19 +187,19 @@ let playerActions = {
             scene.hardDropSound.stop()
             scene.hardDropSound.play()
         }
-        while (playfield.piece.move(TRANSLATION.DOWN)) stats.score += 2
+        while (scene.playfield.piece.move(TRANSLATION.DOWN)) stats.score += 2
         game.lockDown()
-        playfield.hardDropAnimation.reset()
-        playfield.hardDropAnimation.play()
+        scene.playfield.hardDropAnimation.reset()
+        scene.playfield.hardDropAnimation.play()
     },
 
     hold: function () {
-        if (playfield.piece.holdEnabled) {
+        if (scene.playfield.piece.holdEnabled) {
             scheduler.clearInterval(game.fall)
             scheduler.clearTimeout(game.lockDown)
 
             let heldpiece = holdQueue.piece
-            holdQueue.piece = playfield.piece
+            holdQueue.piece = scene.playfield.piece
             game.generate(heldpiece)
         }
     },
@@ -277,22 +276,11 @@ function resumeOnKeyDown(event) {
 
 /* Scene */
 
-const renderer = new THREE.WebGLRenderer({
-    powerPreference: "high-performance",
-    antialias: true,
-    stencil: false
-})
-renderer.setSize(window.innerWidth, window.innerHeight)
-renderer.setClearColor(0x000000, 10)
-renderer.toneMapping = THREE.ACESFilmicToneMapping
-document.body.appendChild(renderer.domElement)
-renderer.domElement.tabIndex = 1
-
 let loadingManager = new THREE.LoadingManager(
     function() {
         loadingDiv.style.display = "none"
         menu.startButton.show()
-        renderer.setAnimationLoop(animate)
+        scene.renderer.setAnimationLoop(animate)
     },
     function (url, itemsLoaded, itemsTotal) {
         loadingPercent.innerText = Math.floor(100 * itemsLoaded / itemsTotal) + '%'
@@ -309,18 +297,13 @@ loadingManager.onStart = function (url, itemsLoaded, itemsTotal) {
 const settings  = new Settings()
 const stats     = new Stats(settings)
 const scene = new TetraScene(settings, loadingManager)
-const controls = new CameraControls(scene.camera, renderer.domElement)
 
-const minoes = new InstancedMino()
-scene.add(minoes)
 const holdQueue = new HoldQueue()
 scene.add(holdQueue)
-const playfield = new Playfield(loadingManager)
-scene.add(playfield)
 const nextQueue = new NextQueue()
 scene.add(nextQueue)
 
-const menu = new Menu(game, settings, stats, scene, minoes, playfield)
+const menu = new Menu(game, settings, stats, scene)
 menu.load()
 
 let fps
@@ -338,20 +321,15 @@ const clock = new THREE.Clock()
 
 function animate() {
     const delta = clock.getDelta()
-    scene.updateMatrixWorld()
     scene.update(delta)
-    playfield.update(delta)
-    minoes.update()
-    controls.update()
 
-    renderer.render(scene, scene.camera)
-    environment.camera.update(renderer, scene)
+    environment.camera.update(scene.renderer, scene)
 
     fps?.update()
 }
 
 window.addEventListener("resize", () => {
-    renderer.setSize(window.innerWidth, window.innerHeight)
+    scene.renderer.setSize(window.innerWidth, window.innerHeight)
     scene.camera.aspect = window.innerWidth / window.innerHeight
     scene.camera.updateProjectionMatrix()
 })

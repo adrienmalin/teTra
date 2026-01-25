@@ -1,13 +1,30 @@
 import * as THREE from 'three'
+import CameraControls from './CameraControls.js'
 import { Vortex } from './Vortex.js'
+import { Playfield, InstancedMino } from './Tetrominoes.js'
 
 
 export class TetraScene extends THREE.Scene {
     constructor(settings, loadingManager) {
         super()
 
+        this.renderer = new THREE.WebGLRenderer({
+            powerPreference: "high-performance",
+            antialias: true,
+            stencil: false
+        })
+        this.renderer.setSize(window.innerWidth, window.innerHeight)
+        this.renderer.setClearColor(0x000000, 10)
+        this.renderer.toneMapping = THREE.ACESFilmicToneMapping
+        this.renderer.toneMappingExposure = .8
+        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+        document.body.appendChild(this.renderer.domElement)
+        this.renderer.domElement.tabIndex = 1
+
         this.camera = new THREE.PerspectiveCamera(100, window.innerWidth / window.innerHeight, 0.1, 1000)
-        this.camera.position.set(5, 16, 12)
+        this.camera.position.set(5, 15, 12)
+
+        this.controls = new CameraControls(this.camera, this.renderer.domElement)
 
         this.vortex = new Vortex(loadingManager)
         this.add(this.vortex)
@@ -43,6 +60,12 @@ export class TetraScene extends THREE.Scene {
             this.hardDropSound.setBuffer(buffer)
         }.bind(this))
 
+
+        this.playfield = new Playfield(loadingManager)
+        this.add(this.playfield)
+        this.minoes = new InstancedMino()
+        this.add(this.minoes)
+
         this.theme = settings.theme
     }
 
@@ -54,6 +77,8 @@ export class TetraScene extends THREE.Scene {
                 this.directionalLight.position.set(5, -20, 20)
                 this.music.src = "audio/benevolence.m4a"
                 this.fog.color.set(0xffffff)
+                this.playfield.edge.visible = true
+                this.playfield.retroEdge.visible = false
                 break
             case "Espace":
                 this.ambientLight.intensity     = 7
@@ -61,6 +86,8 @@ export class TetraScene extends THREE.Scene {
                 this.directionalLight.position.set(2, -3, 20)
                 this.music.src = "audio/benevolence.m4a"
                 this.fog.color.set(0x000000)
+                this.playfield.edge.visible = true
+                this.playfield.retroEdge.visible = false
             break
             case "Rétro":
                 this.ambientLight.intensity     = 1
@@ -68,9 +95,12 @@ export class TetraScene extends THREE.Scene {
                 this.directionalLight.position.set(19, 120, 200)
                 this.music.src = "audio/Tetris_MkVaffQuasi_Ultimix_OC_ReMix.mp3"
                 this.fog.color.set(0x000000)
+                this.playfield.edge.visible = false
+                this.playfield.retroEdge.visible = true
             break
         }
         this.vortex.theme = theme
+        this.minoes.theme = theme
     }
 
     get fogColor() {
@@ -81,6 +111,11 @@ export class TetraScene extends THREE.Scene {
     }
 
     update(delta) {
+        this.controls.update()
+        this.updateMatrixWorld()
         this.vortex.update(delta)
+        this.playfield.update(delta)
+        this.minoes.update(delta)
+        this.renderer.render(this, this.camera)
     }
 }

@@ -4,7 +4,7 @@ import { environment } from './Tetrominoes.js'
 
 
 export class Menu extends GUI {
-    constructor(game, settings, stats, scene, minoes, playfield) {
+    constructor(game, settings, stats, scene) {
         super({title: "ᵀᴱTᴿᴬ"})
         
         this.startButton  = this.add(game, "start").name("Jouer").hide()
@@ -28,14 +28,6 @@ export class Menu extends GUI {
 
         this.settings.add(settings, "theme", ["Plasma", "Espace", "Rétro"]).name("Thème").onChange(theme => {
             scene.theme = theme
-            minoes.theme = theme
-            if (theme == "Rétro") {
-                playfield.edge.visible = false
-                playfield.retroEdge.visible = true
-            } else {
-                playfield.edge.visible = true
-                playfield.retroEdge.visible = false
-            }
             if (dev) changeMaterial()
         })
 
@@ -76,10 +68,14 @@ export class Menu extends GUI {
         function changeMaterial() {
             material?.destroy()
             material = dev.addFolder("minoes material").close()
-            material.add(minoes.material, "constructor", ["MeshBasicMaterial", "MeshStandardMaterial", "MeshPhysicalMaterial"]).listen().onChange(type => {
+            material.add(scene.minoes.material, "constructor", [
+                "MeshBasicMaterial",
+                "MeshStandardMaterial",
+                "MeshPhysicalMaterial"
+            ]).listen().onChange(type => {
                 switch(type) {
                     case "MeshBasicMaterial":
-                        minoes.material = new THREE.MeshBasicMaterial({
+                        scene.minoes.material = new THREE.MeshBasicMaterial({
                             envMap: environment,
                             side: THREE.DoubleSide,
                             transparent: true,
@@ -88,7 +84,7 @@ export class Menu extends GUI {
                         })
                     break
                     case "MeshStandardMaterial":
-                        minoes.material = new THREE.MeshStandardMaterial({
+                        scene.minoes.material = new THREE.MeshStandardMaterial({
                             envMap: environment,
                             side: THREE.DoubleSide,
                             transparent: true,
@@ -98,7 +94,7 @@ export class Menu extends GUI {
                         })
                     break
                     case "MeshPhysicalMaterial":
-                        minoes.material = new THREE.MeshPhysicalMaterial({
+                        scene.minoes.material = new THREE.MeshPhysicalMaterial({
                             envMap: environment,
                             side: THREE.DoubleSide,
                             transparent: true,
@@ -110,11 +106,11 @@ export class Menu extends GUI {
                         })
                     break
                 }
-                minoes.update = minoes.updateColor
+                scene.minoes.update = scene.minoes.updateColor
                 changeMaterial()
             })
 
-            let minoMaterial = minoes.material instanceof Array ? minoes.material[0] : minoes.material
+            let minoMaterial = scene.minoes.material instanceof Array ? scene.minoes.material[0] : scene.minoes.material
             if ("opacity"             in minoMaterial) material.add(minoMaterial, "opacity"            ).min(0).max(1)
             if ("reflectivity"        in minoMaterial) material.add(minoMaterial, "reflectivity"       ).min(0).max(1)
             if ("roughness"           in minoMaterial) material.add(minoMaterial, "roughness"          ).min(0).max(1)
@@ -155,7 +151,7 @@ export class Menu extends GUI {
             vortex.add(scene.vortex.darkCylinder.material, "opacity").name("dark").min(0).max(1).listen()
             vortex.add(scene.vortex.colorFullCylinder.material, "opacity").name("colorFull").min(0).max(1).listen()
 
-            changeMaterial(minoes.material.constructor.name)
+            changeMaterial(scene.minoes.material.constructor.name)
 
             let fog = dev.addFolder("fog").close()
             fog.add(scene.fog, "near", 0, 200)
