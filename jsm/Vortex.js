@@ -17,28 +17,30 @@ export class Vortex extends THREE.Group {
 
         const commonCylinderGeometry = new THREE.CylinderGeometry(35, 35, 1000, 12, 1, true)
         
-        this.darkCylinder = new THREE.Mesh(
-            commonCylinderGeometry,
-            new THREE.MeshLambertMaterial({
-                side: THREE.BackSide,
-                blending: THREE.AdditiveBlending,
-            })
-        )
-        this.add(this.darkCylinder)
-        
         this.colorFullCylinder = new THREE.Mesh(
             commonCylinderGeometry,
             new THREE.MeshBasicMaterial({
                 side: THREE.BackSide,
-                blending: THREE.AdditiveBlending,
+                blending: THREE.NormalBlending
             })
         )
         this.add(this.colorFullCylinder)
+        
+        this.darkCylinder = new THREE.Mesh(
+            commonCylinderGeometry,
+            new THREE.MeshLambertMaterial({
+                side: THREE.BackSide,
+                blending: THREE.AdditiveBlending
+            })
+        )
+        this.add(this.darkCylinder)
 
         this.position.set(5, 100, -10)
     }
 
     set theme(theme) {
+        const loader = new THREE.TextureLoader(this.loadingManager);
+
         switch (theme) {
             case "Plasma":
                 new THREE.TextureLoader(this.loadingManager).load("./images/plasma.jpg", texture => {
@@ -56,6 +58,7 @@ export class Vortex extends THREE.Group {
                     this.colorFullCylinder.material.map = texture
                 })
                 this.colorFullCylinder.material.opacity = 0.6
+                this.colorFullCylinder.material.blending = THREE.NormalBlending
 
                 this.globalRotation           = 0.028
                 this.darkTextureRotation      = 0.005
@@ -82,6 +85,7 @@ export class Vortex extends THREE.Group {
                     this.colorFullCylinder.material.map = texture
                 })
                 this.colorFullCylinder.material.opacity = 0.1
+                this.colorFullCylinder.material.blending = THREE.AdditiveBlending
 
                 this.globalRotation = 0.028
                 this.darkTextureRotation = 0.006

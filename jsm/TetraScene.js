@@ -22,7 +22,7 @@ export class TetraScene extends THREE.Scene {
         this.renderer.domElement.tabIndex = 1
 
         this.camera = new THREE.PerspectiveCamera(100, window.innerWidth / window.innerHeight, 0.1, 1000)
-        this.camera.position.set(5, 15, 12)
+        this.camera.position.set(5.5, 15, 13)
 
         this.controls = new CameraControls(this.camera, this.renderer.domElement)
 
@@ -60,7 +60,6 @@ export class TetraScene extends THREE.Scene {
             this.hardDropSound.setBuffer(buffer)
         }.bind(this))
 
-
         this.playfield = new Playfield(loadingManager)
         this.add(this.playfield)
         this.minoes = new InstancedMino()
@@ -76,6 +75,7 @@ export class TetraScene extends THREE.Scene {
                 this.directionalLight.intensity = 1.75
                 this.directionalLight.position.set(5, -20, 20)
                 this.music.src = "audio/benevolence.m4a"
+                this.background = new THREE.Color(0xffffff);
                 this.fog.color.set(0xffffff)
                 this.playfield.edge.visible = true
                 this.playfield.retroEdge.visible = false
@@ -85,6 +85,7 @@ export class TetraScene extends THREE.Scene {
                 this.directionalLight.intensity = 5
                 this.directionalLight.position.set(2, -3, 20)
                 this.music.src = "audio/benevolence.m4a"
+                this.background = new THREE.Color(0x000000);
                 this.fog.color.set(0x000000)
                 this.playfield.edge.visible = true
                 this.playfield.retroEdge.visible = false
