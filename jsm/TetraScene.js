@@ -18,8 +18,6 @@ export class TetraScene extends THREE.Scene {
         this.directionalLight = new THREE.DirectionalLight(0xffffff, 11)
         this.add(this.directionalLight)
 
-        this.theme = settings.theme
-
         /* Sounds */
         this.music = music
 
@@ -42,6 +40,8 @@ export class TetraScene extends THREE.Scene {
         audioLoader.load('audio/hard-drop.wav', function( buffer ) {
             this.hardDropSound.setBuffer(buffer)
         }.bind(this))
+
+        this.theme = settings.theme
     }
 
     set theme(theme) {
@@ -50,16 +50,19 @@ export class TetraScene extends THREE.Scene {
                 this.ambientLight.intensity     = 0
                 this.directionalLight.intensity = 1.75
                 this.directionalLight.position.set(5, -20, 20)
+                this.music.src = "audio/benevolence.m4a"
                 break
             case "Espace":
                 this.ambientLight.intensity     = 7
                 this.directionalLight.intensity = 5
                 this.directionalLight.position.set(5, -20, 20)
+                this.music.src = "audio/benevolence.m4a"
             break
             case "Rétro":
                 this.ambientLight.intensity     = 1
                 this.directionalLight.intensity = 10
                 this.directionalLight.position.set(19, 120, 200)
+                this.music.src = "audio/Tetris_MkVaffQuasi_Ultimix_OC_ReMix.mp3"
             break
         }
         this.vortex.theme = theme

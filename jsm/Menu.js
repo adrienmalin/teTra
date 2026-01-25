@@ -32,11 +32,9 @@ export class Menu extends GUI {
             if (theme == "Rétro") {
                 playfield.edge.visible = false
                 playfield.retroEdge.visible = true
-                music.src = "audio/Tetris_MkVaffQuasi_Ultimix_OC_ReMix.mp3"
             } else {
                 playfield.edge.visible = true
                 playfield.retroEdge.visible = false
-                music.src = "audio/benevolence.m4a"
             }
             if (dev) changeMaterial()
         })
