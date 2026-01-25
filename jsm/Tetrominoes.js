@@ -212,7 +212,7 @@ class Mino extends THREE.Object3D {
         this.velocity.y += delta * GRAVITY
         this.position.addScaledVector(this.velocity, delta)
         this.rotateOnWorldAxis(this.rotationAngle, delta * this.angularVelocity)
-        if (Math.sqrt(this.position.x * this.position.x + this.position.z * this.position.z) > 40 || this.position.y < -50) {
+        if (this.position.y > 200 || Math.sqrt(this.position.x * this.position.x + this.position.z * this.position.z) > 50) {
             this.dispose()
             return true
         } else {

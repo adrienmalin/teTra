@@ -75,7 +75,7 @@ export class Menu extends GUI {
         let material
         function changeMaterial() {
             material?.destroy()
-            material = dev.addFolder("minoes material")
+            material = dev.addFolder("minoes material").close()
             material.add(minoes.material, "constructor", ["MeshBasicMaterial", "MeshStandardMaterial", "MeshPhysicalMaterial"]).listen().onChange(type => {
                 switch(type) {
                     case "MeshBasicMaterial":
@@ -129,6 +129,8 @@ export class Menu extends GUI {
             if ("transmission"        in minoMaterial) material.add(minoMaterial, "transmission"       ).min(0).max(1)
             if ("clearcoat"           in minoMaterial) material.add(minoMaterial, "clearcoat"          ).min(0).max(1)
             if ("clearcoatRoughness"  in minoMaterial) material.add(minoMaterial, "clearcoatRoughness" ).min(0).max(1)
+
+            return material
         }
 
         let dev
@@ -154,7 +156,11 @@ export class Menu extends GUI {
             vortex.add(scene.vortex.colorFullCylinder.material, "opacity").name("colorFull").min(0).max(1).listen()
 
             changeMaterial(minoes.material.constructor.name)
-            material.close()
+
+            let fog = dev.addFolder("fog").close()
+            fog.add(scene.fog, "near", 0, 200)
+            fog.add(scene.fog, "far", 0, 200)
+            fog.addColor(scene, "fogColor")
         }
     }
 

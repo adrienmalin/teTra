@@ -18,6 +18,8 @@ export class TetraScene extends THREE.Scene {
         this.directionalLight = new THREE.DirectionalLight(0xffffff, 11)
         this.add(this.directionalLight)
 
+        this.fog = new THREE.Fog(0xffffff, 50, 150)
+
         /* Sounds */
         this.music = music
 
@@ -51,21 +53,31 @@ export class TetraScene extends THREE.Scene {
                 this.directionalLight.intensity = 1.75
                 this.directionalLight.position.set(5, -20, 20)
                 this.music.src = "audio/benevolence.m4a"
+                this.fog.color.set(0xffffff)
                 break
             case "Espace":
                 this.ambientLight.intensity     = 7
                 this.directionalLight.intensity = 5
                 this.directionalLight.position.set(2, -3, 20)
                 this.music.src = "audio/benevolence.m4a"
+                this.fog.color.set(0x000000)
             break
             case "Rétro":
                 this.ambientLight.intensity     = 1
                 this.directionalLight.intensity = 10
                 this.directionalLight.position.set(19, 120, 200)
                 this.music.src = "audio/Tetris_MkVaffQuasi_Ultimix_OC_ReMix.mp3"
+                this.fog.color.set(0x000000)
             break
         }
         this.vortex.theme = theme
+    }
+
+    get fogColor() {
+        return this.fog.color.getHexString()
+    }
+    set fogColor(color) {
+        this.fog.color.set(color)
     }
 
     update(delta) {
