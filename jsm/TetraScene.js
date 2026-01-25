@@ -7,7 +7,7 @@ export class TetraScene extends THREE.Scene {
         super()
 
         this.camera = new THREE.PerspectiveCamera(100, window.innerWidth / window.innerHeight, 0.1, 1000)
-        this.camera.position.set(5, 4, 12)
+        this.camera.position.set(5, 16, 12)
 
         this.vortex = new Vortex(loadingManager)
         this.add(this.vortex)
@@ -55,7 +55,7 @@ export class TetraScene extends THREE.Scene {
             case "Espace":
                 this.ambientLight.intensity     = 7
                 this.directionalLight.intensity = 5
-                this.directionalLight.position.set(5, -20, 20)
+                this.directionalLight.position.set(2, -10, 20)
                 this.music.src = "audio/benevolence.m4a"
             break
             case "Rétro":
