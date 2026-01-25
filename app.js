@@ -144,6 +144,18 @@ let game = {
         menu.startButton.name("Rejouer")
         menu.startButton.show()
     },
+
+    fullscreen: function() {
+        if (!document.fullscreenElement) {
+            document.body.requestFullscreen();
+            menu.settings.fullscreenButton.name("Quitter le plein écran");
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+                menu.settings.fullscreenButton.name("Plein écran");
+            }
+        }
+    }
 }
 
 

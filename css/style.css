@@ -24,7 +24,7 @@ span {
 }
 
 .lil-gui.autoPlace {
-    top: inherit;
+    top: auto;
     bottom: 15px;
     left: 15px;
 }

@@ -70,7 +70,8 @@ export class Menu extends GUI {
             scene.tetrisSound.setVolume(volume/100)
             scene.hardDropSound.setVolume(volume/100)
         })
-        
+        this.settings.fullscreenButton = this.settings.add(game, "fullscreen").name("Plein écran")
+
         let material
         function changeMaterial() {
             material?.destroy()

@@ -55,7 +55,7 @@ export class TetraScene extends THREE.Scene {
             case "Espace":
                 this.ambientLight.intensity     = 7
                 this.directionalLight.intensity = 5
-                this.directionalLight.position.set(2, -10, 20)
+                this.directionalLight.position.set(2, -3, 20)
                 this.music.src = "audio/benevolence.m4a"
             break
             case "Rétro":
