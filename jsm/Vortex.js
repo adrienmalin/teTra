@@ -47,7 +47,7 @@ export class Vortex extends THREE.Group {
                     texture.repeat.set(1, 2)
                     this.darkCylinder.material.map = texture
                 })
-                this.darkCylinder.material.opacity = 0.05
+                this.darkCylinder.material.opacity = 0.14
 
                 new THREE.TextureLoader(this.loadingManager).load("./images/plasma2.jpg", texture => {
                     texture.wrapS = THREE.RepeatWrapping
@@ -55,7 +55,7 @@ export class Vortex extends THREE.Group {
                     texture.repeat.set(2, 2)
                     this.colorFullCylinder.material.map = texture
                 })
-                this.colorFullCylinder.material.opacity = 0.8
+                this.colorFullCylinder.material.opacity = 0.6
 
                 this.globalRotation           = 0.028
                 this.darkTextureRotation      = 0.005

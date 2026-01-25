@@ -135,7 +135,7 @@ let game = {
         window.onblur = null
         renderer.domElement.onfocus = null
         menu.settings.domElement.onfocus = null
-        game.playing = false
+        this.playing = false
         scene.music.pause()
         stats.clock.stop()
         messagesSpan.addNewChild("div", { className: "show-level-animation", innerHTML: `<h1>GAME<br/>OVER</h1>` })
@@ -347,5 +347,5 @@ window.addEventListener("resize", () => {
 window.onbeforeunload = function (event) {
     menu.save()
     localStorage["teTraHighScore"] = stats.highScore
-    return !game.playing
+    if (game.playing) return false;
 }

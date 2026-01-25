@@ -75,23 +75,6 @@ export class InstancedMino extends THREE.InstancedMesh {
         const roundedBoxGeometry = new RoundedBoxGeometry(1.03, 1.03, 1.03, 4, 0.15)
         roundedBoxGeometry.translate(0.5, 0.5, 0)
         super(roundedBoxGeometry, undefined, 2*ROWS*COLUMNS)
-        this.roundedBoxGeometry = roundedBoxGeometry
-        let minoFaceShape = new THREE.Shape()
-        minoFaceShape.moveTo(.1, .1)
-        minoFaceShape.lineTo(.1, .9)
-        minoFaceShape.lineTo(.9, .9)
-        minoFaceShape.lineTo(.9, .1)
-        minoFaceShape.lineTo(.1, .1)
-        let minoExtrudeSettings = {
-            steps: 1,
-            depth: .8,
-            bevelEnabled: true,
-            bevelThickness: .1,
-            bevelSize: .1,
-            bevelOffset: 0,
-            bevelSegments: 1
-        }
-        this.extrudeGeometry = new THREE.ExtrudeGeometry(minoFaceShape, minoExtrudeSettings)
         this.offsets = new Uint8Array(2*this.count)
     }
 
@@ -99,14 +82,14 @@ export class InstancedMino extends THREE.InstancedMesh {
         if (theme == "Rétro") {
             this.resetColor()
             this.update = this.updateOffset
-            this.geometry = this.extrudeGeometry
             if (this.materials["Rétro"]) {
                 this.material = this.materials["Rétro"]
             } else {
                 this.materials["Rétro"] = []
                 const loadingManager = new THREE.LoadingManager(() => this.material = this.materials["Rétro"])
                 new THREE.TextureLoader(loadingManager).load("images/sprites.png", (texture) => {
-                    this.materials.Rétro[0] = this.materials.Rétro[2] = new TileMaterial({
+                    this.materials.Rétro[4] =
+                    this.materials.Rétro[5] = new TileMaterial({
                         color: COLORS.RETRO,
                         map: texture,
                         bumpMap: texture,
@@ -117,7 +100,10 @@ export class InstancedMino extends THREE.InstancedMesh {
                     }, 8, 8)
                 })
                 new THREE.TextureLoader(loadingManager).load("images/edges.png", (texture) => {
-                    this.materials.Rétro[1] = this.materials.Rétro[3] = this.materials.Rétro[4] = this.materials.Rétro[5] = new TileMaterial({
+                    this.materials.Rétro[0] =
+                    this.materials.Rétro[1] =
+                    this.materials.Rétro[2] =
+                    this.materials.Rétro[3] = new TileMaterial({
                         color: COLORS.RETRO,
                         map: texture,
                         bumpMap: texture,
@@ -129,7 +115,6 @@ export class InstancedMino extends THREE.InstancedMesh {
                 })
             }
         } else {
-            this.geometry = this.roundedBoxGeometry
             this.update = this.updateColor
             this.material = this.materials[theme]
         }

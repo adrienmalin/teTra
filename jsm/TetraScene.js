@@ -47,8 +47,8 @@ export class TetraScene extends THREE.Scene {
     set theme(theme) {
         switch (theme) {
             case "Plasma":
-                this.ambientLight.intensity     = 0.6
-                this.directionalLight.intensity = 11
+                this.ambientLight.intensity     = 0
+                this.directionalLight.intensity = 1.75
                 this.directionalLight.position.set(5, -20, 20)
                 break
             case "Espace":
