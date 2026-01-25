@@ -73,9 +73,9 @@ const sideMaterial = new THREE.MeshStandardMaterial({
 export class InstancedMino extends THREE.InstancedMesh {
     constructor() {
         const roundedBoxGeometry = new RoundedBoxGeometry(1.03, 1.03, 1.03, 4, 0.15)
-        roundedBoxGeometry.translate(0.5, 0.5, 0.5)
         super(roundedBoxGeometry, undefined, 2*ROWS*COLUMNS)
         this.offsets = new Uint8Array(2*this.count)
+        this.position.set(0.5, 0.5, 0.5)
     }
 
     set theme(theme) {
