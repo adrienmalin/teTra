@@ -149,7 +149,6 @@ export class Menu extends GUI {
         
             let vortex = dev.addFolder("vortex opacity").close()
             vortex.add(scene.vortex.transparentCylinder.material, "opacity").name("dark").min(0).max(1).listen()
-            vortex.add(scene.vortex.opaqueCylinder.material, "opacity").name("opaque").min(0).max(1).listen()
 
             changeMaterial(scene.minoes.material.constructor.name)
 
