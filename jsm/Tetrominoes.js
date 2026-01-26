@@ -39,7 +39,7 @@ const ROTATION = {
 
 const T_SPIN = {
     NONE: "",
-    MINI: "PETITE<br/>PIROUETTE",
+    MINI: "PETITE PIROUETTE",
     T_SPIN: "PIROUETTE"
 }
 

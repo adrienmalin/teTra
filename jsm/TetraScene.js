@@ -35,7 +35,7 @@ export class TetraScene extends THREE.Scene {
         this.directionalLight = new THREE.DirectionalLight(0xffffff, 11)
         this.add(this.directionalLight)
 
-        this.fog = new THREE.Fog(0xffffff, 50, 150)
+        this.fog = new THREE.Fog(0xffffff, 0, 200)
 
         /* Sounds */
         this.music = music
@@ -75,7 +75,7 @@ export class TetraScene extends THREE.Scene {
                 this.directionalLight.intensity = 1.75
                 this.directionalLight.position.set(5, -20, 20)
                 this.music.src = "audio/benevolence.m4a"
-                this.background = new THREE.Color(0xffffff);
+                this.background = new THREE.Color(0xffffff)
                 this.fog.color.set(0xffffff)
                 this.playfield.edge.visible = true
                 this.playfield.retroEdge.visible = false
@@ -83,9 +83,9 @@ export class TetraScene extends THREE.Scene {
             case "Espace":
                 this.ambientLight.intensity     = 7
                 this.directionalLight.intensity = 5
-                this.directionalLight.position.set(2, -3, 20)
+                this.directionalLight.position.set(2, 15, 20)
                 this.music.src = "audio/benevolence.m4a"
-                this.background = new THREE.Color(0x000000);
+                this.background = new THREE.Color(0x000000)
                 this.fog.color.set(0x000000)
                 this.playfield.edge.visible = true
                 this.playfield.retroEdge.visible = false
@@ -95,6 +95,7 @@ export class TetraScene extends THREE.Scene {
                 this.directionalLight.intensity = 10
                 this.directionalLight.position.set(19, 120, 200)
                 this.music.src = "audio/Tetris_MkVaffQuasi_Ultimix_OC_ReMix.mp3"
+                this.background = new THREE.Color(0x000000)
                 this.fog.color.set(0x000000)
                 this.playfield.edge.visible = false
                 this.playfield.retroEdge.visible = true

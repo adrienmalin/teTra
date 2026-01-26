@@ -110,7 +110,7 @@ class Stats {
         let patternScore = 100 * this.level * awardedLineClears
         if (tSpin) messagesSpan.addNewChild("div", {
             className: "rotate-in-animation",
-            innerHTML: tSpin
+            innerHTML: tSpin.replace(" ", "<br/>")
         })
         if (nbClearedLines) messagesSpan.addNewChild("div", {
             className: "zoom-in-animation",

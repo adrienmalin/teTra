@@ -148,8 +148,8 @@ export class Menu extends GUI {
             directionalLightPosition.add(scene.directionalLight.position, "z").listen()
         
             let vortex = dev.addFolder("vortex opacity").close()
-            vortex.add(scene.vortex.darkCylinder.material, "opacity").name("dark").min(0).max(1).listen()
-            vortex.add(scene.vortex.colorFullCylinder.material, "opacity").name("colorFull").min(0).max(1).listen()
+            vortex.add(scene.vortex.transparentCylinder.material, "opacity").name("dark").min(0).max(1).listen()
+            vortex.add(scene.vortex.opaqueCylinder.material, "opacity").name("opaque").min(0).max(1).listen()
 
             changeMaterial(scene.minoes.material.constructor.name)
 
