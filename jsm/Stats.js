@@ -192,10 +192,16 @@ class Stats {
 
 
 const speechSynthesisAvailable = 'speechSynthesis' in window;
-function speak(text, volume=1) {
-    if (!speechSynthesisAvailable) return;
-    const utterance = new SpeechSynthesisUtterance(text);
+let utterance;
+if ('SpeechSynthesisUtterance' in window) {
+    utterance = new SpeechSynthesisUtterance();
     utterance.lang = 'fr-FR';
+}
+
+function speak(text, volume=1) {
+    if (!utterance) return;
+
+    utterance.text = text   ;
     utterance.volume = volume;
     speechSynthesis.speak(utterance);
 }

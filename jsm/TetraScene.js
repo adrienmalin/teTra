@@ -22,7 +22,7 @@ export class TetraScene extends THREE.Scene {
         this.renderer.domElement.tabIndex = 1
 
         this.camera = new THREE.PerspectiveCamera(100, window.innerWidth / window.innerHeight, 0.1, 1000)
-        this.camera.position.set(5.5, 15, 13)
+        this.camera.position.set(5, 4, 13)
 
         this.controls = new CameraControls(this.camera, this.renderer.domElement)
 
