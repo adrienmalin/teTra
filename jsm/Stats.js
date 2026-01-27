@@ -11,9 +11,9 @@ const AWARDED_LINE_CLEARS = {
   
 const CLEARED_LINES_NAMES = [
     "",
-    "SOLO",
-    "DUO",
-    "TRIO",
+    "LIGNE",
+    "DOUBLE",
+    "TRIPLE",
     "TETRA",
 ]
 
@@ -192,16 +192,10 @@ class Stats {
 
 
 const speechSynthesisAvailable = 'speechSynthesis' in window;
-let utterance;
-if ('SpeechSynthesisUtterance' in window) {
-    utterance = new SpeechSynthesisUtterance();
-    utterance.lang = 'fr-FR';
-}
-
 function speak(text, volume=1) {
-    if (!utterance) return;
-
-    utterance.text = text   ;
+    if (!speechSynthesisAvailable) return;
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'fr-FR';
     utterance.volume = volume;
     speechSynthesis.speak(utterance);
 }
