@@ -164,8 +164,8 @@ InstancedMino.prototype.materials = {
         envMap: environment,
         side: THREE.DoubleSide,
         transparent: true,
-        opacity: 0.5,
-        roughness: 0.25,
+        opacity: 0.55,
+        roughness: 0.35,
         metalness: 0.9,
     }),
     Espace: new THREE.MeshStandardMaterial({

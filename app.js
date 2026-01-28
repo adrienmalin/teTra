@@ -138,6 +138,7 @@ let game = {
         scene.music.pause()
         stats.clock.stop()
         messagesSpan.addNewChild("div", { className: "show-level-animation", innerHTML: `<h1>GAME<br/>OVER</h1>` })
+        stats.speak("Game Over")
 
         menu.pauseButton.hide()
         menu.startButton.name("Rejouer")
