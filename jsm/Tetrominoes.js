@@ -172,7 +172,7 @@ InstancedMino.prototype.materials = {
         envMap: environment,
         side: THREE.DoubleSide,
         transparent: true,
-        opacity:   0.85,
+        opacity:   0.66,
         roughness: 0.01,
         metalness: 0.99,
     })
@@ -509,7 +509,7 @@ class Playfield extends THREE.Group {
           new THREE.PlaneGeometry(COLUMNS, SKYLINE),
           new THREE.MeshStandardMaterial({
               color: 0xc5d0a1,
-              roughness: 0.9,
+              roughness: 0.1,
               metalness: 0.9,
           })
         )
