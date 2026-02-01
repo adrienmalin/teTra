@@ -14,11 +14,9 @@ export class Vortex extends THREE.Group {
 
         this.opaqueTextureRotation = 0.006
         this.opaqueMoveForward = 0.025
-
-        const commonCylinderGeometry = new THREE.CylinderGeometry(35, 35, 1000, 12, 1, true)
         
         this.opaqueCylinder = new THREE.Mesh(
-            commonCylinderGeometry,
+            new THREE.CylinderGeometry(40, 40, 1000, 12, 1, true),
             new THREE.MeshBasicMaterial({
                 side: THREE.BackSide,
                 blending: THREE.NormalBlending
@@ -27,7 +25,7 @@ export class Vortex extends THREE.Group {
         this.add(this.opaqueCylinder)
         
         this.transparentCylinder = new THREE.Mesh(
-            commonCylinderGeometry,
+            new THREE.CylinderGeometry(30, 30, 1000, 12, 1, true),
             new THREE.MeshLambertMaterial({
                 side: THREE.BackSide,
                 blending: THREE.AdditiveBlending
@@ -49,7 +47,7 @@ export class Vortex extends THREE.Group {
                     texture.repeat.set(1, 2)
                     this.transparentCylinder.material.map = texture
                 })
-                this.transparentCylinder.material.opacity = 0.14
+                this.transparentCylinder.material.opacity = 0.05
 
                 new THREE.TextureLoader(this.loadingManager).load("./images/plasma2.jpg", texture => {
                     texture.wrapS = THREE.RepeatWrapping
@@ -71,10 +69,10 @@ export class Vortex extends THREE.Group {
                 new THREE.TextureLoader(this.loadingManager).load("./images/colorfull.jpg", texture => {
                     texture.wrapS = THREE.RepeatWrapping
                     texture.wrapT = THREE.MirroredRepeatWrapping
-                    texture.repeat.set(2, 4)
+                    texture.repeat.set(2, 8)
                     this.transparentCylinder.material.map = texture
                 })
-                this.transparentCylinder.material.opacity = 0.12
+                this.transparentCylinder.material.opacity = 0.11
 
                 new THREE.TextureLoader(this.loadingManager).load("./images/stars_space.jpg", texture => {
                     texture.wrapS = THREE.RepeatWrapping
