@@ -74,7 +74,7 @@ export class TetraScene extends THREE.Scene {
                 this.ambientLight.intensity     = 0
                 this.directionalLight.intensity = 1.75
                 this.directionalLight.position.set(5, -20, 20)
-                this.music.src = "audio/benevolence.m4a"
+                this.music.src = "audio/Moon-Over-Moscow-DJ-ResiDance-Mix-2022.mp3"
                 this.background = new THREE.Color(0xffffff)
                 this.fog.color.set(0xffffff)
                 this.playfield.edge.visible = true
