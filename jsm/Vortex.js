@@ -22,7 +22,6 @@ export class Vortex extends THREE.Group {
                 blending: THREE.MultiplyBlending
             })
         )
-        this.add(this.opaqueCylinder)
         
         this.transparentCylinder = new THREE.Mesh(
             new THREE.CylinderGeometry(30, 30, 1000, 12, 1, true),
@@ -31,7 +30,6 @@ export class Vortex extends THREE.Group {
                 blending: THREE.AdditiveBlending
             })
         )
-        this.add(this.transparentCylinder)
 
         this.position.set(5, 100, -10)
     }
@@ -41,20 +39,22 @@ export class Vortex extends THREE.Group {
 
         switch (theme) {
             case "Plasma":
-                new THREE.TextureLoader(this.loadingManager).load("./images/plasma.jpg", texture => {
+                loader.load("./images/plasma.jpg", texture => {
                     texture.wrapS = THREE.RepeatWrapping
                     texture.wrapT = THREE.MirroredRepeatWrapping
                     texture.repeat.set(1, 2)
                     this.transparentCylinder.material.map = texture
                     this.transparentCylinder.material.opacity = 0.15
+                    this.add(this.transparentCylinder)
                 })
                 
-                new THREE.TextureLoader(this.loadingManager).load("./images/plasma2.jpg", texture => {
+                loader.load("./images/plasma2.jpg", texture => {
                     texture.wrapS = THREE.RepeatWrapping
                     texture.wrapT = THREE.MirroredRepeatWrapping
                     texture.repeat.set(2, 2)
                     this.opaqueCylinder.material.map = texture
                     this.opaqueCylinder.material.blending = THREE.MultiplyBlending
+                    this.add(this.opaqueCylinder)
                 })
 
                 this.globalRotation           = 0.028
@@ -67,32 +67,36 @@ export class Vortex extends THREE.Group {
             break
             
             case "Space":
-                new THREE.TextureLoader(this.loadingManager).load("./images/colorfull.jpg", texture => {
+                loader.load("./images/colorfull.jpg", texture => {
                     texture.wrapS = THREE.RepeatWrapping
                     texture.wrapT = THREE.MirroredRepeatWrapping
                     texture.repeat.set(1, 4)
                     this.transparentCylinder.material.map = texture
                     this.transparentCylinder.material.opacity = 0.3
+                    this.add(this.transparentCylinder)
                 })
                 
-                new THREE.TextureLoader(this.loadingManager).load("./images/stars_space.jpg", texture => {
+                loader.load("./images/stars_space.jpg", texture => {
                     texture.wrapS = THREE.RepeatWrapping
                     texture.wrapT = THREE.RepeatWrapping
-                    texture.repeat.set(3, 3)
+                    texture.repeat.set(3, 6)
                     this.opaqueCylinder.material.map = texture
                     this.opaqueCylinder.material.blending = THREE.AdditiveBlending
+                    this.add(this.opaqueCylinder)
                 })
 
                 this.globalRotation = 0.028
                 this.opaqueTextureRotation = 0.006
-                this.opaqueMoveForward = 0.03
-                this.transparentTextureRotation = 0.006
-                this.transparentMoveForward = 0.06
+                this.opaqueMoveForward = 0.06
+                this.transparentTextureRotation = 0
+                this.transparentMoveForward = 0.01
 
                 this.visible = true
             break
 
             case "Retro":
+                this.remove(this.transparentCylinder)
+                this.remove(this.opaqueCylinder)
                 this.visible = false
             break
         }
