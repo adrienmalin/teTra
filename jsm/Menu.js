@@ -26,7 +26,7 @@ export class Menu extends GUI {
         this.settings = this.addFolder("Options")
         this.settings.add(settings, "startLevel").name("Niveau initial").min(1).max(15).step(1)
 
-        this.settings.add(settings, "theme", ["Plasma", "Espace", "Rétro"]).name("Thème").onChange(theme => {
+        this.settings.add(settings, "theme", ["Plasma", "Space", "Retro"]).name("Thème").onChange(theme => {
             scene.theme = theme
             if (dev) changeMaterial()
         })

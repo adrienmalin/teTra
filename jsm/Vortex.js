@@ -66,13 +66,13 @@ export class Vortex extends THREE.Group {
                 this.visible = true
             break
             
-            case "Espace":
+            case "Space":
                 new THREE.TextureLoader(this.loadingManager).load("./images/colorfull.jpg", texture => {
                     texture.wrapS = THREE.RepeatWrapping
                     texture.wrapT = THREE.MirroredRepeatWrapping
-                    texture.repeat.set(2, 4)
+                    texture.repeat.set(1, 4)
                     this.transparentCylinder.material.map = texture
-                    this.transparentCylinder.material.opacity = 0.15
+                    this.transparentCylinder.material.opacity = 0.3
                 })
                 
                 new THREE.TextureLoader(this.loadingManager).load("./images/stars_space.jpg", texture => {
@@ -87,12 +87,12 @@ export class Vortex extends THREE.Group {
                 this.opaqueTextureRotation = 0.006
                 this.opaqueMoveForward = 0.03
                 this.transparentTextureRotation = 0.006
-                this.transparentMoveForward = 0.04
+                this.transparentMoveForward = 0.06
 
                 this.visible = true
             break
 
-            case "Rétro":
+            case "Retro":
                 this.visible = false
             break
         }

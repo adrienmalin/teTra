@@ -72,7 +72,7 @@ export class TetraScene extends THREE.Scene {
         switch (theme) {
             case "Plasma":
                 this.ambientLight.intensity     = 0
-                this.directionalLight.intensity = 5
+                this.directionalLight.intensity = 3
                 this.directionalLight.position.set(5, -20, 20)
                 this.music.src = "audio/Moon-Over-Moscow-DJ-ResiDance-Mix-2022.mp3"
                 this.background = new THREE.Color(0xffffff)
@@ -80,8 +80,8 @@ export class TetraScene extends THREE.Scene {
                 this.playfield.edge.visible = true
                 this.playfield.retroEdge.visible = false
                 break
-            case "Espace":
-                this.ambientLight.intensity     = 2
+            case "Space":
+                this.ambientLight.intensity     = 5
                 this.directionalLight.intensity = 10
                 this.directionalLight.position.set(2, 15, 20)
                 this.music.src = "audio/benevolence.m4a"
@@ -90,7 +90,7 @@ export class TetraScene extends THREE.Scene {
                 this.playfield.edge.visible = true
                 this.playfield.retroEdge.visible = false
             break
-            case "Rétro":
+            case "Retro":
                 this.ambientLight.intensity     = 1
                 this.directionalLight.intensity = 10
                 this.directionalLight.position.set(19, 120, 200)

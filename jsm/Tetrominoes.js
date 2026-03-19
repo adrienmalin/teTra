@@ -79,17 +79,17 @@ export class InstancedMino extends THREE.InstancedMesh {
     }
 
     set theme(theme) {
-        if (theme == "Rétro") {
+        if (theme == "Retro") {
             this.resetColor()
             this.update = this.updateOffset
-            if (this.materials["Rétro"]) {
-                this.material = this.materials["Rétro"]
+            if (this.materials["Retro"]) {
+                this.material = this.materials["Retro"]
             } else {
-                this.materials["Rétro"] = []
-                const loadingManager = new THREE.LoadingManager(() => this.material = this.materials["Rétro"])
+                this.materials["Retro"] = []
+                const loadingManager = new THREE.LoadingManager(() => this.material = this.materials["Retro"])
                 new THREE.TextureLoader(loadingManager).load("images/sprites.png", (texture) => {
-                    this.materials.Rétro[4] =
-                    this.materials.Rétro[5] = new TileMaterial({
+                    this.materials.Retro[4] =
+                    this.materials.Retro[5] = new TileMaterial({
                         color: COLORS.RETRO,
                         map: texture,
                         bumpMap: texture,
@@ -100,10 +100,10 @@ export class InstancedMino extends THREE.InstancedMesh {
                     }, 8, 8)
                 })
                 new THREE.TextureLoader(loadingManager).load("images/edges.png", (texture) => {
-                    this.materials.Rétro[0] =
-                    this.materials.Rétro[1] =
-                    this.materials.Rétro[2] =
-                    this.materials.Rétro[3] = new TileMaterial({
+                    this.materials.Retro[0] =
+                    this.materials.Retro[1] =
+                    this.materials.Retro[2] =
+                    this.materials.Retro[3] = new TileMaterial({
                         color: COLORS.RETRO,
                         map: texture,
                         bumpMap: texture,
@@ -168,7 +168,7 @@ InstancedMino.prototype.materials = {
         roughness: 0.5,
         metalness: 0.9,
     }),
-    Espace: new THREE.MeshStandardMaterial({
+    Space: new THREE.MeshStandardMaterial({
         envMap: environment,
         side: THREE.DoubleSide,
         transparent: true,
