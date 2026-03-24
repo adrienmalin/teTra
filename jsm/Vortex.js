@@ -57,39 +57,40 @@ export class Vortex extends THREE.Group {
                     this.add(this.opaqueCylinder)
                 })
 
-                this.globalRotation           = 0.028
-                this.transparentTextureRotation      = 0.005
-                this.transparentMoveForward          = 0.009
-                this.opaqueTextureRotation = 0.006
-                this.opaqueMoveForward     = 0.025
+                this.globalRotation             = 0.028
+                this.transparentTextureRotation = 0.005
+                this.transparentMoveForward     = 0.009
+                this.opaqueTextureRotation      = 0.006
+                this.opaqueMoveForward          = 0.025
 
                 this.visible = true
             break
             
             case "Space":
                 loader.load("./images/colorfull.jpg", texture => {
-                    texture.wrapS = THREE.RepeatWrapping
+                    texture.wrapS = THREE.MirroredRepeatWrapping
                     texture.wrapT = THREE.MirroredRepeatWrapping
-                    texture.repeat.set(1, 4)
+                    texture.repeat.set(1, 8)
                     this.transparentCylinder.material.map = texture
                     this.transparentCylinder.material.opacity = 0.3
                     this.add(this.transparentCylinder)
                 })
                 
                 loader.load("./images/stars_space.jpg", texture => {
-                    texture.wrapS = THREE.RepeatWrapping
+                    texture.wrapS = THREE.MirroredRepeatWrapping
                     texture.wrapT = THREE.MirroredRepeatWrapping
-                    texture.repeat.set(3, 6)
+                    texture.repeat.set(4, 8)
                     this.opaqueCylinder.material.map = texture
+                    this.opaqueCylinder.material.map.offset.x = 5
                     this.opaqueCylinder.material.blending = THREE.AdditiveBlending
                     this.add(this.opaqueCylinder)
                 })
 
-                this.globalRotation = 0.028
-                this.opaqueTextureRotation = 0.006
-                this.opaqueMoveForward = 0.06
+                this.globalRotation             = 0.028
+                this.opaqueTextureRotation      = 0.006
+                this.opaqueMoveForward          = 0.04
                 this.transparentTextureRotation = 0
-                this.transparentMoveForward = 0.01
+                this.transparentMoveForward     = 0.02
 
                 this.visible = true
             break

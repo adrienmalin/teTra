@@ -93,7 +93,7 @@ export class InstancedMino extends THREE.InstancedMesh {
                         color: COLORS.RETRO,
                         map: texture,
                         bumpMap: texture,
-                        bumpScale: 1.5,
+                        bumpScale: 5,
                         envMap: environment,
                         envMapIntensity: 5, 
                         roughness: 0.03,
@@ -109,7 +109,7 @@ export class InstancedMino extends THREE.InstancedMesh {
                         color: COLORS.RETRO,
                         map: texture,
                         bumpMap: texture,
-                        bumpScale: 1.5,
+                        bumpScale: 5,
                         envMap: environment,
                         envMapIntensity: 5, 
                         roughness: 0.03,
@@ -181,7 +181,6 @@ InstancedMino.prototype.materials = {
                 #include <begin_vertex>
                 vPos = position;
 
-                // Bruit basé sur la position du sommet pour irrégularité
                 float n = sin(position.x*3.1 + position.y*5.2 + position.z*7.3) * 0.03;
                 transformed += normal * n;
                 `
@@ -490,7 +489,7 @@ class Playfield extends THREE.Group {
             color: COLORS.RETRO,
             map: retroEdgeTexture,
             bumpMap: retroEdgeTexture,
-            bumpScale: 1.5,
+            bumpScale: 5,
             envMap: environment,
             envMapIntensity: 5,
             roughness: 0.03,
