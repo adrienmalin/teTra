@@ -81,20 +81,10 @@ export class TetraScene extends THREE.Scene {
                 this.playfield.retroEdge.visible = false
                 break
             case "Space":
-                this.ambientLight.intensity     = 5
-                this.directionalLight.intensity = 10
+                this.ambientLight.intensity     = 2
+                this.directionalLight.intensity = 1
                 this.directionalLight.position.set(2, 15, 20)
                 this.music.src = "audio/benevolence.m4a"
-                this.background = new THREE.Color(0x000000)
-                this.fog.color.set(0x000000)
-                this.playfield.edge.visible = true
-                this.playfield.retroEdge.visible = false
-            break
-            case "Retro":
-                this.ambientLight.intensity     = 1
-                this.directionalLight.intensity = 10
-                this.directionalLight.position.set(19, 120, 200)
-                this.music.src = "audio/Tetris_MkVaffQuasi_Ultimix_OC_ReMix.mp3"
                 this.background = new THREE.Color(0x000000)
                 this.fog.color.set(0x000000)
                 this.playfield.edge.visible = false

@@ -93,12 +93,6 @@ export class Vortex extends THREE.Group {
 
                 this.visible = true
             break
-
-            case "Retro":
-                this.remove(this.transparentCylinder)
-                this.remove(this.opaqueCylinder)
-                this.visible = false
-            break
         }
     }
 

@@ -79,7 +79,7 @@ export class InstancedMino extends THREE.InstancedMesh {
     }
 
     set theme(theme) {
-        if (theme == "Retro") {
+        if (theme == "Space") {
             this.resetColor()
             this.update = this.updateOffset
             if (this.materials["Retro"]) {
@@ -94,8 +94,10 @@ export class InstancedMino extends THREE.InstancedMesh {
                         map: texture,
                         bumpMap: texture,
                         bumpScale: 1.5,
-                        roughness: 0.25,
-                        metalness: 0.9,
+                        envMap: environment,
+                        envMapIntensity: 5, 
+                        roughness: 0.07,
+                        metalness: 1,
                         transparent: true,
                     }, 8, 8)
                 })
@@ -108,8 +110,10 @@ export class InstancedMino extends THREE.InstancedMesh {
                         map: texture,
                         bumpMap: texture,
                         bumpScale: 1.5,
-                        roughness: 0.25,
-                        metalness: 0.9,
+                        envMap: environment,
+                        envMapIntensity: 5, 
+                        roughness: 0.07,
+                        metalness: 1,
                         transparent: true,
                     }, 1, 1)
                 })
@@ -164,9 +168,9 @@ InstancedMino.prototype.materials = {
         envMap: environment,
         side: THREE.DoubleSide,
         transparent: true,
-        opacity: 0.55,
-        roughness: 0.5,
-        metalness: 0.9,
+        opacity: 0.6,
+        roughness: 0.1,
+        metalness: 0.95,
     }),
     Space: new THREE.MeshStandardMaterial({
         envMap: environment,
@@ -483,8 +487,8 @@ class Playfield extends THREE.Group {
             .lineTo(COLUMNS, 0)
             .lineTo(COLUMNS, SKYLINE)
             .lineTo(COLUMNS + 1, SKYLINE)
-            .lineTo(COLUMNS + 1, -1/3)
-            .lineTo(-1, -1/3)
+            .lineTo(COLUMNS + 1, -1)
+            .lineTo(-1, -1)
             .moveTo(-1, SKYLINE)
         const retroEdgeTexture = new THREE.TextureLoader(loadingManager).load("images/edge.png", (texture) => {
             texture.wrapS = THREE.RepeatWrapping
@@ -494,9 +498,11 @@ class Playfield extends THREE.Group {
             color: COLORS.RETRO,
             map: retroEdgeTexture,
             bumpMap: retroEdgeTexture,
+            envMap: environment,
+            envMapIntensity: 5,
             bumpScale: 1.5,
-            roughness: 0.25,
-            metalness: 0.8,
+            roughness: 0.07,
+            metalness: 1
         })
         this.retroEdge = new THREE.Mesh(
             new THREE.ExtrudeGeometry(retroEdgeShape, {
@@ -506,11 +512,15 @@ class Playfield extends THREE.Group {
             [retroEdgeMaterial, sideMaterial, sideMaterial, sideMaterial, sideMaterial, sideMaterial],
         )
         const back = new THREE.Mesh(
-          new THREE.PlaneGeometry(COLUMNS, SKYLINE),
-          new THREE.MeshStandardMaterial({
-              color: 0xc5d0a1,
-              roughness: 0.1,
-              metalness: 0.9,
+            new THREE.PlaneGeometry(COLUMNS, SKYLINE),
+            new THREE.MeshStandardMaterial({
+                color: 0xc5d0a1,
+                envMap: environment,
+                envMapIntensity: 5, 
+                roughness: 0.1,
+                metalness: 0.9,
+                opacity:   0.1,
+                transparent: true
           })
         )
         back.position.set(COLUMNS/2, SKYLINE/2)
