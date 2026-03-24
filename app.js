@@ -175,16 +175,23 @@ function playSound(sound, note=0) {
 /* Handle player inputs */
 
 let playerActions = {
-    moveLeft: () => scene.playfield.piece.move(TRANSLATION.LEFT),
+    moveLeft: () => scene.playfield.piece.move(TRANSLATION.LEFT)? scene.moveSound.play() : scene.hitSound.stop() && scene.hitSound.play(),
 
-    moveRight: () => scene.playfield.piece.move(TRANSLATION.RIGHT),
+    moveRight: () => scene.playfield.piece.move(TRANSLATION.RIGHT)? scene.moveSound.play() : scene.hitSound.stop() && scene.hitSound.play(),
 
-    rotateCW: () => scene.playfield.piece.rotate(ROTATION.CW),
+    rotateCW: () => scene.playfield.piece.rotate(ROTATION.CW)? scene.rotateSound.stop() && scene.rotateSound.play() : scene.hitSound.stop() && scene.hitSound.play(),
 
-    rotateCCW: () => scene.playfield.piece.rotate(ROTATION.CCW),
+    rotateCCW: () => scene.playfield.piece.rotate(ROTATION.CCW)? scene.rotateSound.stop() && scene.rotateSound.play() : scene.hitSound.stop() && scene.hitSound.play(),
 
     softDrop: function () {
-        if (scene.playfield.piece.move(TRANSLATION.DOWN)) stats.score++
+        if (scene.playfield.piece.move(TRANSLATION.DOWN)) {
+            stats.score++
+            scene.moveSound.stop()
+            scene.moveSound.play()
+        } else {
+            scene.floorSound.stop()
+            scene.floorSound.play()
+        }
     },
 
     hardDrop: function () {

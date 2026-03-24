@@ -96,7 +96,7 @@ export class InstancedMino extends THREE.InstancedMesh {
                         bumpScale: 1.5,
                         envMap: environment,
                         envMapIntensity: 5, 
-                        roughness: 0.07,
+                        roughness: 0.03,
                         metalness: 1,
                         transparent: true,
                     }, 8, 8)
@@ -112,7 +112,7 @@ export class InstancedMino extends THREE.InstancedMesh {
                         bumpScale: 1.5,
                         envMap: environment,
                         envMapIntensity: 5, 
-                        roughness: 0.07,
+                        roughness: 0.03,
                         metalness: 1,
                         transparent: true,
                     }, 1, 1)
@@ -168,35 +168,27 @@ InstancedMino.prototype.materials = {
         envMap: environment,
         side: THREE.DoubleSide,
         transparent: true,
-        opacity: 0.55,
+        opacity: 0.66,
         roughness: 0.1,
         metalness: 0.95,
-    }),
-    Space: new THREE.MeshStandardMaterial({
-        envMap: environment,
-        side: THREE.DoubleSide,
-        transparent: true,
-        opacity:   0.66,
-        roughness: 0.01,
-        metalness: 0.99,
+        onBeforeCompile: shader => {
+            shader.vertexShader = `
+                varying vec3 vPos;
+                ${shader.vertexShader}
+            `.replace(
+                '#include <begin_vertex>',
+                `
+                #include <begin_vertex>
+                vPos = position;
+
+                // Bruit basé sur la position du sommet pour irrégularité
+                float n = sin(position.x*3.1 + position.y*5.2 + position.z*7.3) * 0.03;
+                transformed += normal * n;
+                `
+            );
+        }
     })
 }
-InstancedMino.prototype.materials['Plasma'].onBeforeCompile = shader => {
-    shader.vertexShader = `
-        varying vec3 vPos;
-        ${shader.vertexShader}
-    `.replace(
-        '#include <begin_vertex>',
-        `
-        #include <begin_vertex>
-        vPos = position;
-
-        // Bruit basé sur la position du sommet pour irrégularité
-        float n = sin(position.x*3.1 + position.y*5.2 + position.z*7.3) * 0.03;
-        transformed += normal * n;
-        `
-    );
-};
 
 
 class Mino extends THREE.Object3D {
@@ -498,10 +490,10 @@ class Playfield extends THREE.Group {
             color: COLORS.RETRO,
             map: retroEdgeTexture,
             bumpMap: retroEdgeTexture,
+            bumpScale: 1.5,
             envMap: environment,
             envMapIntensity: 5,
-            bumpScale: 1.5,
-            roughness: 0.07,
+            roughness: 0.03,
             metalness: 1
         })
         this.retroEdge = new THREE.Mesh(

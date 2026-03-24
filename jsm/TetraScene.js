@@ -47,17 +47,37 @@ export class TetraScene extends THREE.Scene {
         this.lineClearSound = new THREE.Audio(listener)
         audioLoader.load('audio/line-clear.ogg', function( buffer ) {
             this.lineClearSound.setBuffer(buffer)
+            this.lineClearSound.setVolume(settings.sfxVolume/100)
         }.bind(this))
         this.tetrisSound = new THREE.Audio(listener)
         audioLoader.load('audio/tetris.ogg', function( buffer ) {
             this.tetrisSound.setBuffer(buffer)
-            this.lineClearSound.setVolume(settings.sfxVolume/100)
             this.tetrisSound.setVolume(settings.sfxVolume/100)
-            this.hardDropSound.setVolume(settings.sfxVolume/100)
         }.bind(this))
         this.hardDropSound = new THREE.Audio(listener)
         audioLoader.load('audio/hard-drop.wav', function( buffer ) {
             this.hardDropSound.setBuffer(buffer)
+            this.hardDropSound.setVolume(settings.sfxVolume/100)
+        }.bind(this))
+        this.hitSound = new THREE.Audio(listener)
+        audioLoader.load('audio/hit.mp3', function( buffer ) {
+            this.hitSound.setBuffer(buffer)
+            this.hitSound.setVolume(settings.sfxVolume/100)
+        }.bind(this))
+        this.floorSound = new THREE.Audio(listener)
+        audioLoader.load('audio/floor.ogg', function( buffer ) {
+            this.floorSoung.setBuffer(buffer)
+            this.floorSoung.setVolume(settings.sfxVolume/100)
+        }.bind(this))
+        this.moveSound = new THREE.Audio(listener)
+        audioLoader.load('audio/move.ogg', function( buffer ) {
+            this.moveSound.setBuffer(buffer)
+            this.moveSound.setVolume(settings.sfxVolume/100)
+        }.bind(this))
+        this.rotateSound = new THREE.Audio(listener)
+        audioLoader.load('audio/rotate.ogg', function( buffer ) {
+            this.rotateSound.setBuffer(buffer)
+            this.rotateSound.setVolume(settings.sfxVolume/100)
         }.bind(this))
 
         this.playfield = new Playfield(loadingManager)
@@ -72,8 +92,8 @@ export class TetraScene extends THREE.Scene {
         switch (theme) {
             case "Plasma":
                 this.ambientLight.intensity     = 1
-                this.directionalLight.intensity = 1
-                this.directionalLight.position.set(5, -20, 20)
+                this.directionalLight.intensity = 3
+                this.directionalLight.position.set(5, -20, -10)
                 this.music.src = "audio/Moon-Over-Moscow-DJ-ResiDance-Mix-2022.mp3"
                 this.background = new THREE.Color(0xffffff)
                 this.fog.color.set(0xffffff)
