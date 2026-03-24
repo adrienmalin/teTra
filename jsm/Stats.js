@@ -181,10 +181,10 @@ class Stats {
             this.b2b = -1
         }
 
-        if (this.speechSynthesisAvailable && this.settings.sfxVolume) {
+        /*if (this.speechSynthesisAvailable && this.settings.sfxVolume) {
             if (tSpin) this.speak(tSpin, this.settings.sfxVolume);
             if (nbClearedLines > 1) this.speak(CLEARED_LINES_NAMES[nbClearedLines], this.settings.sfxVolume);
-        }
+        }*/
 
         this.goal -= awardedLineClears
         if (this.goal <= 0) return this.level++

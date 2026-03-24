@@ -17,7 +17,7 @@ export class Vortex extends THREE.Group {
         
         this.opaqueCylinder = new THREE.Mesh(
             new THREE.CylinderGeometry(40, 40, 1000, 12, 1, true),
-            new THREE.MeshBasicMaterial({
+            new THREE.MeshLambertMaterial({
                 side: THREE.BackSide,
                 blending: THREE.MultiplyBlending
             })
@@ -44,7 +44,7 @@ export class Vortex extends THREE.Group {
                     texture.wrapT = THREE.MirroredRepeatWrapping
                     texture.repeat.set(1, 2)
                     this.transparentCylinder.material.map = texture
-                    this.transparentCylinder.material.opacity = 0.15
+                    this.transparentCylinder.material.opacity = 0.3
                     this.add(this.transparentCylinder)
                 })
                 
@@ -78,7 +78,7 @@ export class Vortex extends THREE.Group {
                 
                 loader.load("./images/stars_space.jpg", texture => {
                     texture.wrapS = THREE.RepeatWrapping
-                    texture.wrapT = THREE.RepeatWrapping
+                    texture.wrapT = THREE.MirroredRepeatWrapping
                     texture.repeat.set(3, 6)
                     this.opaqueCylinder.material.map = texture
                     this.opaqueCylinder.material.blending = THREE.AdditiveBlending
