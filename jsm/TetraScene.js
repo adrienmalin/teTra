@@ -66,8 +66,8 @@ export class TetraScene extends THREE.Scene {
         }.bind(this))
         this.floorSound = new THREE.Audio(listener)
         audioLoader.load('audio/floor.ogg', function( buffer ) {
-            this.floorSoung.setBuffer(buffer)
-            this.floorSoung.setVolume(settings.sfxVolume/100)
+            this.floorSound.setBuffer(buffer)
+            this.floorSound.setVolume(settings.sfxVolume/100)
         }.bind(this))
         this.moveSound = new THREE.Audio(listener)
         audioLoader.load('audio/move.ogg', function( buffer ) {
@@ -93,7 +93,7 @@ export class TetraScene extends THREE.Scene {
             case "Plasma":
                 this.ambientLight.intensity     = 1
                 this.directionalLight.intensity = 3
-                this.directionalLight.position.set(5, -20, -10)
+                this.directionalLight.position.set(5, 50, -20)
                 this.music.src = "audio/Moon-Over-Moscow-DJ-ResiDance-Mix-2022.mp3"
                 this.background = new THREE.Color(0xffffff)
                 this.fog.color.set(0xffffff)
@@ -103,7 +103,7 @@ export class TetraScene extends THREE.Scene {
             case "Space":
                 this.ambientLight.intensity     = 3
                 this.directionalLight.intensity = 10
-                this.directionalLight.position.set(2, 15, 20)
+                this.directionalLight.position.set(2, 15, -20)
                 this.music.src = "audio/benevolence.m4a"
                 this.background = new THREE.Color(0x000000)
                 this.fog.color.set(0x000000)

@@ -148,19 +148,20 @@ let game = {
     fullscreen: function() {
         if (document.fullscreenElement) {
             if (document.exitFullscreen) {
-                document.exitFullscreen();
+                document.exitFullscreen()
             }
         } else {
-            document.body.requestFullscreen();
+            document.body.requestFullscreen()
         }
     }
 }
 
 document.onfullscreenchange = function() {
     if (document.fullscreenElement) {
-        menu.settings.fullscreenButton.name("Quitter le plein écran");
+        menu.settings.fullscreenButton.name("Quitter le plein écran")
     } else {
-        menu.settings.fullscreenButton.name("Plein écran");
+        menu.settings.fullscreenButton.name("Plein écran")
+        game.pause()
     }
 }
 
@@ -292,7 +293,7 @@ function resumeOnKeyDown(event) {
 let loadingManager = new THREE.LoadingManager(
     function() {
         loadingDiv.style.display = "none"
-        menu.startButton.show()
+        if (!game.playing) menu.startButton.show()
         scene.renderer.setAnimationLoop(animate)
     },
     function (url, itemsLoaded, itemsTotal) {

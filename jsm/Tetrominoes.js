@@ -93,7 +93,7 @@ export class InstancedMino extends THREE.InstancedMesh {
                         color: COLORS.RETRO,
                         map: texture,
                         bumpMap: texture,
-                        bumpScale: 5,
+                        bumpScale: 1,
                         envMap: environment,
                         envMapIntensity: 5, 
                         roughness: 0.03,
@@ -109,7 +109,7 @@ export class InstancedMino extends THREE.InstancedMesh {
                         color: COLORS.RETRO,
                         map: texture,
                         bumpMap: texture,
-                        bumpScale: 5,
+                        bumpScale: 1,
                         envMap: environment,
                         envMapIntensity: 5, 
                         roughness: 0.03,
@@ -170,7 +170,7 @@ InstancedMino.prototype.materials = {
         transparent: true,
         opacity: 0.66,
         roughness: 0.1,
-        metalness: 0.95,
+        metalness: 0.6,
         onBeforeCompile: shader => {
             shader.vertexShader = `
                 varying vec3 vPos;
@@ -478,8 +478,8 @@ class Playfield extends THREE.Group {
             .lineTo(COLUMNS, 0)
             .lineTo(COLUMNS, SKYLINE)
             .lineTo(COLUMNS + 1, SKYLINE)
-            .lineTo(COLUMNS + 1, -1)
-            .lineTo(-1, -1)
+            .lineTo(COLUMNS + 1, -6/8)
+            .lineTo(-1, -6/8)
             .moveTo(-1, SKYLINE)
         const retroEdgeTexture = new THREE.TextureLoader(loadingManager).load("images/edge.png", (texture) => {
             texture.wrapS = THREE.RepeatWrapping
@@ -489,7 +489,7 @@ class Playfield extends THREE.Group {
             color: COLORS.RETRO,
             map: retroEdgeTexture,
             bumpMap: retroEdgeTexture,
-            bumpScale: 5,
+            bumpScale: 1,
             envMap: environment,
             envMapIntensity: 5,
             roughness: 0.03,

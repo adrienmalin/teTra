@@ -111,6 +111,7 @@ export class Menu extends GUI {
             })
 
             let minoMaterial = scene.minoes.material instanceof Array ? scene.minoes.material[0] : scene.minoes.material
+            if ("color"               in minoMaterial) material.addColor(minoMaterial, "color"         )
             if ("opacity"             in minoMaterial) material.add(minoMaterial, "opacity"            ).min(0).max(1)
             if ("reflectivity"        in minoMaterial) material.add(minoMaterial, "reflectivity"       ).min(0).max(1)
             if ("roughness"           in minoMaterial) material.add(minoMaterial, "roughness"          ).min(0).max(1)
