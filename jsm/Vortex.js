@@ -79,7 +79,7 @@ export class Vortex extends THREE.Group {
                 loader.load("./images/stars_space.jpg", texture => {
                     texture.wrapS = THREE.MirroredRepeatWrapping
                     texture.wrapT = THREE.MirroredRepeatWrapping
-                    texture.repeat.set(4, 8)
+                    texture.repeat.set(3, 6)
                     this.opaqueCylinder.material.map = texture
                     this.opaqueCylinder.material.map.offset.x = 5
                     this.opaqueCylinder.material.blending = THREE.AdditiveBlending

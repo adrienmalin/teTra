@@ -46,25 +46,30 @@ let game = {
     },
 
     resume: function() {
-        document.onkeydown = onkeydown
-        document.onkeyup = onkeyup
-        window.onblur = game.pause
-        menu.settings.domElement.onclick = game.pause
-
-        document.body.classList.remove("pause")
-        menu.resumeButton.hide()
-        menu.pauseButton.show()
-
-        stats.clock.start()
-        stats.clock.elapsedTime = stats.elapsedTime
-        
-        if (settings.musicVolume) scene.music.play()
-
-        if (scene.playfield.piece) {
-            scheduler.resetInterval(game.fall, stats.fallPeriod)
-        } else {
-            this.generate()
-        }
+        pauseSpan.innerHTML = "3"
+        setTimeout(() => pauseSpan.innerHTML = "2", 1000)
+        setTimeout(() => pauseSpan.innerHTML = "1", 2000)
+        setTimeout(() => {
+            document.onkeydown = onkeydown
+            document.onkeyup = onkeyup
+            window.onblur = game.pause
+            menu.settings.domElement.onclick = game.pause
+    
+            document.body.classList.remove("pause")
+            menu.resumeButton.hide()
+            menu.pauseButton.show()
+    
+            stats.clock.start()
+            stats.clock.elapsedTime = stats.elapsedTime
+            
+            if (settings.musicVolume) scene.music.play()
+    
+            if (scene.playfield.piece) {
+                scheduler.resetInterval(game.fall, stats.fallPeriod)
+            } else {
+                this.generate()
+            }
+        }, 3000)
     },
 
     generate: function(nextPiece=nextQueue.shift()) {
@@ -122,6 +127,7 @@ let game = {
         window.onblur = null
         
         pauseSpan.onfocus = game.resume
+        pauseSpan.innerHTML = "II"
         document.body.classList.add("pause")
         menu.pauseButton.hide()
         menu.resumeButton.show()
