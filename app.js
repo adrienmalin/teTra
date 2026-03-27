@@ -50,6 +50,7 @@ let game = {
         setTimeout(() => pauseSpan.innerHTML = "2", 1000)
         setTimeout(() => pauseSpan.innerHTML = "1", 2000)
         setTimeout(() => {
+            pauseSpan.innerHTML = ""
             document.onkeydown = onkeydown
             document.onkeyup = onkeyup
             window.onblur = game.pause
@@ -186,9 +187,9 @@ let playerActions = {
 
     moveRight: () => scene.playfield.piece.move(TRANSLATION.RIGHT)? scene.moveSound.play() : scene.hitSound.stop() && scene.hitSound.play(),
 
-    rotateCW: () => scene.playfield.piece.rotate(ROTATION.CW)? scene.rotateSound.stop() && scene.rotateSound.play() : scene.hitSound.stop() && scene.hitSound.play(),
+    rotateCW: () => scene.playfield.piece.rotate(ROTATION.CW)? scene.rotateSound.stop() && scene.rotateSound.play() : scene.spinEndSound.stop() && scene.spinEndSound.play(),
 
-    rotateCCW: () => scene.playfield.piece.rotate(ROTATION.CCW)? scene.rotateSound.stop() && scene.rotateSound.play() : scene.hitSound.stop() && scene.hitSound.play(),
+    rotateCCW: () => scene.playfield.piece.rotate(ROTATION.CCW)? scene.rotateSound.stop() && scene.rotateSound.play() : scene.spinEndSound.stop() && scene.spinEndSound.play(),
 
     softDrop: function () {
         if (scene.playfield.piece.move(TRANSLATION.DOWN)) {

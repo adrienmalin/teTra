@@ -79,6 +79,11 @@ export class TetraScene extends THREE.Scene {
             this.rotateSound.setBuffer(buffer)
             this.rotateSound.setVolume(settings.sfxVolume/100)
         }.bind(this))
+        this.spinEndSound = new THREE.Audio(listener)
+        audioLoader.load('audio/spinend.mp3', function( buffer ) {
+            this.spinEndSound.setBuffer(buffer)
+            this.spinEndSound.setVolume(settings.sfxVolume/100)
+        }.bind(this))
 
         this.playfield = new Playfield(loadingManager)
         this.add(this.playfield)
