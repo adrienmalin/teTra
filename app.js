@@ -145,7 +145,7 @@ let game = {
         scene.music.pause()
         stats.clock.stop()
         messagesSpan.addNewChild("div", { className: "show-level-animation", innerHTML: `<h1>GAME<br/>OVER</h1>` })
-        stats.speak("Game Over")
+        stats.speak("Game Over", 'en-US')
 
         menu.pauseButton.hide()
         menu.startButton.name("Rejouer")
@@ -168,7 +168,7 @@ document.onfullscreenchange = function() {
         menu.settings.fullscreenButton.name("Quitter le plein écran")
     } else {
         menu.settings.fullscreenButton.name("Plein écran")
-        game.pause()
+        if (game.playing) game.pause()
     }
 }
 
@@ -194,10 +194,8 @@ let playerActions = {
     softDrop: function () {
         if (scene.playfield.piece.move(TRANSLATION.DOWN)) {
             stats.score++
-            scene.moveSound.stop()
             scene.moveSound.play()
         } else {
-            scene.floorSound.stop()
             scene.floorSound.play()
         }
     },

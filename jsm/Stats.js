@@ -72,7 +72,7 @@ class Stats {
         if (level <= 20) this.fallPeriod = 1000 * Math.pow(0.8 - ((level - 1) * 0.007), level - 1)
         if (level > 15) this.lockDelay = 500 * Math.pow(0.9, level - 15)
         messagesSpan.addNewChild("div", { className: "show-level-animation", innerHTML: `<h1>NIVEAU<br/>${this.level}</h1>` })
-        this.speak(`Niveau ${level}`, this.settings.sfxVolume);
+        this.speak(`Niveau ${level}`);
     }
 
     get level() {
@@ -182,20 +182,20 @@ class Stats {
         }
 
         /*if (this.speechSynthesisAvailable && this.settings.sfxVolume) {
-            if (tSpin) this.speak(tSpin, this.settings.sfxVolume);
-            if (nbClearedLines > 1) this.speak(CLEARED_LINES_NAMES[nbClearedLines], this.settings.sfxVolume);
+            if (tSpin) this.speak(tSpin);
+            if (nbClearedLines > 1) this.speak(CLEARED_LINES_NAMES[nbClearedLines]);
         }*/
 
         this.goal -= awardedLineClears
         if (this.goal <= 0) return this.level++
     }
 
-    speak(text, volume=1) {
+    speak(text, lang='fr-FR', volume=1) {
         if (!this.speechSynthesisAvailable) return;
 
         const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'fr-FR';
-        utterance.volume = volume;
+        utterance.lang = lang;
+        utterance.volume = this.settings.sfxVolume;
         speechSynthesis.speak(utterance);
     }
 }
